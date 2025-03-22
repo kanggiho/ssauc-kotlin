@@ -1,0 +1,212 @@
+/* 회원가입 페이지 전용 컨테이너 */
+.signup-container {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.signup-section {
+    margin-top: 50px;
+}
+
+.signup-section h2 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 700;
+}
+
+/* 라벨 + 입력칸 (+버튼) 한 줄 배치 */
+.form-row-inline {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* 라벨 고정 폭 */
+.form-row-inline label {
+    width: 120px;
+    margin-right: 10px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* 인풋 + 버튼 */
+.input-group-inline {
+    display: flex;
+    flex: 1;
+    align-items: center;
+}
+
+/* 밑줄 인풋 */
+.input-group-inline input {
+    flex: 1;
+    max-width: 350px;
+    border: none;
+    border-bottom: 1px solid #000;
+    padding: 10px 0;
+    font-size: 16px;
+    outline: none;
+    background: none;
+    margin-right: 10px; /* 버튼 간격 */
+}
+
+/* 단일 입력창 (주소, 우편번호 등) */
+.form-control {
+    width: 100%;
+    border: none;
+    border-bottom: 1px solid #000;
+    padding: 10px 0;
+    font-size: 16px;
+    outline: none;
+    background: none;
+}
+
+.error-container {
+    margin-left: 130px;
+    margin-bottom: 20px;
+}
+
+/* 에러 메시지 (빨간) */
+.error-msg {
+    display: block;
+    color: red;
+    font-size: 14px;
+}
+
+/* 성공 피드백 메시지 (초록) */
+.feedback-msg {
+    display: block;
+    color: green;
+    font-size: 14px;
+}
+
+/* 버튼 스타일 */
+.check-btn {
+    border: 1px solid #000;
+    background-color: #fff;
+    color: #000;
+    border-radius: 15px;
+    cursor: pointer;
+    padding: 8px 16px;
+    font-size: 14px;
+    margin-right: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+.check-btn:hover:not(:disabled) {
+    background-color: #000;
+    color: #fff;
+}
+.check-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* 완료, 취소 버튼 */
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 40px;
+}
+.submit-btn,
+.cancel-btn {
+    border: 1px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.submit-btn {
+    background-color: #000;
+    color: #fff;
+}
+.submit-btn:hover {
+    background-color: #333;
+}
+
+.cancel-btn {
+    background-color: #fff;
+    color: #000;
+}
+.cancel-btn:hover {
+    background-color: #f2f2f2;
+    color: #000;
+}
+
+/* 필수 입력 표시 (빨간 *) */
+.required {
+    color: red;
+    margin-left: 5px;
+}
+
+/* 비활성화 -> 회색 배경 */
+.disabled-input {
+    background-color: #e9ecef !important;
+}
+
+/* 모달 배경 (화면 중앙 정렬) */
+.modal {
+    display: none; /* 초기에는 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    align-items: center;
+    justify-content: center;
+}
+
+/* 모달 배경 (화면 중앙 정렬) */
+.modal {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 모달 내용 */
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 350px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 모달 메시지 */
+.modal-content p {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 확인 버튼 */
+.modal-content button {
+    padding: 10px 16px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #000;
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+}
+
+.modal-content button:hover {
+    background-color: #333;
+}
+

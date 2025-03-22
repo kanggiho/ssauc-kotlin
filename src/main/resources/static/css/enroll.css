@@ -1,0 +1,114 @@
+/* reset */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* 기본 폰트 및 배경 설정 */
+body {
+    background-color: #f0f2f5;
+    font-family: 'SUIT Variable', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 전체 컨텐츠 영역 */
+.login-wrapper {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 브랜드 텍스트 */
+.brand {
+    font-size: 32px;
+    margin-bottom: 30px;
+}
+
+/* 라벨 스타일 */
+.auth-label {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+/* 안내 문구 스타일 */
+.instruction {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* QR 코드 이미지 컨테이너 */
+.qr-container {
+    margin-bottom: 30px;
+}
+
+.qr-image {
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+}
+
+/* 30px 여백 */
+.spacer {
+    height: 30px;
+}
+
+/* 입력칸과 버튼을 같은 줄에 배치하는 영역 */
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 폼 내부의 입력칸과 버튼 */
+.form-container form {
+    display: flex;
+    align-items: center;
+}
+
+/* 인증 코드 입력칸 스타일 (400px x 35px) */
+.form-container input[type="text"] {
+    width: 400px;
+    height: 35px;
+    padding: 5px 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* 인증 버튼 스타일 (65px x 35px, 둥근 모서리 15px) */
+.check-btn {
+    border: 1px solid #000;
+    margin-left: 10px;
+    width: 80px;
+    height: 40px;
+    font-size: 16px;
+    background-color: #fff;
+    border-radius: 15px;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.check-btn:hover {
+    background-color: #000;
+    color: #fff;
+}
+
+/* 에러 메시지 스타일 */
+.error-message {
+    color: red;
+    margin-top: 15px;
+    font-size: 1rem;
+    text-align: center;
+}

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>구매 현황</title>
+    <!-- 스타일시트 연결 -->
+    <link rel="stylesheet" href="/css/mypage.css">
+</head>
+<body>
+
+<div class="history-container" layout:fragment="content">
+    <!-- 왼쪽 사이드바 (mypage와 동일) -->
+    <div th:replace="~{mypage/mypage :: sidebar}"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="history-main">
+        <!-- 페이지 제목 -->
+        <h2>구매 현황</h2>
+
+        <!-- 필터 섹션 -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <a th:href="@{/history/buy(filter='bidding')}"
+                   class="filter-btn" th:classappend="${filter=='bidding'} ? ' active' : ''">
+                    입찰중
+                </a>
+                <a th:href="@{/history/buy(filter='complete')}"
+                   class="filter-btn" th:classappend="${filter=='complete'} ? ' active' : ''">
+                    구매 완료
+                </a>
+            </div>
+        </div>
+
+        <!-- 입찰중 리스트 -->
+        <div th:if="${filter=='bidding'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>상품 이름</th>
+                    <th>판매자</th>
+                    <th>현재가</th>
+                    <th>내 입찰가</th>
+                    <th>자동입찰 한도</th>
+                    <th>경매 마감 시간</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="bid : ${list}">
+                    <td class="productBid" th:onclick="|location.href='/bid/bid?productId=' + ${bid.productId}|">
+                        <img class="historyImage" th:src="${bid.productImageUrl}" alt="상품 대표 이미지"/>
+                        <span th:text="${bid.productName}">상품 A</span>
+                    </td>
+                    <td>
+                        <img class="historyImage" th:src="${bid.profileImageUrl}" alt="프로필 이미지"/>
+                        <span th:text="${bid.sellerName}"
+                              th:attr="data-sellername=${bid.sellerName}"
+                              onclick="handleSellerClick(event)">user</span>
+                    </td>
+                    <td th:text="${bid.tempPrice}">현재가</td>
+                    <td th:text="${bid.bidPrice}">10000</td>
+                    <td th:text="${bid.maxBidAmount}">15000</td>
+                    <td th:text="${#temporals.format(bid.endAt, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 14:30:00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 구매 완료 리스트 -->
+        <div th:if="${filter=='complete'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>상품 이름</th>
+                    <th>판매자</th>
+                    <th>구매 가격</th>
+                    <th>구매 시간</th>
+                    <th>거래 완료 시간</th>
+                    <th>조치</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="order : ${list}">
+                    <td class="productBid" th:onclick="|location.href='/bid/bid?productId=' + ${order.productId}|">
+                        <img class="historyImage" th:src="${order.productImageUrl}" alt="상품 대표 이미지"/>
+                        <span th:text="${order.productName}">상품 A</span>
+                    </td>
+                    <td>
+                        <img class="historyImage" th:src="${order.profileImageUrl}" alt="프로필 이미지"/>
+                        <span class="productBid"
+                              th:text="${order.sellerName}"
+                              th:attr="data-sellername=${order.sellerName}"
+                              onclick="handleSellerClick(event)">user</span>
+                    </td>
+                    <td th:text="${order.totalPrice}">50,000 원</td>
+                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-05 14:30:00</td>
+                    <td th:text="${#temporals.format(order.completedDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 17:00:00</td>
+                    <td>
+                        <button class="history-btn" style="cursor: pointer;"
+                                th:onclick="|location.href='/history/bought?id=' + ${order.productId}|">
+                            상세
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" th:href="@{/history/buy(filter=${filter}, page=${currentPage - 1})}">
+                <button>&lt;</button>
+            </a>
+            <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+        <a th:href="@{/history/buy(filter=${filter}, page=${i})}">
+            <button th:text="${i}" th:classappend="${i == currentPage} ? ' active' : ''"></button>
+        </a>
+            </span>
+            <a th:if="${currentPage < totalPages}" th:href="@{/history/buy(filter=${filter}, page=${currentPage + 1})}">
+                <button>&gt;</button>
+            </a>
+        </div>
+
+    </main>
+</div>
+
+
+</body>
+</html>

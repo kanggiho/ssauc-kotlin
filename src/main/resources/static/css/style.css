@@ -1,0 +1,634 @@
+/* 기본 스타일 초기화 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Arial", sans-serif;
+}
+
+body {
+    background-color: #fff;
+    color: #333;
+}
+
+
+/* 헤더 전체 컨테이너 */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* 로고 스타일 */
+.logo a {
+    font-size: 22px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+}
+
+/* 검색창 */
+.search-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 30px;
+    width: 500px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    padding: 8px 10px;
+    flex: 1;
+}
+
+.search-box .menu-btn,
+.search-box .search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+/* 유저 메뉴 */
+.user-menu {
+    display: flex;
+    align-items: center;
+}
+
+.user-menu a {
+    text-decoration: none;
+    color: #888;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.user-menu i {
+    font-size: 18px;
+    margin-left: 10px;
+    color: #333;
+    cursor: pointer;
+}
+
+/* 상품 등록 버튼 */
+.register-btn {
+    background: none;
+    border: 1px solid #000;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* GNB 네비게이션 */
+.gnb {
+    text-align: center;
+}
+
+.gnb ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+}
+
+.gnb-item a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* 선택된 메뉴 스타일 */
+.gnb-item.active a {
+    border-bottom: 3px solid #000;
+    padding-bottom: 5px;
+}
+
+.gnb .nav {
+    display: flex;
+    justify-content: flex-start; /* 왼쪽 정렬 */
+    flex-grow: 1; /* 가득 차게 */
+}
+
+.register-btn {
+    background: none;
+    border: 1px solid #000;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+    margin-bottom: 1em;
+    color: black;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.search-box {
+    flex-grow: 2; /* 검색창이 충분히 넓게 확장 */
+    max-width: 500px;
+}
+
+.user-menu {
+    white-space: nowrap; /* 아이콘 줄바꿈 방지 */
+}
+
+.gnb .nav-link {
+    font-size: 18px; /* 글씨 크기 */
+    color: black !important; /* 글씨 색상 검은색 */
+    text-decoration: none; /* 밑줄 제거 */
+}
+
+.gnb .nav-link:hover,
+.gnb .nav-link:focus,
+.gnb .nav-link:active,
+.gnb .nav-link:visited {
+    color: black !important; /* 클릭 후에도 색상 유지 */
+    text-decoration: none; /* 밑줄 제거 */
+}
+
+
+.footer {
+    background-color: #000;
+    color: #fff;
+    padding: 40px 0;
+}
+.footer a {
+    color: #fff;
+    text-decoration: none;
+}
+.footer a:hover {
+    text-decoration: underline;
+}
+
+.logo_image {
+    width: 12em;
+    height: auto;
+    padding-left: 26px;
+    margin-top: 5px;
+    margin-left: -30px;
+}
+
+.footer_image {
+    width: 10em;
+    height: auto;
+    margin-left: -16px;
+}
+
+.input-group {
+    padding-right: 50px;
+}
+
+/* 네비게이션 바 스타일 */
+.gnb {
+    position: relative;
+    background: white;
+    border-bottom: 1px solid #ddd;
+    z-index: 999;
+}
+
+.gnb .nav-link {
+    font-size: 18px;
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 10px 15px;
+}
+
+.gnb .nav-link:hover {
+    color: black;
+}
+
+/* LNB 스타일 */
+.lnb {
+    position: absolute;
+    justify-content: start;
+    align-items: center;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border-top: 1px solid #ddd;
+    display: none; /* 기본적으로 숨김 */
+    padding: 15px 20px;
+    z-index: 1000;
+}
+
+/* 중고 경매에 마우스를 올리면 LNB 표시 */
+.gnb-item:hover .lnb {
+    display: flex;
+}
+
+/* LNB 내부 스타일 */
+.lnb-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px 12px;
+}
+
+
+.lnb-category {
+    width: 15%;
+    font-weight: bold;
+    border-right: 1px solid #ddd;
+    padding-right: 15px;
+    flex-direction: column;
+    margin-left: 290px;
+}
+
+.lnb-category ul {
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    align-items: flex-start; /* 가운데 정렬 */
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lnb-category li {
+    padding: 8px 0; /* 항목 사이 간격 추가 */
+}
+
+.lnb-list {
+    display: flex;
+    width: 60em;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 50px;
+    padding-left: 20px;
+}
+
+.lnb-list li {
+    padding: 9px 0; /* 항목 사이 간격 추가 */
+}
+
+.lnb-list ul {
+    flex-direction: column;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    min-width: 150px; /* 최소 너비를 설정하여 일정한 간격 유지 */
+}
+
+.lnb-list a {
+    width: 100%;
+    text-decoration: none;
+    color: black;
+    display: block;
+}
+
+.lnb-list a:hover {
+    color: #ff9900;
+}
+
+.nav-link {
+    height: 100%;
+}
+
+/* 캐러셀 스타일 */
+.carousel {
+    max-width: 1200px; /* 배너 최대 너비 */
+    margin: auto; /* 중앙 정렬 */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px; /* 모서리 둥글게 */
+    overflow: hidden; /* 이미지 넘침 방지 */
+}
+
+.carousel-inner img {
+    width: 100%;
+    height: 400px; /* 고정 높이 설정 */
+    object-fit: cover; /* 비율 유지하면서 잘 맞춤 */
+}
+
+/* 화살표 색상 조정 */
+.carousel-control-prev,
+.carousel-control-next {
+    filter: invert(100%); /* 색상을 반전하여 잘 보이게 */
+}
+
+/* 카테고리 캐러셀 스타일 */
+.category-carousel {
+    max-width: 900px; /* 배너 최대 너비 */
+    margin: auto; /* 중앙 정렬 */
+}
+
+.carousel-inner {
+    display: flex;
+    align-items: center;
+}
+
+.carousel-item {
+    text-align: center;
+}
+
+/* 아이콘 스타일 */
+.category-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* 아이콘 간 간격 */
+}
+
+.category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}
+
+.category-icon {
+    width: 80px; /* 아이콘 크기 */
+    height: 80px;
+    border: 2px solid teal;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px; /* 아이콘 크기 */
+    color: teal;
+}
+
+/* 화살표 스타일 */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 5%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: black;
+    border-radius: 50%;
+    padding: 10px;
+}
+
+/* 상품 카드 스타일 */
+.product-card {
+    border: none;
+    text-align: center;
+    padding: 10px;
+}
+
+.product-card img {
+    width: 100%;
+    height: 160px; /* 크기 축소 */
+    object-fit: cover;
+    border-radius: 8px; /* 살짝 둥글게 */
+}
+
+.product-title {
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.product-price {
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+}
+
+.product-info {
+    font-size: 0.8rem;
+    color: gray;
+}
+
+/* 반응형 설정 */
+@media (max-width: 1200px) {  /* PC 작은 화면 */
+    .row-cols-lg-5 {
+        --bs-columns: 4;
+    }
+}
+
+@media (max-width: 992px) {  /* 태블릿 */
+    .row-cols-lg-5 {
+        --bs-columns: 3;
+    }
+}
+
+@media (max-width: 768px) {  /* 모바일 */
+    .row-cols-lg-5 {
+        --bs-columns: 2;
+    }
+}
+
+.recent-item {
+    display: block;
+    width: 100%;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.recent-item img {
+    width: 100%;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* TOP 버튼 스타일 */
+.top-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    background: black;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.top-btn:hover {
+    background: #444;
+}
+
+/* 스크롤 내릴 때 나타나도록 설정 */
+.top-btn.hide {
+    display: none;
+}
+
+.footer {
+    margin-top: 20px;
+    background-color: #000;
+    padding: 40px 20px;
+    font-size: 14px;
+}
+.footer a {
+    color: #fff;
+    text-decoration: none;
+}
+.footer a:hover {
+    text-decoration: none;
+}
+.footer-title {
+    font-weight: bold;
+}
+
+/* 메인페이지 Premium SSAUC */
+.premium-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 50px;
+    margin: 20px 0 20px 0;
+    border-radius: 8px;
+}
+.premium-text {
+    max-width: 300px;
+    align-items: center;
+}
+.premium-btn {
+    background-color: #80392e;
+    color: #fff;
+    border: none;
+}
+.premium-btn:hover {
+    background-color: #5c2720;
+}
+.premium-carousel-item img {
+    max-height: 300px;
+    object-fit: contain;
+}
+
+/*bestItem 텍스트*/
+#best_item, #ssaucs_pick {
+    text-align: center;
+    margin: 70px;
+}
+
+.view-all {
+    color: black;
+    text-align: end;
+    text-decoration: none;
+}
+
+/* 알림 드롭다운 스타일 */
+.dropdown-menu {
+    width: 320px;           /* 드롭다운 너비 */
+    max-height: 300px;      /* 드롭다운 최대 높이 */
+    overflow-y: auto;       /* 세로 스크롤 생성 */
+    overflow-x: hidden;     /* 가로 스크롤 숨김 */
+    white-space: normal;    /* 여러 줄 표시 (줄바꿈 허용) */
+    word-wrap: break-word;  /* 긴 단어나 문자열을 자동으로 줄바꿈 */
+    word-break: break-word; /* (브라우저 호환성 위해 함께 선언) */
+}
+
+/* 알림 드롭다운 스타일 */
+.notification-list {
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 개별 알림 항목 */
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 아이콘과 텍스트 사이 간격 */
+    padding: 8px;
+}
+
+/* 아이콘 스타일 */
+.notification-icon {
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+}
+
+/* 텍스트 영역을 수직 정렬 */
+.notification-text {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* 텍스트 스타일 */
+.notification-text .fw-bold {
+    font-size: 12px;
+}
+
+.notification-text .text-muted {
+    font-size: 11px;
+}
+
+.dropdown-header {
+    font-weight: bold;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.text-dark-notification {
+    color: black;
+    font-size: 13px;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.notification-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.notification-text {
+    font-size: 10px;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: gray;
+}
+
+/* 삭제 버튼 스타일 */
+.clear-btn {
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    color: red;
+    font-weight: bold;
+    border-top: 1px solid #ddd;
+}
+
+.clear-btn:hover {
+    background: #f8d7da;
+}
+
+/* 알림 아이콘 빨간점 */
+.notification-icon {
+    position: relative;
+    font-size: 24px;
+    cursor: pointer;
+    border: none;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    margin: 12px;
+    background: red;
+    border-radius: 50%;
+    display: none;
+}

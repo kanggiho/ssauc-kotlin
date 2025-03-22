@@ -1,0 +1,61 @@
+package com.example.ssauc.repositoryTests;
+
+
+import com.example.ssauc.user.chat.entity.ChatMessage;
+import com.example.ssauc.user.chat.entity.ChatRoom;
+import com.example.ssauc.user.chat.repository.ChatMessageRepository;
+import com.example.ssauc.user.chat.repository.ChatRoomRepository;
+import com.example.ssauc.user.login.entity.Users;
+import com.example.ssauc.user.login.repository.UsersRepository;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.time.LocalDateTime;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+class ChatMessageRepositoryTest {
+
+    @Autowired
+    private ChatMessageRepository chatMessageRepository;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
+
+    @Test
+    void testSaveAndFindChatMessage() {
+        // Given
+        Users sender = usersRepository.save(Users.builder()
+                .userName("senderUser")
+                .email("sender@example.com")
+                .password("securepassword")
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        ChatRoom chatRoom = chatRoomRepository.save(ChatRoom.builder()
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        ChatMessage message = ChatMessage.builder()
+                .sender(sender)
+                .chatRoom(chatRoom)
+                .message("Hello, world!")
+                .sentAt(LocalDateTime.now())
+                .build();
+
+        // When
+        ChatMessage savedMessage = chatMessageRepository.save(message);
+        ChatMessage foundMessage = chatMessageRepository.findById(savedMessage.getMessageId()).orElse(null);
+
+        // Then
+        assertThat(foundMessage).isNotNull();
+        assertThat(foundMessage.getMessage()).isEqualTo("Hello, world!");
+        assertThat(foundMessage.getSender().getUserId()).isEqualTo(sender.getUserId());
+    }
+}

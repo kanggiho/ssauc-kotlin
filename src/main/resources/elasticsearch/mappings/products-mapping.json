@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "productId": {
+      "type": "keyword"
+    },
+    "category": {
+      "type": "text",
+      "analyzer": "korean_analyzer"
+    },
+    "name": {
+      "type": "text",
+      "analyzer": "korean_analyzer",
+      "fields": {
+        "ngram": {
+          "type": "text",
+          "analyzer": "edge_ngram_analyzer"
+        }
+      }
+    },
+    "description": {
+      "type": "text",
+      "analyzer": "korean_analyzer"
+    },
+    "price": {
+      "type": "long"
+    },
+    "createdAt": {
+      "type": "date",
+      "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "updatedAt": {
+      "type": "date",
+      "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "endAt": {
+      "type": "date",
+      "format": "yyyy-MM-dd'T'HH:mm:ss"
+    },
+    "viewCount": {
+      "type": "long"
+    },
+    "dealType": {
+      "type": "integer"
+    },
+    "bidCount": {
+      "type": "integer"
+    },
+    "likeCount": {
+      "type": "integer"
+    },
+    "suggest": {
+      "type": "text",
+      "analyzer": "edge_ngram_analyzer"
+    }
+  }
+}

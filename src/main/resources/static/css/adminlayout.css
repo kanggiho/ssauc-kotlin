@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Lufga:wght@400;600&family=SUIT:wght@400;600&display=swap');
+@charset "UTF-8";
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'SUIT', Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+}
+.sidebar {
+    width: 305px;
+    background-color: #161616;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 10px;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    margin-top: 15px;
+}
+.logo img {
+    width: 200px;
+    height: 104px;
+}
+.logo span {
+    font-family: 'Lufga', Arial, sans-serif;
+    font-size: 35px;
+    font-weight: 600;
+}
+.logo .highlight {
+    color: #FFD028;
+}
+.menu {
+    flex-grow: 1;
+    margin-top: 56px;
+}
+.menu-item {
+    color: #fff;
+    padding: 15px 20px;
+    cursor: pointer;
+    font-family: 'SUIT', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 5px;
+}
+.menu-item:hover,
+.menu-item.active {
+    color: #FFD028;
+    background-color: #3A3A3A;
+    border-radius: 5px;
+}
+.submenu {
+    margin-left: 18px;
+    display: none;
+}
+.submenu-item {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'SUIT', Arial, sans-serif;
+    font-size: 17px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 8px;
+}
+.submenu-item:hover {
+    background-color: #484848;
+    border-radius: 5px;
+}
+.submenu-item.active {
+    color: #FFD028;
+    background-color: #3A3A3A;
+    border-radius: 5px;
+}
+.menu-item.active + .submenu {
+    display: block;
+}
+.user-info-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    background-color: #222222;
+    color: #fff;
+    border: 1px solid #303030;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.user-info-button:hover {
+    background-color: #303030;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.user-info div {
+    margin-left: 5px;
+}
+.user-info img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.user-id {
+    margin-bottom: 5px;
+}
+.logout-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+.logout-icon:hover {
+    background-color: #303030;
+}
+.logout-icon img {
+    width: 30px;
+    height: 30px;
+}
+.content {
+    flex-grow: 1;
+    background-color: #F5F6FA;
+    padding: 36px 32px;
+}

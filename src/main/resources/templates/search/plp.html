@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>검색 결과 - SSAUC</title>
+    <!-- list.html 스타일을 반영하되, 파일명은 plp.css로 구성 -->
+    <link rel="stylesheet" th:href="@{/css/list.css}">
+    <!-- plp.js (아래에서 설명) -->
+    <script th:src="@{/js/plp.js}"></script>
+    <style>
+
+        /* ✅ "총 n개의 상품"을 왼쪽 끝으로 이동 */
+        .total-count {
+            position: absolute;
+            left: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .search-sort-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 400px; /* 크기 조정 */
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding-right: 35px; /* 돋보기 아이콘 공간 확보 */
+        }
+
+        .search-bar button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* ✅ 정렬 옵션을 오른쪽 정렬 */
+        .sort-dropdown {
+            width: auto;
+            min-width: 200px;
+        }
+
+        /* ✅ 상품 개수 텍스트 */
+        .total-count {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* ✅ 상품 이미지 문제 해결 */
+        .product-card img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* ✅ 상품 목록 레이아웃 정리 */
+        #productGrid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+        /* ✅ 검색창 크기 줄이고 중앙 정렬 */
+        .search-bar-wrapper {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .search-bar button img {
+            width: 24px;
+            height: 24px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" layout:fragment="content">
+
+    <div class="container mt-4">
+        <div class="row">
+
+            <!-- [2] 왼쪽 사이드바(필터) : list.html의 사이드바와 동일 -->
+            <div class="col-lg-2">
+                <div class="sidebar">
+                    <h5>필터</h5>
+                    <div class="canBid">
+                        <input class="form-check-input" id="filter_available_bid" type="checkbox" onchange="toggleCheckBox()">
+                        <span>경매 가능만 보기</span>
+                    </div>
+
+                    <h5>카테고리</h5>
+                    <div class="category-list">
+                        <a th:href="@{/list/category(categoryId=1)}">디지털기기</a>
+                        <a th:href="@{/list/category(categoryId=2)}">가구/인테리어</a>
+                        <a th:href="@{/list/category(categoryId=3)}">유아동</a>
+                        <a th:href="@{/list/category(categoryId=4)}">여성의류</a>
+                        <a th:href="@{/list/category(categoryId=5)}">여성잡화</a>
+                        <a th:href="@{/list/category(categoryId=6)}">남성패션/잡화</a>
+                        <a th:href="@{/list/category(categoryId=7)}">생활가전</a>
+                        <a th:href="@{/list/category(categoryId=8)}">생활/주방</a>
+                    </div>
+
+                    <h5 class="mt-4">가격</h5>
+                    <div class="price-filter">
+                        <button class="price-button" th:data-min-price="0" th:data-max-price="20000" onclick="filterByPrice(this)">~2만원</button>
+                        <button class="price-button" th:data-min-price="20000" th:data-max-price="30000" onclick="filterByPrice(this)">2만원 ~ 3만원</button>
+                        <button class="price-button" th:data-min-price="30000" th:data-max-price="40000" onclick="filterByPrice(this)">3만원 ~ 4만원</button>
+                        <button class="price-button" th:data-min-price="40000" th:data-max-price="200000" onclick="filterByPrice(this)">4만원 ~ 20만원</button>
+                    </div>
+
+                    <div class="price-input">
+                        <input type="number" id="minPriceInput" placeholder="최소 가격 (원)" min="0">
+                        <span>~</span>
+                        <input type="number" id="maxPriceInput" placeholder="최대 가격 (원)" min="0">
+                        <button onclick="filterByInputPrice()" style="width: 30px; height: 30px; align-items: center">🔍</button>
+                    </div>
+
+                    <button id="filterResetBtn" class="btn btn-secondary btn-sm mt-3">필터 초기화</button>
+                </div>
+            </div>
+
+            <!-- 오른쪽 상품 목록 -->
+            <div class="col-lg-10">
+                <div class="search-sort-container">
+
+                    <!-- 상품 개수 -->
+                    <span id="totalCountLabel" class="total-count">총 2개의 상품</span>
+
+                    <!-- 검색창 -->
+                    <div class="search-bar-wrapper">
+                        <div class="search-bar">
+                            <input type="text" id="searchInput" placeholder="검색어를 입력하세요." th:value="${keyword}">
+                            <button type="submit" id="searchIcon" class="icon-btn">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Magnifying_glass_icon.svg/768px-Magnifying_glass_icon.svg.png"
+                                     alt="검색 아이콘">
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 정렬 옵션 -->
+                    <select id="sortSelect" class="form-select form-select-sm sort-dropdown">
+                        <option value="VIEW_DESC">기본순 (조회수 많은 순)</option>
+                        <option value="LIKE_DESC">좋아요 많은 순</option>
+                        <option value="PRICE_ASC">낮은 가격순</option>
+                        <option value="PRICE_DESC">높은 가격순</option>
+                        <option value="BID_DESC">입찰 많은 순</option>
+                        <option value="RECENT">최신 등록순</option>
+                    </select>
+                </div>
+
+                <!-- 연관 검색어 영역 -->
+                <div id="relatedSearchContainer" class="related-search-container" style="display:none;">
+                    <h3>연관 검색어</h3>
+                    <ul id="relatedSearchList"></ul>
+                </div>
+
+                <!-- 자동완성 목록 (절대 위치) -->
+                <ul id="autoCompleteList"
+                    style="position:absolute; display:none; border:1px solid #ddd; background:#fff; z-index:999;">
+                </ul>
+
+                <!-- 한 줄 5개씩, 최대 30개 (row-cols-lg-5) -->
+                <div id="productGrid" class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+                    <!-- JS에서 상품 생성 -->
+                </div>
+
+                <!-- 페이지네이션 -->
+                <nav id="pagination" class="mt-4">
+                    <!-- JS에서 페이지 버튼 생성 -->
+                </nav>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

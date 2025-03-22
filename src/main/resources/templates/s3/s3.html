@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>홈페이지</title>
+</head>
+<body>
+<h1>홈페이지</h1>
+<p>아래 링크를 통해 파일 업로드 및 파일 표시 기능을 이용할 수 있습니다.</p>
+<ul>
+    <li><a th:href="@{/s3/upload}">파일 업로드</a></li>
+    <li><a th:href="@{/s3/display}">파일 표시</a></li>
+    <li><a th:href="@{/s3/delete}">파일 삭제</a></li>
+</ul>
+</body>
+</html>

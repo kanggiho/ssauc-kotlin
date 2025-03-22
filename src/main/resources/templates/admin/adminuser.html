@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/adminlayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>상품 관리</title>
+    <!-- 페이지네이션 및 정렬 버튼 커스터마이징: 검은색 스타일 -->
+    <style>
+        .pagination .page-link {
+            color: #000;
+            border-color: #000;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #000;
+            border-color: #000;
+            color: #fff;
+        }
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #000;
+            color: #000;
+        }
+        /* 정렬 버튼 스타일 */
+        .sort-btn {
+            font-size: 0.8rem;
+            text-decoration: none;
+            color: #000;
+        }
+        .sort-btn:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid" layout:fragment="content">
+    <div class="row">
+        <div class="col-12">
+
+
+
+
+            <!-- Card로 감싸서 깔끔하게 디자인 -->
+            <div class="card shadow-sm mb-4" style="margin:50px;">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="mb-0">회원 관리</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">
+                                    회원 번호
+                                    <a th:href="@{/admin/user(page=${usersList.number}, sort='userId,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/user(page=${usersList.number}, sort='userId,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">회원이름</th>
+                                <th class="text-center">이메일</th>
+                                <th class="text-center">연락처</th>
+                                <th class="text-center">가입일</th>
+                                <th class="text-center">경고횟수</th>
+                                <th class="text-center">쏙머니</th>
+
+                                <th class="text-center">
+                                    상태
+                                    <a th:href="@{/admin/user(page=${usersList.number}, sort='status,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/user(page=${usersList.number}, sort='status,desc')}" class="sort-btn">⭣</a>
+                                </th>
+
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="user : ${usersList}"
+                                th:onclick="|window.location.href='/admin/user/detail?userId=' + ${user.userId}|"
+                                style="cursor: pointer;">
+                                <td class="text-center">[[${user.userId}]]</td>
+                                <td class="text-center">[[${user.userName}]]</td>
+                                <td class="text-center">[[${user.email}]]</td>
+                                <td class="text-center">[[${user.phone}]]</td>
+                                <td class="text-center">[[${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}]]</td>
+                                <td class="text-center">[[${user.warningCount}]]</td>
+                                <td class="text-center">[[${#numbers.formatInteger(user.cash, 3, 'COMMA')}]]</td>
+                                <td class="text-center"
+                                    th:style="(${user.status} == 'ACTIVE') ? 'color:green !important;' :
+                                    ((${user.status} == 'INACTIVE') ? 'color:blue !important;' :
+                                    ((${user.status} == 'BLOCKED') ? 'color:red !important;' : ''))">
+                                    [[${user.status}]]
+                                </td>
+                            </tr>
+                            <!-- 신고 목록이 없을 경우 -->
+                            <tr th:if="${#lists.isEmpty(usersList?.content)}">
+                                <td colspan="6" class="text-center">검색 결과가 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- 페이지네이션 및 엑셀 내보내기 버튼 -->
+            <nav th:if="${usersList != null and usersList.totalPages >= 1}">
+                <div class="row align-items-center">
+                    <div class="col-auto mx-auto">
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${usersList.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/user(page=${usersList.number - 1}, sort=${currentSort}, keyword=${keyword})}"
+                                   aria-label="Previous">&laquo;</a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="page : ${#numbers.sequence(0, usersList.totalPages - 1)}"
+                                th:classappend="${page} == ${usersList.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/user(page=${page}, sort=${currentSort}, keyword=${keyword})}">
+                                    [[${page + 1}]]
+                                </a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${usersList.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/user(page=${usersList.number + 1}, sort=${currentSort}, keyword=${keyword})}"
+                                   aria-label="Next">&raquo;</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 엑셀 내보내기 버튼 -->
+                    <div class="col-auto ms-2">
+                        <a class="btn btn-success"
+                           th:href="@{/admin/user/export(keyword=${keyword})}"
+                           role="button"
+                           style="margin-left: -200px"
+                        >엑셀 내보내기</a>
+                    </div>
+                </div>
+            </nav>
+
+
+            <!-- 검색 폼 추가 -->
+            <div class="d-flex justify-content-center my-5">
+                <form th:action="@{/admin/user}" method="get" class="d-flex" style="width: 450px; margin-left: 200px;">
+                    <input
+                            type="text"
+                            class="form-control-sm me-2"
+                            name="keyword"
+                            placeholder="회원 이름 검색"
+                            th:value="${keyword}"
+                            aria-label="Search"
+                    />
+                    <button class="btn btn-outline-dark me-2" type="submit">검색</button>
+                    <!-- 초기화 버튼 (검색어가 있을 경우에만 표시) -->
+                    <button
+                            th:if="${keyword != null and keyword != ''}"
+                            type="button"
+                            class="btn btn-outline-dark btn-sm"
+                            onclick="window.location.href='/admin/user'">
+                        초기화
+                    </button>
+                </form>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

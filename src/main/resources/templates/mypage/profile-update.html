@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 정보 수정</title>
+  <!-- 회원가입과 동일한 스타일 사용 -->
+  <link rel="stylesheet" th:href="@{/css/signup.css}">
+  <!-- 프로필 수정 전용 CSS (추가 수정 가능) -->
+  <link rel="stylesheet" th:href="@{/css/profile-update.css}">
+  <script th:src="@{/js/profile-update.js}" defer></script>
+  <!-- Daum 우편번호 API -->
+  <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script>
+    // Firebase 설정 (프로젝트별로 수정)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAwXoI6qLHJpf1xMyx83pGxOUffLLneGEo",
+      authDomain: "ssgfinalpjt.firebaseapp.com",
+      projectId: "ssgfinalpjt",
+      storageBucket: "ssgfinalpjt.firebasestorage.app",
+      messagingSenderId: "818168642030",
+      appId: "1:818168642030:web:fc24c362b8b2e29e8b36ff",
+      measurementId: "G-MD48Q5J1DE"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+<body>
+<div class="signup-container" layout:fragment="content">
+  <section class="signup-section">
+    <h2>회원 정보 수정</h2>
+    <!-- 폼 제출은 AJAX로 처리하므로 th:action 등은 사용하지 않습니다 -->
+    <form id="profileUpdateForm" class="signup-form">
+      <!-- 이메일 (수정 불가, hidden 처리) -->
+      <input type="hidden" id="email" name="email" th:value="${user.email}">
+
+      <!-- 닉네임 -->
+      <div class="form-row-inline">
+        <label for="userName">닉네임 <span class="required">*</span></label>
+        <div class="input-group-inline">
+          <input type="text" id="userName" name="userName" th:value="${user.userName}"
+                 placeholder="변경 시에만 입력 (2글자 이상)" required>
+          <button type="button" id="nickCheckBtn" class="check-btn">중복확인</button>
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="nickError"></span>
+      </div>
+
+      <!-- 새 비밀번호 -->
+      <div class="form-row-inline">
+        <label for="password">새 비밀번호</label>
+        <div class="input-group-inline">
+          <input type="password" id="password" name="password"
+                 placeholder="변경 시에만 입력 (8자 이상, 영문/숫자/특수문자)">
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="passwordError"></span>
+      </div>
+
+      <!-- 비밀번호 확인 -->
+      <div class="form-row-inline">
+        <label for="confirmPassword">비밀번호 확인</label>
+        <div class="input-group-inline">
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 확인">
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="confirmPasswordError"></span>
+      </div>
+
+      <!-- 휴대폰 번호 및 인증 -->
+      <div class="form-row-inline">
+        <label for="phone">휴대폰 번호 <span class="required">*</span></label>
+        <div class="input-group-inline">
+          <input type="text" id="phone" name="phone" th:value="${user.phone}"
+                 placeholder="변경 시에만 입력 (10~11자리)" required>
+          <button type="button" id="phoneValidateBtn" class="check-btn">인증번호 전송</button>
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="phoneError"></span>
+      </div>
+      <div class="form-row-inline">
+        <label for="smsCode">인증번호 <span class="required">*</span></label>
+        <div class="input-group-inline">
+          <input type="text" id="smsCode" name="smsCode" placeholder="인증번호 입력" disabled>
+          <button type="button" id="verifySmsBtn" class="check-btn" disabled>인증 확인</button>
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="smsCodeError"></span>
+      </div>
+
+      <!-- 주소 (우편번호, 기본주소, 상세주소) -->
+      <div class="form-row-inline">
+        <label for="zipcode">우편번호</label>
+        <div class="input-group-inline">
+          <input type="text" id="zipcode" name="zipcode" th:value="${zipcode}"
+                 placeholder="변경 시에만 입력" readonly>
+          <button type="button" id="addAddressBtn" class="check-btn">주소 찾기</button>
+        </div>
+      </div>
+      <div class="form-row-inline">
+        <label for="address">기본 주소</label>
+        <div class="input-group-inline">
+          <input type="text" id="address" name="address" th:value="${address}"
+                 placeholder="변경 시에만 입력" readonly>
+        </div>
+      </div>
+      <div class="form-row-inline">
+        <label for="addressDetail">상세 주소</label>
+        <div class="input-group-inline">
+          <input type="text" id="addressDetail" name="addressDetail" th:value="${addressDetail}"
+                 placeholder="변경 시에만 입력">
+        </div>
+      </div>
+      <div class="error-container">
+        <span class="error-msg" id="addressError"></span>
+      </div>
+
+      <!-- 프로필 이미지 업로드 영역 -->
+      <div class="form-row-inline">
+        <label>프로필 이미지</label>
+        <div class="input-group-inline" style="display: flex; align-items: center; gap: 20px;">
+          <!-- 350x350 고정 드롭존 -->
+          <div class="image-dropzone" id="dropzone" style="width:350px; height:350px; border:1px solid #ccc; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+            <img id="profileImagePreview" src="[[${user.profileImage} != null ? ${user.profileImage} : '/img/default-profile.png']]" alt="프로필 미리보기" style="width:100%; height:100%; object-fit:cover;">
+          </div>
+          <!-- 파일 첨부 및 업로드 버튼 -->
+          <div class="file-buttons" style="display: flex; flex-direction: column; gap: 10px;">
+            <button type="button" id="attachFileBtn" class="check-btn">파일 첨부</button>
+            <button type="button" id="uploadProfileImageBtn" class="check-btn">업로드</button>
+          </div>
+        </div>
+      </div>
+      <!-- 메시지를 표시할 컨테이너 (드롭존 바로 아래에 위치) -->
+      <div id="uploadMessageContainer" style="margin-top: 10px; text-align: center;"></div>
+
+      <!-- 숨김 file input -->
+      <input type="file" id="profileImageInput" accept="image/*" style="display:none;">
+      <!-- 프로필 이미지 URL (hidden) -->
+      <input type="hidden" id="profileImage" name="profileImage" th:value="${user.profileImage}">
+
+
+      <!-- 완료/취소 버튼 -->
+      <div class="button-row">
+        <button type="submit" class="submit-btn">수정 완료</button>
+        <button type="button" id="cancelBtn" class="cancel-btn">취소</button>
+      </div>
+
+      <!-- 수정 결과 메시지 표시 영역 -->
+      <div class="error-container">
+        <span class="error-msg" id="submitErrorMsg"></span>
+      </div>
+    </form>
+  </section>
+</div>
+
+<!-- 커스텀 Alert 모달 (프로필 수정 완료/오류 메시지 표시) -->
+<div id="customAlertModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p id="customAlertMessage"></p>
+    <button id="customAlertConfirmBtn">확인</button>
+  </div>
+</div>
+
+<!-- Firebase reCAPTCHA 컨테이너 (hidden) -->
+<div id="recaptcha-container" style="display:none;"></div>
+</body>
+</html>

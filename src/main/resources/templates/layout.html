@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSAUC</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Pretendard 폰트 추가 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" th:href="@{/css/info.css}">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            font-family: 'Pretendard', sans-serif !important;
+        }
+    </style>
+
+</head>
+<body>
+
+<th:block th:fragment="header">
+
+    <header id="stickyHeader">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white">
+            <div class="container d-flex justify-content-between align-items-center">
+                <!-- 좌측: 브랜드 -->
+                <a th:href="@{/}">
+                    <img src="/img/index/ssauc_logo2.png" class="logo_image">
+                </a>
+
+                <!-- 우측: 검색창, 좋아요, 장바구니 아이콘 -->
+                <div class="d-flex align-items-center">
+                    <!-- 검색폼 -->
+                    <form action="/search" method="GET" class="d-flex me-3 w-100">
+                        <button type="submit" class="btn btn-light border w-100 d-flex align-items-center px-3">
+                            <input type="search" name="keyword" placeholder="검색어를 입력해주세요"
+                                   aria-label="검색" class="border-0 w-100" style="outline: none;">
+                            <i class="bi bi-search ms-2"></i>
+                        </button>
+                    </form>
+
+                    <!-- 유저메뉴 (JWT 로그인 상태인지 #authentication으로 체크) -->
+                    <div class="user-menu d-flex align-items-center">
+                        <!-- 비로그인 상태 -->
+                        <th:block th:if="${#authentication == null or #authentication.name == 'anonymousUser'}">
+                            <a href="/login" class="me-3 text-dark text-decoration-none">로그인</a>
+                            <a href="/signup" class="me-3 text-dark text-decoration-none">회원가입</a>
+                        </th:block>
+
+                        <!-- 로그인 상태 (JWT) -->
+                        <th:block th:unless="${#authentication == null or #authentication.name == 'anonymousUser'}">
+                            <a th:href="@{/mypage}">
+                                <img th:src="${#authentication?.principal?.profileImage != null ? #authentication.principal.profileImage : '/img/default-profile.png'}" ...
+                                     style="height: 30px; width: 30px; margin-right: 5px; border-radius: 50%; object-fit: cover;"
+                                     alt="Profile Image">
+                            </a>
+                            <span class="me-3 text-dark fw-bold"
+                                  th:text="${#authentication.principal.userName} + ' 님'">
+        사용자 님
+    </span>
+                            <a href="/logout" class="text-danger me-3 text-decoration-none">로그아웃</a>
+                        </th:block>
+
+                        <!-- 인증되지 않은 경우(게스트) -->
+                        <a th:if="${#authentication == null or #authentication.name == 'anonymousUser'}"
+                           th:href="@{/login}" class="me-3 text-dark">
+                            <i class="bi bi-bell"></i>
+                        </a>
+
+                        <!-- 인증된 경우 -->
+                        <div class="dropdown" th:if="${#authentication != null && #authentication.name != 'anonymousUser'}">
+                            <button class="btn notification-icon" type="button" id="notificationDropdown"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-bell"></i>
+                            </button>
+
+                            <ul class="dropdown-menu notification-list"
+                                aria-labelledby="notificationDropdown"
+                                id="notificationList"
+                                data-bs-auto-close="false">
+
+                                <li class="dropdown-header">알림</li>
+
+                                <!-- 알림 목록 반복 -->
+                                <li th:each="n : ${notifications}">
+                                    <div class="d-flex align-items-center p-3 border-bottom"
+                                         th:classappend="
+                    ${n.type == '채팅'} ? ' bg-chat text-dark' :
+                    (${n.type == '상회입찰'} ? ' bg-bid text-dark' :
+                    (${n.type == '입찰마감'} ? ' bg-deadline text-dark' : ''))
+                 ">
+                                        <!-- 왼쪽 프로필 아이콘 (이미지 사용 가능) -->
+                                        <div class="me-3 d-flex align-items-center justify-content-center icon-circle">
+                                            <i th:classappend="
+                        ${n.type == '채팅'} ? 'bi bi-chat-left-dots' :
+                        (${n.type == '상회입찰'} ? 'bi bi-arrow-up-circle' :
+                        (${n.type == '입찰마감'} ? 'bi bi-hourglass-split' : 'bi bi-bell'))
+                    "></i>
+                                        </div>
+
+                                        <!-- 가운데 텍스트 -->
+                                        <div class="flex-grow-1">
+                                            <div class="fw-bold text-dark-notification" th:text="${n.type}">알림 종류</div>
+                                            <div class="text-dark-notification" th:text="${n.message}">알림 메시지</div>
+                                            <div class="text-muted small"
+                                                 th:text="${#temporals.format(n.createdAt, 'yyyy.MM.dd HH:mm')}">
+                                                날짜
+                                            </div>
+                                        </div>
+
+                                        <!-- 개별 알림 삭제 버튼 -->
+                                        <button type="button"
+                                                class="btn-close ms-auto"
+                                                aria-label="Close"
+                                                th:attr="onclick='removeNotification(' + ${n.notificationId} + ', this)'">
+                                        </button>
+                                    </div>
+                                </li>
+
+                                <!-- 알림이 없을 때 -->
+                                <li th:if="${notifications.size() == 0}" class="no-notification text-center text-muted py-3">
+                                    알림이 없습니다.
+                                </li>
+
+                                <!-- 알림이 있을 때 -->
+                                <li th:if="${notifications.size() != 0}" class="dropdown-footer text-center p-2">
+                                    <button type="button" class="btn btn-link text-danger fw-bold" onclick="clearAllNotifications()">
+                                        <i class="bi bi-trash"></i> 비우기
+                                    </button>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                        <!-- 인증되지 않은 경우 -->
+                        <a th:if="${#authentication == null or #authentication.name == 'anonymousUser'}"
+                           th:href="@{/login}" class="me-3 text-dark">
+                            <i class="bi bi-heart"></i>
+                        </a>
+
+                        <!-- 인증된 경우 -->
+                        <a th:if="${#authentication != null and #authentication.name != 'anonymousUser'}"
+                           th:href="@{/list/likelist}" class="me-3 text-dark">
+                            <i class="bi bi-heart"></i>
+                        </a>
+
+
+                        <!-- 인증되지 않은 경우 -->
+                        <a th:if="${#authentication == null or #authentication.name == 'anonymousUser'}"
+                           th:href="@{/login}" class="me-3 text-dark">
+                            <i class="bi bi-chat-dots"></i>
+                        </a>
+
+                        <!-- 인증된 경우 -->
+                        <a th:if="${#authentication != null and #authentication.name != 'anonymousUser'}"
+                           th:href="@{/chat/mychat(userId=${#authentication.principal.userId})}" class="me-3 text-dark">
+                            <i class="bi bi-chat-dots"></i>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+
+        <!-- GNB 네비게이션 -->
+        <nav class="gnb bg-white">
+            <div class="container">
+                <ul class="nav justify-content: flex-start fw-bold">
+                    <li class="nav-item gnb-item">
+                        <a class="nav-link active" th:href="@{/list/list}" style="height: 100%">중고 경매</a>
+
+                        <!-- 중고 경매 LNB -->
+                        <div class="lnb">
+                            <div class="lnb-container">
+                                <div class="lnb-category">
+                                    <ul>
+
+                                        <li><a th:href="@{/list/list}">카테고리</a></li>
+                                        <li><a th:href="@{/list/list}">전체보기</a></li>
+                                        <li id="shalom"><a href="#">추천경매</a></li>
+                                        <li><a href="#">인기경매</a></li>
+                                        <li><a href="#">마감임박</a></li>
+                                    </ul>
+                                </div>
+                                <div class="lnb-list">
+                                    <ul>
+                                        <li><a th:href="@{/list/category(categoryId=1)}">디지털기기</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=2)}">가구/인테리어</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=3)}">유아동</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=4)}">여성의류</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=5)}">여성잡화</a></li>
+                                    </ul>
+                                    <ul>
+                                        <li><a th:href="@{/list/category(categoryId=6)}">남성패션/잡화</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=7)}">생활가전</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=8)}">생활/주방</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=9)}">스포츠/레저</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=10)}">취미/게임/음반</a></li>
+                                    </ul>
+                                    <ul>
+                                        <li><a th:href="@{/list/category(categoryId=11)}">뷰티/미용</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=12)}">식품</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=13)}">가공식품</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=14)}">건강기능식품</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=15)}">반려동물용품</a></li>
+                                    </ul>
+                                    <ul>
+                                        <li><a th:href="@{/list/category(categoryId=16)}">티켓/교환권</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=17)}">도서</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=18)}">유아도서</a></li>
+                                        <li><a th:href="@{/list/category(categoryId=19)}">기타 중고물품</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/list/premiumlist}">프리미엄 경매</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">이용가이드</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/contact/faq}">고객센터</a>
+                    </li>
+                    <a th:href="@{/product/insert}" class="register-btn ms-auto">상품 등록</a>
+                </ul>
+            </div>
+        </nav>
+
+    </header>
+</th:block>
+
+
+<div class="container" layout:fragment="content">
+
+</div>
+
+<footer class="footer container-fluid text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <img src="/img/index/ssauc_logo1.png" class="footer_image">
+                <ul class="list-unstyled">
+                    <li><a href="#">회사소개</a> | <a href="#">이용약관</a> | <a href="#">개인정보취급방침</a></li>
+                </ul>
+                <p>상호명 : (주)SSAUC | 대표이사 : 강기호, 김건희, 김희재, 박상협, 정영재</p>
+                <p>주소 : 서울 강남구 삼성로 534 SAC아트홀 6층</p>
+                <p>Tel : 02-6463-6827 | Email : ssauc@campusseven.com</p>
+                <p style="color: #747474">사업자 등록번호 : 101-23-45678 | 통신판매업 신고번호 : 제01-2345호</p>
+                <p style="color: #747474">(주)SSAUC은 통신판매중개자로서 (주)SSAUC은 매도인의 경우를 제외하고 사이트 상에 등록된 모든 상품과 그 내용에 대해 책임을 지지
+                    않습니다.</p>
+                <p style="color: #747474" class="small">Copyrightⓒ 2025, SSAUC, Inc All rights reserved.</p>
+            </div>
+            <div class="col-md-4">
+                <h5 class="footer-title">고객센터</h5>
+                <p>중고 경매 : 02-6463-6828 (평일 09:00 ~ 18:00)</p>
+                <p>프리미엄 경매 : 02-6463-6829 (평일 09:00 ~ 18:00)</p>
+                <p>주말 및 공휴일은 휴무 입니다. (점심 12:00 ~ 13:00)</p>
+                <p class="small">(정확한 상담을 위해 통화 내용이 저장됩니다.)</p>
+                <ul class="list-unstyled">
+                    <br>
+                    <li><a href="/contact/faq">자주 묻는 질문 &nbsp; &nbsp; </a> &nbsp; &nbsp;| <a href="/contact/qna"> &nbsp;
+                        &nbsp; 1:1 문의 &nbsp; &nbsp; </a> | &nbsp; &nbsp;<a href="/contact/chatbot"> &nbsp; &nbsp; 챗봇 상담
+                        &nbsp; &nbsp; &nbsp;</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- 페이지별 스크립트 삽입 영역 추가 -->
+<div layout:fragment="dialog"></div>
+<div layout:fragment="dialog2"></div>
+<div layout:fragment="alert"></div>
+<div layout:fragment="script"></div>
+<div th:replace="mypage/user-info-modal :: userInfoModal"></div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/user-info.js"></script>
+
+<script>
+    window.addEventListener("scroll", function () {
+        let header = document.getElementById("stickyHeader");
+        if (window.scrollY > 100) {
+            header.classList.add("fixed-top", "shadow");
+        } else {
+            header.classList.remove("fixed-top", "shadow");
+        }
+    });
+
+    function removeNotification(notificationId, btn) {
+        console.log("removeNotification called, id=", notificationId);
+
+        fetch(`/notifications/${notificationId}/read`, {
+            method: 'PATCH'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to update notification");
+                }
+                // 성공 시, 화면에서 해당 알림 제거
+                const notificationItem = btn.closest('li');
+                if (notificationItem) {
+                    notificationItem.remove();
+                }
+            })
+            .catch(error => {
+                console.error("Error removing notification:", error);
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // 드롭다운 버튼과 메뉴 요소 가져오기
+        const dropdownButton = document.getElementById("notificationDropdown");
+        const dropdownMenu = document.getElementById("notificationList");
+
+        // Bootstrap 드롭다운 객체 생성
+        const dropdown = new bootstrap.Dropdown(dropdownButton);
+
+        // 드롭다운 내부 클릭 시 닫히지 않도록 이벤트 방지
+        dropdownMenu.addEventListener("click", function (event) {
+            event.stopPropagation(); // 이벤트 전파 방지 → 드롭다운 닫히는 현상 방지
+        });
+
+        // X 버튼 눌러도 드롭다운이 닫히지 않도록 설정
+        document.querySelectorAll(".btn-close").forEach(button => {
+            button.addEventListener("click", function (event) {
+                event.stopPropagation(); // X 버튼 클릭 시 드롭다운 닫힘 방지
+            });
+        });
+    });
+
+    /**
+     * 모든 알림 삭제 (화면에서 제거)
+     */
+    function clearAllNotifications() {
+        console.log("clearAllNotifications 실행됨");
+
+        // 서버로 모든 알림을 삭제하는 API 호출
+        fetch('/notifications/clear', {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to clear notifications");
+                }
+                // UI에서 모든 알림 삭제
+                document.getElementById("notificationList").innerHTML = `
+                <li class="no-notification text-center text-muted py-3">
+                    알림이 없습니다.
+                </li>
+            `;
+                console.log("모든 알림이 삭제됨!");
+            })
+            .catch(error => {
+                console.error("Error clearing notifications:", error);
+            });
+    }
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>파일 삭제</title>
+</head>
+<body>
+<h1>파일 삭제</h1>
+<form th:action="@{/s3/delete}" method="post">
+  <label for="fileUrl">파일 URL:</label>
+  <input type="text" id="fileUrl" name="fileUrl" placeholder="삭제할 파일의 URL을 입력하세요" required>
+  <button type="submit">삭제</button>
+</form>
+<br>
+<a th:href="@{/s3}">S3 테스트 홈으로 돌아가기</a>
+</body>
+</html>

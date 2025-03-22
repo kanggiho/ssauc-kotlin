@@ -1,0 +1,11 @@
+{
+  "properties": {
+    "keywords": {
+      "type": "text",
+      "analyzer": "standard"
+    },
+    "searchedAt": {
+      "type": "date"
+    }
+  }
+}

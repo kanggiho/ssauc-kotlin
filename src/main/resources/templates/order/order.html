@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <!-- 필요한 css,js,cdn 등등 추가하기 -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <style>
+        /* 회색 배경 스타일 */
+        .disabled-input {
+            background-color: #e9ecef !important;
+        }
+    </style>
+
+
+</head>
+
+<div class="container" layout:fragment="content">
+
+    <!-- container 시작 -->
+    <div class="container py-5">
+
+        <!-- 배송주소 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 style="margin-left: 10px">📜 주문서</h3>
+                <br>
+
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">직거래 및 배송 장소</div>
+                    <div class="card-body">
+
+                        <form id="addressForm">
+                            <!-- 우편번호 및 찾기 버튼 -->
+                            <div class="mb-3">
+                                <label for="zipcode" class="form-label">우편번호</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="zipcode" placeholder="우편번호" readonly>
+                                    <button type="button" class="btn btn-outline-secondary" id="addAdressBtn">우편번호 찾기
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- 기본 주소 -->
+                            <div class="mb-3">
+                                <label for="address" class="form-label">주소</label>
+                                <input type="text" class="form-control" id="address" placeholder="주소" readonly>
+                            </div>
+                            <!-- 상세 주소 -->
+                            <div class="mb-3">
+                                <label for="addressDetail" class="form-label">상세 주소</label>
+                                <input type="text" class="form-control" id="addressDetail" placeholder="상세 주소를 입력하세요">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100" id="saveAddressBtn">주소 저장</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 주문상품 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">주문상품</div>
+                    <div class="card-body">
+                        <!-- 예시 상품 정보 -->
+                        <div class="d-flex align-items-center mb-4"
+                             style="border: 1px solid #eee; border-radius: 0.5rem; padding: 1rem;">
+                            <!-- 상품 이미지 -->
+                            <img
+                                    th:src="${product.getImageUrl()}"
+                                    alt="상품 이미지"
+                                    class="img-fluid rounded me-3"
+                                    style="width: 80px; height: 80px; object-fit: cover;"
+                            >
+                            <!-- 상품 상세 -->
+                            <div>
+                                <h6 class="fw-bold mb-1" th:text="${product.getName()}">상품명</h6>
+                                <p class="mb-1 text-muted">옵션 / 수량 1개</p>
+                                <p class="fw-bold mb-0"><span
+                                        th:text="${T(java.lang.String).format('%,d P', product.getPrice())}"></span></p>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold">거래 방식</h6>
+
+                        <!-- 배송 방법 선택 (라디오 버튼) -->
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline"
+                                 th:if="${product.dealType == 1 or product.dealType == 2}">
+                                <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="deliveryOption"
+                                        id="deliveryOption1"
+                                        value="택배"
+                                        checked>
+                                <label class="form-check-label" for="deliveryOption1">택배</label>
+                            </div>
+
+                            <div class="form-check form-check-inline"
+                                 th:if="${product.dealType == 0 or product.dealType == 2}">
+                                <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="deliveryOption"
+                                        id="deliveryOption2"
+                                        value="직거래">
+                                <label class="form-check-label" for="deliveryOption2">직거래</label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 최종 주문정보 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">최종 주문정보</div>
+                    <div class="card-body">
+                        <!-- 구매가 -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>구매가</span>
+                            <span th:text="${T(java.lang.String).format('%,d P', price)}"></span>
+                        </div>
+                        <!-- 수수료 -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>수수료</span>
+                            <span th:text="${T(java.lang.String).format('%,d P', fee)}"></span>
+                        </div>
+
+                        <!-- 총 결제금액 -->
+                        <div class="border-top pt-3 mt-3 d-flex justify-content-between fw-bold">
+                            <span>총 결제금액</span>
+                            <span th:text="${T(java.lang.String).format('%,d P', total)}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결제하기 버튼 -->
+        <div class="row">
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-primary btn-lg">결제하기</button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- 결제 확인 Modal -->
+    <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">결제 확인</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>현재 보유 캐시: <strong id="userCash">0 P</strong></p>
+                    <p>총 결제 금액: <strong id="totalPayment">0 P</strong></p>
+                    <p class="text-danger" id="paymentWarning" style="display: none;">⚠️ 보유 캐시가 부족합니다.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="confirmPaymentBtn" disabled>결제하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- container 끝 -->
+
+    <script>
+
+        let addressSaved = false;
+
+        addAdress()
+        saveAdress()
+        pay()
+
+
+        // 새 주소 추가 기능 구현
+        function addAdress() {
+
+            document.addEventListener("DOMContentLoaded", function () {
+                document.getElementById("addAdressBtn").addEventListener("click", function () {
+
+                    new daum.Postcode({
+                        oncomplete: function (data) {
+                            // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                            // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                            // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                            var addr = ''; // 주소 변수
+                            var extraAddr = ''; // 참고항목 변수
+
+                            //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                            if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                                addr = data.roadAddress;
+                            } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                                addr = data.jibunAddress;
+                            }
+
+                            // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                            if (data.userSelectedType === 'R') {
+                                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                                if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                                    extraAddr += data.bname;
+                                }
+                                // 건물명이 있고, 공동주택일 경우 추가한다.
+                                if (data.buildingName !== '' && data.apartment === 'Y') {
+                                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                                }
+                                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                                if (extraAddr !== '') {
+                                    extraAddr = ' (' + extraAddr + ')';
+                                }
+                                // 조합된 참고항목을 해당 필드에 넣는다.
+                                // document.getElementById("sample6_extraAddress").value = extraAddr;
+
+                            } else {
+                                // document.getElementById("sample6_extraAddress").value = '';
+                            }
+
+                            // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                            document.getElementById("zipcode").value = data.zonecode;
+                            document.getElementById("address").value = addr;
+                            // 커서를 상세주소 필드로 이동한다.
+                            document.getElementById("addressDetail").focus();
+                        }
+                    }).open();
+
+
+                });
+            });
+        }
+
+        function saveAdress() {
+            document.addEventListener("DOMContentLoaded", function () {
+                // 주소 저장 버튼 클릭 시 처리
+                document.getElementById("addressForm").addEventListener("submit", function (e) {
+                    e.preventDefault(); // 폼 기본 제출 방지
+
+                    // 입력 필드들 선택
+                    var zipcodeInput = document.getElementById("zipcode");
+                    var addressInput = document.getElementById("address");
+                    var addressDetailInput = document.getElementById("addressDetail");
+                    var saveBtn = document.getElementById("saveAddressBtn");
+
+                    // 예외 처리: 모든 필드가 입력되었는지 확인
+                    if (zipcodeInput.value.trim() === "" ||
+                        addressInput.value.trim() === "" ||
+                        addressDetailInput.value.trim() === "") {
+                        alert("우편번호, 주소, 상세주소 모두 입력해주세요.");
+                        return; // 조건이 맞지 않으면 저장 진행하지 않음
+                    }
+
+                    // 필드들을 비활성화(disabled) 및 스타일 적용
+                    zipcodeInput.setAttribute("disabled", "true");
+                    addressInput.setAttribute("disabled", "true");
+                    addressDetailInput.setAttribute("disabled", "true");
+
+                    zipcodeInput.classList.add("disabled-input");
+                    addressInput.classList.add("disabled-input");
+                    addressDetailInput.classList.add("disabled-input");
+
+                    // 저장 버튼도 비활성화하고 스타일 변경 (Bootstrap 클래스 변경)
+                    saveBtn.classList.remove("btn-primary");
+                    saveBtn.classList.add("btn-secondary");
+                    saveBtn.setAttribute("disabled", "true");
+
+                    // 만약 서버로 데이터를 전송해야 한다면 AJAX 호출 등을 진행
+                    // 여기서는 단순히 UI 변경만 처리함
+                    addressSaved = true;
+                    alert("주소가 저장되었습니다.");
+                });
+            });
+        }
+
+
+        function pay() {
+            document.addEventListener("DOMContentLoaded", function () {
+                const paymentButton = document.querySelector(".btn-primary.btn-lg"); // 결제하기 버튼
+                const confirmPaymentButton = document.getElementById("confirmPaymentBtn"); // 결제 확인 버튼
+                const userCashDisplay = document.getElementById("userCash"); // 보유 캐시 표시
+                const totalPaymentDisplay = document.getElementById("totalPayment"); // 총 결제 금액 표시
+                const paymentWarning = document.getElementById("paymentWarning"); // 경고 메시지
+
+                let userCash = parseInt("[[${userCash}]]"); // 서버에서 받아올 사용자 보유 캐시 (임시 값)
+                //let totalPayment = parseInt(document.querySelector("[th\\:text='${total}']").innerText.replace(/,/g, '')); // 총 결제 금액 가져오기
+                let totalPayment = parseInt("[[${total}]]");
+
+                // 결제하기 버튼 클릭 시 모달 띄우기
+                paymentButton.addEventListener("click", function () {
+
+                    if (!addressSaved) {
+                        alert("먼저 주소를 저장해주세요.");
+                        return;
+                    }
+
+                    // 현재 보유 캐시 및 결제 금액 표시
+                    userCashDisplay.innerText = userCash.toLocaleString() + " P";
+                    totalPaymentDisplay.innerText = totalPayment.toLocaleString() + " P";
+
+                    // 보유 캐시 부족 시 경고 메시지 출력 & 결제 버튼 비활성화
+                    if (userCash < totalPayment) {
+                        paymentWarning.style.display = "block";
+                        confirmPaymentButton.disabled = true;
+                    } else {
+                        paymentWarning.style.display = "none";
+                        confirmPaymentButton.disabled = false;
+                    }
+
+                    // Bootstrap 5 Modal 띄우기
+                    let paymentModal = new bootstrap.Modal(document.getElementById("paymentModal"));
+                    paymentModal.show();
+                });
+
+                // 결제 확인 버튼 클릭 시 처리
+                confirmPaymentButton.addEventListener("click", function () {
+                    if (userCash >= totalPayment) {
+                        userCash -= totalPayment; // 캐시 차감
+                        alert("결제가 완료되었습니다! 남은 캐시: " + userCash.toLocaleString() + " P");
+
+                        var zipcodeInput = document.getElementById("zipcode");
+                        var addressInput = document.getElementById("address");
+                        var addressDetailInput = document.getElementById("addressDetail");
+
+
+                        // name이 "deliveryOption"인 라디오 버튼 중 체크된 값을 가져옴
+                        const selectedOption = document.querySelector("input[name='deliveryOption']:checked").value;
+                        console.log("선택된 옵션:", selectedOption);
+                        // 이후 선택된 옵션에 따라 다른 작업을 수행할 수 있습니다.
+
+                        // 전송할 데이터 준비 (여기서 orderRequestDto 속성명으로 전달)
+                        const orderRequestDto = {
+                            productId: [[${orderRequestDto.productId}]],
+                            sellerId: [[${orderRequestDto.sellerId}]],
+                            buyerId: [[${orderRequestDto.buyerId}]],
+                            totalPayment: totalPayment,
+                            postalCode: zipcodeInput.value,
+                            deliveryAddress: addressInput.value + " " + addressDetailInput.value,
+                            selectedOption: selectedOption
+                        };
+
+                        // 동적으로 form 생성하여 POST 요청 전송
+                        var form = document.createElement("form");
+                        form.method = "POST";
+                        form.action = "/pay/pay";
+
+                        // orderRequestDto의 각 데이터를 hidden input에 담음
+                        for (var key in orderRequestDto) {
+                            if (orderRequestDto.hasOwnProperty(key)) {
+                                var input = document.createElement("input");
+                                input.type = "hidden";
+                                input.name = key;
+                                input.value = orderRequestDto[key];
+                                form.appendChild(input);
+                            }
+                        }
+
+                        document.body.appendChild(form);
+                        form.submit(); // 폼 제출 → 서버에서 리다이렉트 실행 (Flash Attribute 전달)
+
+
+                    } else {
+                        alert("캐시가 부족하여 결제할 수 없습니다.");
+                    }
+                });
+            });
+        }
+
+    </script>
+
+
+</div>
+</html>

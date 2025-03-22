@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <link rel="stylesheet" th:href="@{/css/list.css}">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<div class="container" layout:fragment="content">
+
+    <!-- 최근 본 상품 박스 -->
+    <div class="floating-box" th:if="${#authentication != null && #authentication.name != 'anonymousUser'}">
+        <h6>최근 본 물품</h6>
+        <!-- 스크롤 영역 -->
+        <div class="recent-items-container">
+            <!-- 최근 본 상품 목록 반복 -->
+            <div th:each="view : ${recentViews}">
+                <a th:href="@{/bid/bid(productId=${view.product.productId})}" class="recent-item">
+                    <img th:src="${view.product.imageUrl}" alt="상품 이미지">
+                </a>
+            </div>
+        </div>
+        <!-- TOP 버튼 -->
+        <button id="topBtn" class="top-btn hide">TOP</button>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- 왼쪽 사이드바 -->
+            <div class="col-lg-2">
+                <div class="sidebar">
+                    <h5>필터</h5>
+                    <div class="canBid">
+                        <input class="form-check-input" id="filter_available_bid" type="checkbox" onchange="toggleCheckBox()">
+                        <span>경매 가능만 보기</span>
+                    </div>
+
+                    <h5>카테고리</h5>
+                    <div class="category-list">
+                        <a th:href="@{/list/category(categoryId=1)}">디지털기기</a>
+                        <a th:href="@{/list/category(categoryId=2)}">가구/인테리어</a>
+                        <a th:href="@{/list/category(categoryId=3)}">유아동</a>
+                        <a th:href="@{/list/category(categoryId=4)}">여성의류</a>
+                        <a th:href="@{/list/category(categoryId=5)}">여성잡화</a>
+                        <a th:href="@{/list/category(categoryId=6)}">남성패션/잡화</a>
+                        <a th:href="@{/list/category(categoryId=7)}">생활가전</a>
+                        <a th:href="@{/list/category(categoryId=8)}">생활/주방</a>
+                    </div>
+
+                    <h5 class="mt-4">가격</h5>
+                    <div class="price-filter">
+                        <button class="price-button" th:data-min-price="0" th:data-max-price="20000" onclick="filterByPrice(this)">~2만원</button>
+                        <button class="price-button" th:data-min-price="20000" th:data-max-price="30000" onclick="filterByPrice(this)">2만원 ~ 3만원</button>
+                        <button class="price-button" th:data-min-price="30000" th:data-max-price="40000" onclick="filterByPrice(this)">3만원 ~ 4만원</button>
+                        <button class="price-button" th:data-min-price="40000" th:data-max-price="200000" onclick="filterByPrice(this)">4만원 ~ 20만원</button>
+                    </div>
+
+                    <div class="price-input">
+                        <input type="text" id="minPrice" placeholder="최소 가격 (원)">
+                        <span>~</span>
+                        <input type="text" id="maxPrice" placeholder="최대 가격 (원)">
+                        <button onclick="filterByInputPrice()">🔍</button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 상품 리스트 -->
+            <div class="col-lg-10">
+                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+                    <div class="col" th:each="product : ${secondList}">
+                        <div class="card product-card">
+                            <button class="icon-btn" th:data-product-id="${product.productId}" onclick="toggleHeart(this)">
+                                <i th:class="${product.liked} ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                            </button>
+                            <a th:href="@{/bid/bid(productId=${product.productId})}">
+                                <div class="image-container">
+                                    <img    class="product-img"
+                                            th:inline="text"
+                                            th:style="${product.getGap().equals('⏳ 입찰 마감') or product.getStatus().equals('판매완료')? 'filter: opacity(0.3) drop-shadow(0 0 0 #000000);' : ''}"
+                                            th:src="${product.imageUrl}" alt="시계">
+                                    <div class="overlay-text"
+                                         th:if="${product.getGap().equals('⏳ 입찰 마감') or product.getStatus().equals('판매완료')}">
+                                        ⏳ 입찰 마감
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="product-title" th:text="${product.name}"></p>
+                                    <p class="product-price" th:text="${product.price}"></p>
+                                    <p class="product-info">[[${product.bidCount}]] | [[${product.gap}]]</p>
+                                    <p class="product-info">
+                                        [[${product.location}]] | ❤️ <span class="like-count" th:text="${product.likeCount}"></span>
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination-container">
+                    <div class="pagination">
+                        <th:block th:with="isPriceFiltered=${(param.minPrice != null or param.maxPrice != null)}">
+
+                            <!-- 이전 페이지 버튼 -->
+                            <a th:if="${secondList.hasPrevious()}"
+                               th:href="${isPriceFiltered} ?
+                   @{/list/price(minPrice=${param.minPrice}, maxPrice=${param.maxPrice}, categoryId=${param.categoryId}, page=${secondList.number - 1})} :
+                   @{/list/list(page=${secondList.number - 1})}"
+                               class="page-link">&lt;</a>
+
+                            <!-- 페이지 번호 (5개씩 표시) -->
+                            <th:block th:with="start=${(secondList.number / 5) * 5}, end=${T(java.lang.Math).min(start + 4, secondList.totalPages - 1)}">
+                                <a th:each="i : ${#numbers.sequence(start, end)}"
+                                   th:href="${isPriceFiltered} ?
+                       @{/list/price(minPrice=${param.minPrice}, maxPrice=${param.maxPrice}, categoryId=${param.categoryId}, page=${i})} :
+                       @{/list/list(page=${i})}"
+                                   th:text="${i + 1}"
+                                   th:classappend="${i == secondList.number} ? 'active' : ''"
+                                   class="page-link"></a>
+                            </th:block>
+
+                            <!-- 다음 페이지 버튼 -->
+                            <a th:if="${secondList.hasNext()}"
+                               th:href="${isPriceFiltered} ?
+                   @{/list/price(minPrice=${param.minPrice}, maxPrice=${param.maxPrice}, categoryId=${param.categoryId}, page=${secondList.number + 1})} :
+                   @{/list/list(page=${secondList.number + 1})}"
+                               class="page-link">&gt;</a>
+                        </th:block>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        var isLoggedIn = /*[[${user != null and user.userId != null}]]*/ false;
+
+        function toggleHeart(button) {
+            // 로그인 여부 체크: 로그인 안 되어 있으면 메시지 표시 후 리턴
+            if (!isLoggedIn || isLoggedIn === "false") {
+                // confirm 창의 기본 버튼은 브라우저에 따라 "확인"/"취소"로 표시됩니다.
+                // "확인"을 누르면 true, "취소"(혹은 아니오)를 누르면 false 반환.
+                if (confirm("로그인 후 이용할 수 있습니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                    // 사용자가 확인을 누른 경우 로그인 페이지로 이동
+                    window.location.href = '/login';
+                }
+                return; // 로그인하지 않았다면 이후 동작 중단
+            }
+
+            const productId = button.getAttribute("data-product-id"); // 상품 아이디 받기
+            const icon = button.querySelector("i");
+            const card = button.closest(".product-card");
+            const likeCountElement = card.querySelector(".like-count");
+
+            // 현재 좋아요 수 파싱 (쉼표 제거 후 정수 변환)
+            let currentCount = parseInt(likeCountElement.textContent.replace(/,/g, ''), 10) || 0;
+
+            fetch("/api/like", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: productId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        icon.classList.remove("bi-heart");
+                        icon.classList.add("bi-heart-fill")
+                        currentCount++;
+                    } else {
+                        icon.classList.remove("bi-heart-fill");
+                        icon.classList.add("bi-heart");
+                        currentCount = Math.max(0, currentCount - 1);
+                    }
+
+                    likeCountElement.textContent = currentCount.toLocaleString();
+                })
+                .catch(error => console.error("Error:", error));
+        }
+
+        function filterByPrice(button) {
+            const minPrice = button.getAttribute("data-min-price");
+            const maxPrice = button.getAttribute("data-max-price");
+
+            // GET 요청을 보낼 URL 생성 (페이지 번호 포함)
+            const url = `/list/price?minPrice=${minPrice}&maxPrice=${maxPrice}&page=${0}`;
+
+            // 페이지 이동
+            window.location.href = url;
+        }
+
+        function filterByInputPrice() {
+            const minPrice = document.getElementById("minPrice").value;
+            const maxPrice = document.getElementById("maxPrice").value;
+
+            if (!minPrice || !maxPrice) {
+                alert("최소 가격과 최대 가격을 입력해주세요.");
+                return;
+            }
+
+            if (isNaN(minPrice) || isNaN(maxPrice)) {
+                alert("숫자만 입력 가능합니다.");
+                return;
+            }
+
+            if (parseInt(minPrice) > parseInt(maxPrice)) {
+                alert("최소 가격이 최대 가격보다 클 수 없습니다.");
+                return;
+            }
+
+            // GET 요청을 보낼 URL 생성 (페이지 번호 포함)
+            const url = `/list/price?minPrice=${minPrice}&maxPrice=${maxPrice}&page=${0}`;
+
+            // 페이지 이동
+            window.location.href = url;
+        }
+
+        function toggleCheckBox() {
+            let checkbox = document.getElementById('filter_available_bid');
+            let params = new URLSearchParams(window.location.search);
+            let page = params.get("page") || 0;
+            if (checkbox.checked) {
+                // 체크한 경우 availableBid 필터 적용 (filter=true)
+                window.location.href = `/list/availableBid?filter=true&page=${page}`;
+            } else {
+                // 체크 해제 시 filter 파라미터 없이 기본 리스트로 이동
+                window.location.href = `/list/list?page=${page}`;
+            }
+        }
+
+        // 페이지 로드 시 체크박스 상태 유지
+
+        window.onload = function() {
+            let params = new URLSearchParams(window.location.search);
+            let isFiltered = params.get("filter") === "true";
+
+            document.getElementById('filter_available_bid').checked = isFiltered;
+        };
+
+    </script>
+
+</div>
+
+</html>

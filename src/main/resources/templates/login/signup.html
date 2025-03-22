@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>SSAUC 회원가입</title>
+    <!-- CSRF 토큰 메타 태그 (필요 시) -->
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}" />
+    <meta th:if="${_csrf != null}" name="_csrf_header" th:content="${_csrf.headerName}" />
+
+    <!-- Firebase SDK (compat 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+
+    <!-- Firebase 초기화 (SDK 로드 후 실행) -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwXoI6qLHJpf1xMyx83pGxOUffLLneGEo",
+            authDomain: "ssgfinalpjt.firebaseapp.com",
+            projectId: "ssgfinalpjt",
+            storageBucket: "ssgfinalpjt.firebasestorage.app",
+            messagingSenderId: "818168642030",
+            appId: "1:818168642030:web:fc24c362b8b2e29e8b36ff",
+            measurementId: "G-MD48Q5J1DE"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <!-- Daum 우편번호 API -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+    <!-- signup.css와 signup.js 로드 -->
+    <link rel="stylesheet" th:href="@{/css/signup.css}">
+    <script th:src="@{/js/signup.js}" defer></script>
+</head>
+<body>
+<div layout:fragment="content" class="signup-container">
+    <section class="signup-section">
+        <h2>회원가입</h2>
+        <!--
+            ※ th:action="@{/register}" method="post" =>
+               현재는 JS에서 fetch() 호출 (Ajax)로 회원가입 처리하므로 중복됨.
+               -> form 태그를 활용할 필요가 없거나,
+                  form을 그대로 사용하지만 js에서 e.preventDefault()하여 fetch() 호출.
+        -->
+        <form id="signupForm" class="signup-form"
+              th:action="@{/register}" method="post">
+
+            <!-- 이메일 -->
+            <div class="form-row-inline">
+                <label for="email">이메일 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <!--
+                        param.email != null ? param.email : '' =>
+                        간편로그인 등에서 이메일이 넘어왔을 경우 자동 기입 (수정 불가)
+                     -->
+                    <input type="email" id="email" name="email"
+                           placeholder="ex) ssg@gmail.com"
+                           th:value="${param.email != null ? param.email : ''}"
+                           th:readonly="${param.email != null}" required />
+                    <button type="button" id="emailCheckBtn" class="check-btn">중복확인</button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="emailError"></span>
+            </div>
+
+            <!-- 비밀번호 -->
+            <div class="form-row-inline">
+                <label for="password">비밀번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="password" id="password" name="password"
+                           placeholder="비밀번호를 입력해주세요" required />
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="passwordError"></span>
+                <!-- 실시간 피드백 -->
+                <span class="feedback-msg" id="passwordFeedback"></span>
+            </div>
+
+            <!-- 비밀번호 확인 -->
+            <div class="form-row-inline">
+                <label for="confirmPassword">비밀번호 확인 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                           placeholder="비밀번호를 다시 입력해주세요" required />
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="confirmPasswordError"></span>
+                <span class="feedback-msg" id="confirmFeedback"></span>
+            </div>
+
+            <!-- 닉네임 -->
+            <div class="form-row-inline">
+                <label for="userName">닉네임 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="userName" name="userName"
+                           placeholder="닉네임을 입력해주세요"
+                           th:value="${param.nickname != null ? param.nickname : ''}" required />
+                    <button type="button" id="nickCheckBtn" class="check-btn">중복확인</button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="userNameError"></span>
+            </div>
+
+            <!-- 휴대폰 번호 -->
+            <div class="form-row-inline">
+                <label for="phone">휴대폰 번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="phone" name="phone"
+                           placeholder="휴대폰 번호를 입력해주세요" required>
+                    <button type="button" id="phoneValidateBtn" class="check-btn" disabled>
+                        인증번호 요청
+                    </button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="phoneError"></span>
+            </div>
+
+            <!-- 인증번호 -->
+            <div class="form-row-inline">
+                <label for="smsCode">휴대폰 인증번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="smsCode" name="smsCode"
+                           placeholder="인증번호를 입력해주세요" disabled>
+                    <button type="button" id="verifySmsBtn" class="check-btn" disabled>
+                        인증 확인
+                    </button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="smsCodeError"></span>
+            </div>
+
+            <!-- 우편번호 -->
+            <div class="form-row-inline">
+                <label for="zipcode">우편번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="zipcode" name="zipcode"
+                           placeholder="우편번호" class="form-control" readonly>
+                    <button type="button" id="addAdressBtn" class="check-btn">우편번호 찾기</button>
+                </div>
+            </div>
+
+            <!-- 주소 -->
+            <div class="form-row-inline">
+                <label for="address">주소 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="address" name="address"
+                           placeholder="주소" class="form-control" readonly>
+                </div>
+            </div>
+
+            <!-- 상세주소 -->
+            <div class="form-row-inline">
+                <label for="addressDetail">상세 주소 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="addressDetail" name="addressDetail"
+                           placeholder="상세 주소를 입력하세요" required>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="addressError"></span>
+            </div>
+
+            <!-- 폼 제출 버튼 -->
+            <div class="button-row">
+                <button type="submit" class="submit-btn" id="signupSubmitBtn">완료</button>
+                <button type="button" class="cancel-btn" id="cancelBtn">취소</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<!-- 커스텀 Alert 모달 -->
+<div id="customAlertModal" class="modal">
+    <div class="modal-content">
+        <p id="customAlertMessage"></p>
+        <button id="customAlertConfirmBtn">확인</button>
+    </div>
+</div>
+</body>
+</html>

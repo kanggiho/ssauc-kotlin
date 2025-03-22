@@ -1,0 +1,321 @@
+.member-info-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+/* 카드형 레이아웃을 위한 info-graph-container */
+.info-graph-container {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.section-title-icon {
+    background-color: #e0e7ff;  /* 연보라 아이콘 배경 */
+    padding: 4px 6px;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-right: 8px;
+    color: #4f46e5;  /* 진보라 */
+}
+
+/* h3 타이틀 스타일 */
+.reputation-graph h3,
+.reputation-calculation h3 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #000;  /* 검정 글씨 */
+    background-color: #f0f0ff;  /* 살짝 연보라 */
+    border-left: 6px solid #b0c4ff;  /* 파랑 포인트 */
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* 기간 선택 UI 관련 스타일 */
+.reputation-graph-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.period-label {
+    font-size: 14px;
+    color: #333;
+}
+
+.period-select {
+    padding: 4px 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* h4 타이틀 스타일 */
+.calculation-list h4 {
+    font-size: 17px;
+    color: #000;  /* 검정 글씨 */
+    background-color: #f8f9ff;  /* 연회색 배경 */
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.basic-info {
+    flex: 1;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #fdfdfd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+    min-height: 350px;
+}
+
+.basic-info-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.profile-image {
+    margin-left: 16px;
+}
+
+.basic-info .profile-image {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 16px;
+}
+
+.basic-info h2 {
+    font-size: 30px;
+    margin: 0;
+    color: #333;
+}
+
+.basic-info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f8f9ff; /* 연보라톤 배경 */
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #444;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    transition: background-color 0.3s;
+}
+
+.info-item:hover,
+.reputation-graph h3:hover,
+.reputation-calculation h3:hover {
+    background-color: #eef2ff; /* 호버 시 강조 */
+}
+
+.info-item .info-icon {
+    font-size: 18px;
+    background-color: #e0e7ff; /* 아이콘 배경색 */
+    padding: 4px 6px;
+    border-radius: 6px;
+    color: #4f46e5; /* 진보라 텍스트 */
+}
+
+/* 리뷰 요약 섹션 */
+.review-summary {
+    margin-bottom: 20px;
+}
+
+.sparkle-icon {
+    width: 50px;    /* 필요에 따라 크기 조절 */
+    height: 50px;
+    vertical-align: middle;  /* 텍스트와 수직 정렬 */
+}
+
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.info-icon {
+    background-color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    vertical-align: top;
+    position: relative;   /* 🌟 상대 위치 조정 */
+    top: -7px;             /* 🌟 위로 이동 (조절 가능) */
+    font-weight: bold;
+    color: #333;
+}
+
+.tooltip-box {
+    display: none; /* 기본 숨김 */
+    position: absolute;
+    top: -10px;
+    left: 100%;
+    margin-left: 10px;
+    background-color: #fff;
+    color: #333;
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.tooltip-box::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent white transparent transparent;
+}
+
+.tooltip-container:hover .tooltip-box {
+    display: block;
+}
+
+.tooltip-container:hover {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-box ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: disc;
+    margin-left: 16px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* 🌟 요약 내용 박스 (그라데이션 테두리와 배경 적용) */
+.summary-box {
+    padding: 16px;
+    border-radius: 10px;
+    margin-top: 8px;
+    color: #333;
+    font-size: 15px;
+    line-height: 1.6;
+
+    /* 🌟 그라데이션 테두리 처리 */
+    border: 1px solid transparent;  /* 얇은 테두리 */
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-image:
+            linear-gradient(to right, #d0eaff, #eaefff, #e0d9ff),  /* 내부 밝은 배경 */
+            linear-gradient(to right, #b0caff, #cfc4ff, #c8b8ff);  /* 🌟 파랑→보라 강조 테두리 */
+}
+
+/* 평판 그래프 카드 스타일 */
+.reputation-graph {
+    flex: 1;
+    max-width: 600px;
+    padding: 20px;
+    border-radius: 12px;
+    background-color: #fdfdfd;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+    min-height: 350px;
+}
+.reputation-graph h3 {
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+#reputationChart {
+    max-height: 300px;  /* 🌟 최대 높이 제한 */
+    width: 100%;        /* 부모 요소에 맞춤 */
+    height: auto;
+}
+
+
+/* 평판 점수 계산 방식 섹션 */
+.reputation-calculation {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.reputation-calculation p {
+    margin-left: 12px;  /* 원하는 들여쓰기 너비 */
+    padding-left: 8px;  /* 약간 여유 */
+    border-left: 3px solid #d0d7ff;  /* 연보라 얇은 선 강조 */
+    color: #444;
+    font-size: 14px;
+}
+.calculation-list {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.calculation-list div {
+    width: 48%;
+}
+
+
+/* 모달 전용 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 9000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 50%;          /* 부모(.modal)의 80%로 설정 */
+    max-width: 500px;    /* 너무 커지지 않도록 최대 800px */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.modal-content .basic-info {
+    margin-top: 20px;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal.hidden {
+    display: none;
+}
+.modal.show {
+    display: flex;
+}

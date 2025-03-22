@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+
+    <title>로그인</title>
+
+    <!-- SUIT 폰트 (CDN) -->
+    <link
+            href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/stylesheet.css"
+            rel="stylesheet"
+    />
+
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" th:href="@{/css/adminlogin.css}"/>
+</head>
+
+<body>
+<div class="login-wrapper">
+
+    <!-- 서버측 에러 메시지 -->
+    <div th:if="${error}" class="error-message">
+        <span th:text="${error}"></span>
+    </div>
+
+    <div class="login-content">
+        <!-- 로그인 폼 -->
+        <div class="login-form-container">
+            <div class="login-form-container2">
+                <form action="/admin/home" method="POST" id="loginForm" class="login-form">
+
+                    <div class="logo-image-container">
+                        <div class="logo-image-area">
+                            <img th:src="@{/img/index/ssauc_logo2.png}"
+                                 alt="브랜드 로고 이미지"
+                                 class="logo-image2"/>
+                            <h2>관리자 모드</h2>
+                        </div>
+                    </div>
+
+                    <!-- 아이디 -->
+                    <label for="inputId" class="label-id">아이디</label>
+                    <div class="input-group">
+                        <input
+                                type="text"
+                                id="inputId"
+                                name="adminId"
+                                class="input-id"
+                                placeholder="아이디"
+                                value="admin"
+                        />
+                    </div>
+
+                    <!-- 비밀번호 -->
+                    <label for="inputPassword" class="label-pw">비밀번호</label>
+                    <div class="input-group">
+                        <input
+                                type="password"
+                                id="inputPassword"
+                                name="adminPw"
+                                class="input-pw"
+                                placeholder="비밀번호"
+                                value="1234"
+                        />
+                    </div>
+
+                    <!-- 로그인 버튼 -->
+                    <div class="login-button">
+                        <button type="button" class="login-btn" id="loginBtn">로그인</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+
+
+    </div>
+
+</div>
+
+<!-- 로그인 실패 시 alert 메시지 표시 -->
+<th:block th:if="${loginError}">
+    <script>
+        alert("유효한 이메일 비밀번호를 입력하세요.");
+    </script>
+</th:block>
+
+<!-- 자바스크립트 로직(axios 등) -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/jquery.easing.min.js"></script>
+<script src="/js/sb-admin-2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<th:block layout:fragment="script">
+    <script>
+        // 로그인 버튼 클릭 이벤트
+        document.getElementById("loginBtn").addEventListener("click", function (event) {
+            const inputId = document.getElementById("inputId").value.trim();
+            const inputPassword = document.getElementById("inputPassword").value.trim();
+
+            // 유효성 검사
+            if (!inputId) {
+                alert("아이디를 입력해주세요.");
+                event.preventDefault(); // 폼 제출 중단
+                return;
+            }
+
+            if (!inputPassword) {
+                alert("비밀번호를 입력해주세요.");
+                event.preventDefault();
+                return;
+            }
+
+            // 모든 유효성 검사를 통과한 경우
+            document.getElementById("loginForm").submit();
+            console.log(`ID: ${inputId}, Password: ${inputPassword}`);
+        });
+
+
+        // 필요에 따라 추가 구현 가능
+    </script>
+</th:block>
+
+</body>
+</html>

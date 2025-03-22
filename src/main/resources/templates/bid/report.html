@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 추가 커스텀 스타일 */
+        .product-info img {
+            max-width: 150px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .product-info .product-name {
+            font-size: 1.75rem;
+            font-weight: normal;
+            color: #000;
+        }
+        .product-info .product-other {
+            font-size: 1rem;
+            color: #000;
+        }
+        .productBid {
+            cursor: pointer;
+            color: #66a6ff;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container" layout:fragment="content">
+    <!-- productId를 숨겨진 필드로 출력 -->
+    <input type="hidden" id="productId" th:value="${productId}"/>
+
+    <h2 class="mt-4 ms-3">게시글 신고</h2>
+
+    <!-- 상품 정보 파티션 (상품 이미지, 이름, 가격 표시) -->
+    <div class="product-info my-4 p-3 border rounded">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center">
+                <!-- 상품 이미지 (product.getImageUrl() 값이 URL이라 가정) -->
+                <img th:src="${product.getImageUrl()}" alt="상품 이미지" class="img-fluid">
+            </div>
+            <div class="col-md-9">
+                <!-- 상품 이름과 가격 -->
+                <h4 class="product-name" th:text="${product.getName()}">상품 이름</h4>
+                <p class="product-other">가격 : <span th:text="${T(java.lang.String).format('%,d 원', product.getPrice())}">0</span></p>
+                <p class="product-other">신고 대상자 :
+                    <span class="productBid"
+                          th:text="${product.getSeller().userName}"
+                          th:attr="data-sellername=${product.getSeller().userName}"
+                          onclick="handleSellerClick(event)">user</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 신고 폼 영역 -->
+    <div class="container py-4">
+        <div class="border p-4 rounded bg-light">
+            <!-- 신고사유 선택 (Select Box) -->
+            <div class="mb-3 row">
+                <label for="reportReason" class="col-sm-3 col-form-label">신고사유 선택</label>
+                <div class="col-sm-9">
+                    <select class="form-select" id="reportReason">
+                        <option selected>음란물/청소년유해물</option>
+                        <option>폭력적인언어</option>
+                        <option>사기의심 상품</option>
+                        <option>횡령물 의심 상품</option>
+                        <option>금지된 물품 판매</option>
+                        <option>기타 신고</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 상세 신고 사유 (Textarea) -->
+            <div class="mb-3 row">
+                <label for="reportContent" class="col-sm-3 col-form-label">상세 신고 사유</label>
+                <div class="col-sm-9">
+                    <textarea class="form-control"
+                              id="reportContent"
+                              rows="6"
+                              placeholder="내용을 입력해주세요"></textarea>
+                </div>
+            </div>
+
+            <!-- 등록하기 버튼 -->
+            <div class="d-flex justify-content-end">
+                <button type="button" class="btn btn-primary" id="submitReport">등록하기</button>
+            </div>
+        </div>
+    </div>
+    <!-- 신고 폼 영역 끝 -->
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('submitReport').addEventListener('click', function () {
+                console.log("등록하기 버튼 클릭됨");
+
+                var productId = document.getElementById('productId').value;
+                var reportReason = document.getElementById('reportReason').value;
+                var reportContent = document.getElementById('reportContent').value;
+
+                console.log("productId:", productId, "reportReason:", reportReason, "reportContent:", reportContent);
+
+                var data = {
+                    productId: productId,
+                    reportReason: reportReason,
+                    details: reportContent
+                };
+
+                fetch('/bid/report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error('네트워크 응답이 올바르지 않습니다.');
+                        }
+                        return response.text();
+                    })
+                    .then(function (result) {
+                        console.log("서버 응답:", result);
+                        alert('신고가 성공적으로 등록되었습니다.');
+                        window.location.href = "/bid/bid?productId=" + productId;
+                    })
+                    .catch(function (error) {
+                        console.error('신고 등록 중 오류 발생:', error);
+                        alert('신고 등록에 실패하였습니다.');
+                    });
+            });
+        });
+    </script>
+</div>
+</body>
+</html>

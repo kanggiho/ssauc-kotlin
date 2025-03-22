@@ -1,0 +1,27 @@
+name: "📅 팀 일정"
+description: "팀 일정을 기록하는 이슈 템플릿입니다."
+labels: ["schedule"]
+body:
+  - type: input
+    attributes:
+      label: "📌 날짜"
+      description: "일정을 입력하세요 (예: X월 XX일)"
+      placeholder: "예) 2월 19일"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "📝 일정 목록"
+      description: "팀 일정 항목을 입력하세요."
+      placeholder: |
+        - 회의: 오후 2시 (회의실 A)
+        - 개발 작업: XX 기능 완료
+        - 디자인 피드백 반영
+        - 내부 공유 미팅
+    value: |
+      - [ ] 첫 번째 일정
+      - [ ] 두 번째 일정
+      - [ ] 세 번째 일정
+    validations:
+      required: true

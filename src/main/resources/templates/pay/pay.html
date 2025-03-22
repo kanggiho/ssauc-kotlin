@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <!-- 필요한 css,js,cdn 등등 추가하기 -->
+</head>
+
+<div class="container" layout:fragment="content">
+    <!-- 필요한 태그 추가하기 -->
+
+    <!-- container 시작 -->
+    <div class="container py-5">
+
+        <!-- 결제 상세정보 제목 -->
+        <h2 class="text-center fw-bold mb-4">결제 상세정보</h2>
+
+        <!-- 결제번호 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <p class="mb-1 text-muted" th:text="${timestamp}">2025.02.24 14:24:20</p>
+                        <p class="fw-bold mb-0" th:text="${confirmNumber}">결제번호: 202502245459885</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결제 상품 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+                        <span>결제상품</span>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold"><span th:text="${seller}">주식회사 SSAUC</span> 🏠</h6>
+                        <div class="d-flex align-items-center p-3 border rounded">
+                            <!-- 상품 이미지 -->
+                            <img
+                                    th:src="${imgUrl}"
+                                    alt="상품 이미지"
+                                    class="img-fluid rounded me-3"
+                                    style="width: 80px; height: 80px; object-fit: cover;"
+                            >
+                            <!-- 상품 정보 -->
+                            <div>
+                                <p class="mb-1 fw-bold" th:text="${productName}">DANIEL KLEIN</p>
+                                <p class="mb-1 text-muted small">결제 번호 : <span th:text="${confirmNumber}"></span></p>
+                                <p class="mb-1 text-muted small">주소 : <span th:text="${totalAddress}"></span> | 거래방식 : <span th:text="${selectedOption}"></span></p>
+                                <p class="fw-bold mb-0" th:text="${totalPrice}">64,300원</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결제 정보 파티션 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header fw-bold">결제정보</div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-danger fw-bold">결제금액</span>
+                            <span class="fw-bold text-danger" th:text="${totalPrice}">64,300원</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>상품금액</span>
+                            <span th:text="${totalPrice}">64,300원</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-3 fw-bold">
+                            <span>SSAUC 머니 사용</span>
+                            <span th:text="${totalPrice}">64,300원</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 이동 버튼 파티션 -->
+
+        <div class="d-flex justify-content-end mt-4">
+            <a href="/" class="btn btn-secondary me-2">메인화면</a>
+            <a href="/mypage" class="btn btn-primary">마이페이지</a>
+        </div>
+
+
+
+    </div>
+    <!-- container 끝 -->
+
+
+</div>
+</html>

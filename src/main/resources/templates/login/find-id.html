@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>아이디 찾기</title>
+    <!-- Firebase SDK (compat 버전) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script>
+        const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+        /* Firebase 설정 (본인의 프로젝트 설정으로 교체) */
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwXoI6qLHJpf1xMyx83pGxOUffLLneGEo",
+            authDomain: isLocalhost ? "localhost" : "ssgfinalpjt.firebaseapp.com",
+            projectId: "ssgfinalpjt",
+            storageBucket: "ssgfinalpjt.firebasestorage.app",
+            messagingSenderId: "818168642030",
+            appId: "1:818168642030:web:fc24c362b8b2e29e8b36ff",
+            measurementId: "G-MD48Q5J1DE"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <link rel="stylesheet" th:href="@{/css/find-id.css}">
+    <script th:src="@{/js/find-id.js}" defer></script>
+</head>
+<body>
+<div class="find-id-container" layout:fragment="content">
+    <section class="find-id-section">
+        <h2>아이디 찾기</h2>
+        <form id="findIdForm" class="find-id-form">
+            <!-- 닉네임 입력 -->
+            <div class="form-row-inline">
+                <label for="userName">닉네임 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="userName" name="userName" placeholder="닉네임 입력" required>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="userNameError"></span>
+            </div>
+
+            <!-- 휴대폰 번호 입력 및 인증번호 전송 -->
+            <div class="form-row-inline">
+                <label for="phone">휴대폰 번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="phone" name="phone" placeholder="01012345678" required>
+                    <button type="button" id="sendCodeBtn" class="check-btn">인증번호 전송</button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="phoneError"></span>
+            </div>
+
+            <!-- SMS 인증번호 입력 및 확인 -->
+            <div class="form-row-inline">
+                <label for="code">인증번호 <span class="required">*</span></label>
+                <div class="input-group-inline">
+                    <input type="text" id="code" name="code" placeholder="인증번호 입력" required>
+                    <button type="button" id="verifyCodeBtn" class="check-btn">인증번호 확인</button>
+                </div>
+            </div>
+            <div class="error-container">
+                <span class="error-msg" id="codeError"></span>
+            </div>
+        </form>
+
+        <!-- 아이디 찾기/취소 버튼 영역 -->
+        <div class="button-row">
+            <button type="button" id="findIdBtn" class="submit-btn" disabled>아이디 찾기</button>
+            <button type="button" id="cancelBtn" class="cancel-btn">취소</button>
+        </div>
+
+        <!-- reCAPTCHA (invisible) -->
+        <div id="recaptcha-container" style="position: absolute; left: -9999px;"></div>
+
+        <!-- 결과 모달: 인증 성공 시 아이디(이메일) 노출 -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span id="closeModal" class="close">&times;</span>
+                <p>회원님의 아이디(이메일): <span id="userEmail"></span></p>
+                <button type="button" id="modalConfirmBtn" class="submit-btn">확인</button>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

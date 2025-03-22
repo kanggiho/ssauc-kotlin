@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>리뷰 상세</title>
+    <!-- 스타일시트 연결 -->
+    <link rel="stylesheet" href="/css/mypage.css">
+    <link rel="stylesheet" href="/css/evaluated.css">
+</head>
+<body>
+
+<div class="evaluated-container" layout:fragment="content">
+    <!-- 왼쪽 사이드바 (mypage와 동일) -->
+    <div th:replace="~{mypage/mypage :: sidebar}"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="evaluated-main">
+        <h2>리뷰 상세</h2>
+
+        <!-- 리뷰 상세 정보 영역 -->
+        <div class="review-detail">
+            <p class="reviewee">
+                받은 사람:
+                <span class="productBid"
+                      th:text="${review.revieweeName}"
+                      th:attr="data-sellername=${review.revieweeName}"
+                      onclick="handleSellerClick(event)"></span>
+            </p>
+            <p class="product-name">
+                거래한 상품:
+                <span class="productBid"
+                      th:data-href="|${review.transactionType=='구매' ? '/history/bought?id=' : '/history/sold?id='}${review.productId}|"
+                      th:text="${review.productName}"
+                      onclick="location.href=this.dataset.href">
+                </span>
+            </p>
+
+            <!-- 평가 항목 (거래 타입에 따라 조건부 처리) -->
+            <hr>
+            <div class="review-ratings">
+                <div class="rating-item">
+                    <span class="rating-label">대화 매너:</span>
+                    <span class="rating-value"
+                          th:classappend="${review.option1} ? ' positive' : ' negative'"
+                          th:text="${review.option1} ? '😊 친절했어요' : '😐 아쉬워요'">
+                    </span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label"
+                          th:text="${#strings.equals(reviewType, 'written') ? (review.transactionType == '구매' ? '상품 상태:' : '가격 협상 과정:') : (review.transactionType == '구매' ? '가격 협상 과정:' : '상품 상태:')}">
+                    </span>
+                    <span class="rating-value"
+                          th:classappend="${review.option2} ? ' positive' : ' negative'"
+                          th:text="${#strings.equals(reviewType, 'written') ? (review.transactionType == '구매' ? (review.option2 ? '✨ 마음에 들어요' : '💔 설명과 달라요') : (review.option2 ? '😍 깔끔한 거래' : '🥶 무리한 요청'))
+                                      : (review.transactionType == '구매' ? (review.option2 ? '😍 깔끔한 거래' : '🥶 무리한 요청') : (review.option2 ? '✨ 마음에 들어요' : '💔 설명과 달라요'))}">
+                    </span>
+                </div>
+                <div class="rating-item">
+                    <span class="rating-label"
+                          th:text="${#strings.equals(reviewType, 'written') ? (review.transactionType == '구매' ? '가격:' : '상품 수령 후 피드백:') : (review.transactionType == '구매' ? '상품 수령 후 피드백:' : '가격:')}">
+                    </span>
+                    <span class="rating-value"
+                          th:classappend="${review.option3} ? ' positive' : ' negative'"
+                          th:text="${#strings.equals(reviewType, 'written') ? (review.transactionType == '구매' ? (review.option3 ? '🤩 합리적이에요' : '🤑 비쌌어요') : (review.option3 ? '💬 빠른 피드백' : '🚫 연락 두절'))
+                                      : (review.transactionType == '구매' ? (review.option3 ? '💬 빠른 피드백' : '🚫 연락 두절') : (review.option3 ? '🤩 합리적이에요' : '🤑 비쌌어요'))}">
+                    </span>
+                </div>
+            </div>
+
+            <!-- 리뷰 내용 -->
+            <div class="review-comment">
+                <h3>리뷰 내용</h3>
+                <div class="comment-info">
+                    <p th:text="${review.comment}"></p>
+                </div>
+                <hr>
+                <!-- 작성자 및 작성일 -->
+                <div class="review-date">
+                    <p class="reviewer">
+                        작성한 사람:
+                        <span class="productBid"
+                              th:text="${review.reviewerName}"
+                              th:attr="data-sellername=${review.reviewerName}"
+                              onclick="handleSellerClick(event)"></span>
+                    </p>
+                    <p th:text="'작성일: ' + ${#temporals.format(review.createdAt, 'yyyy-MM-dd')}"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/admin/adminlayout}">
+<head>
+    <meta charset="UTF-8">
+    <title>충전 관리</title>
+    <!-- 페이지네이션 및 정렬 버튼 커스터마이징: 검은색 스타일 -->
+    <style>
+        .pagination .page-link {
+            color: #000;
+            border-color: #000;
+        }
+        .pagination .page-item.active .page-link {
+            background-color: #000;
+            border-color: #000;
+            color: #fff;
+        }
+        .pagination .page-link:hover {
+            background-color: #f8f9fa;
+            border-color: #000;
+            color: #000;
+        }
+        /* 정렬 버튼 스타일 */
+        .sort-btn {
+            font-size: 0.8rem;
+            text-decoration: none;
+            color: #000;
+        }
+        .sort-btn:hover {
+            color: #000;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid" layout:fragment="content">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Card로 감싸서 깔끔하게 디자인 -->
+            <div class="card shadow-sm mb-4" style="margin:50px;">
+                <div class="card-header bg-dark text-white">
+                    <h2 class="mb-0">충전 관리</h2>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover align-middle">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="text-center">
+                                    충전 번호
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='chargeId,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='chargeId,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">
+                                    회원 이름
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='user.userName,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='user.userName,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">IMP_UID</th>
+                                <th class="text-center">
+                                    충전 타입
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='chargeType,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='chargeType,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">
+                                    금액
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='amount,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='amount,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">상태</th>
+                                <th class="text-center">
+                                    충전일
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='createdAt,asc')}" class="sort-btn">⭡</a>
+                                    <a th:href="@{/admin/charge(page=${chargeList.number}, sort='createdAt,desc')}" class="sort-btn">⭣</a>
+                                </th>
+                                <th class="text-center">영수증</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="charge : ${chargeList}">
+                                <td class="text-center">[[${charge.chargeId}]]</td>
+                                <td class="text-center">[[${charge.user.userName}]]</td>
+                                <td class="text-center">[[${charge.impUid}]]</td>
+                                <td class="text-center">[[${charge.chargeType}]]</td>
+                                <td class="text-center">[[${#numbers.formatInteger(charge.amount, 3, 'COMMA')}]]</td>
+                                <td class="text-center">[[${charge.status}]]</td>
+                                <td class="text-center">[[${#temporals.format(charge.createdAt, 'yyyy-MM-dd HH:mm')}]]</td>
+                                <td class="text-center">
+                                    <a class="btn btn-primary btn-sm"
+                                       th:if="${charge.receiptUrl != null and charge.receiptUrl != ''}"
+                                       th:href="${charge.receiptUrl}"
+                                       target="_blank">
+                                        영수증
+                                    </a>
+                                    <span th:if="${charge.receiptUrl == null or #strings.isEmpty(charge.receiptUrl)}">없음</span>
+                                </td>
+                            </tr>
+                            <!-- 충전 내역이 없을 경우 -->
+                            <tr th:if="${#lists.isEmpty(chargeList?.content)}">
+                                <td colspan="8" class="text-center">검색 결과가 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- 페이지네이션 및 엑셀 내보내기 버튼 -->
+            <nav th:if="${chargeList != null and chargeList.totalPages >= 1}">
+                <div class="row align-items-center">
+                    <div class="col-auto mx-auto">
+                        <ul class="pagination mb-0">
+                            <li class="page-item" th:classappend="${chargeList.first} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/charge(page=${chargeList.number - 1}, sort=${currentSort}, keyword=${keyword})}"
+                                   aria-label="Previous">&laquo;</a>
+                            </li>
+
+                            <li class="page-item"
+                                th:each="page : ${#numbers.sequence(0, chargeList.totalPages - 1)}"
+                                th:classappend="${page} == ${chargeList.number} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{/admin/charge(page=${page}, sort=${currentSort}, keyword=${keyword})}">
+                                    [[${page + 1}]]
+                                </a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${chargeList.last} ? 'disabled'">
+                                <a class="page-link"
+                                   th:href="@{/admin/charge(page=${chargeList.number + 1}, sort=${currentSort}, keyword=${keyword})}"
+                                   aria-label="Next">&raquo;</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 엑셀 내보내기 버튼 -->
+                    <div class="col-auto ms-2">
+                        <a class="btn btn-success"
+                           th:href="@{/admin/charge/export(keyword=${keyword})}"
+                           role="button"
+                           style="margin-left: -200px">
+                            엑셀 내보내기
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 검색 폼 추가 -->
+            <div class="d-flex justify-content-center my-5">
+                <form th:action="@{/admin/charge}" method="get" class="d-flex" style="width: 450px; margin-left: 200px;">
+                    <input
+                            type="text"
+                            class="form-control-sm me-2"
+                            name="keyword"
+                            placeholder="회원 이름 또는 충전 타입 검색"
+                            th:value="${keyword}"
+                            aria-label="Search"
+                    />
+                    <button class="btn btn-outline-dark me-2" type="submit">검색</button>
+                    <!-- 초기화 버튼 (검색어가 있을 경우에만 표시) -->
+                    <button
+                            th:if="${keyword != null and keyword != ''}"
+                            type="button"
+                            class="btn btn-outline-dark btn-sm"
+                            onclick="window.location.href='/admin/charge'">
+                        초기화
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

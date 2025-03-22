@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>SSAUC 머니 페이지</title>
+    <!-- 스타일시트 연결 -->
+    <link rel="stylesheet" th:href="@{/css/mypage.css}">
+    <link rel="stylesheet" th:href="@{/css/cash.css}">
+    <!-- PortOne V2 SDK 로드 -->
+    <script src="https://cdn.portone.io/v2/browser-sdk.js" async defer></script>
+</head>
+<body>
+
+<div class="history-container" layout:fragment="content">
+    <!-- 왼쪽 사이드바 (mypage와 동일) -->
+    <div th:replace="~{mypage/mypage :: sidebar}"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="history-main">
+        <!-- SSAUC 머니 요약 -->
+        <div class="cash-summary">
+            <div class="cash-box">
+                <p class="cash-title"> SSAUC 머니 ></p>
+                <div class="cash-box-content">
+                    <h2 class="cash-amount" th:text="${T(java.lang.String).format('%,d 원', user.cash)}">0 원</h2>
+                    <div class="cash-buttons">
+                        <button class="charge" id="openChargeModal">충전</button>
+                        <button class="refund">환급</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용 내역 섹션 -->
+        <div class="history-header">
+            <h2> 쏙머니 내역</h2>
+            <div class="date-filter">
+                <form action="/cash/cash" method="get">
+                    <!-- 현재 선택된 필터 유지 (예: charge, withdraw, calculate) -->
+                    <input type="hidden" name="filter" th:value="${filter}">
+                    <label>조회 기간</label>
+                    <input type="date" name="startDate" value="" placeholder="시작일">
+                    ~
+                    <input type="date" name="endDate" value="" placeholder="종료일">
+                    <button type="submit" class="search-btn">조회</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 내역 필터 -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <!-- 결제 (구매) 내역 -->
+                <a th:href="@{/cash/cash(filter='payment')}" class="filter-btn"
+                   th:classappend="${filter=='payment'} ? ' active' : ''">결제</a>
+                <!-- 정산 (판매) 내역 -->
+                <a th:href="@{/cash/cash(filter='settlement')}" class="filter-btn"
+                   th:classappend="${filter=='settlement'} ? ' active' : ''">정산</a>
+                <!-- 충전 내역 -->
+                <a th:href="@{/cash/cash(filter='charge')}" class="charge filter-btn"
+                   th:classappend="${filter=='charge'} ? ' active' : ''">충전</a>
+                <!-- 환급 내역 -->
+                <a th:href="@{/cash/cash(filter='withdraw')}" class="refund filter-btn"
+                   th:classappend="${filter=='withdraw'} ? ' active' : ''">환급</a>
+            </div>
+        </div>
+
+        <!-- 결제 내역 테이블 (User == 구매자) -->
+        <div th:if="${filter == 'payment'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>결제 ID</th>
+                    <th>상품명</th>
+                    <th>결제 금액</th>
+                    <th>결제 시간</th>
+                    <th>상태</th>
+                    <th>조치</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="calculate : ${calculateList}">
+                    <td th:text="${calculate.orderId}">1</td>
+                    <td class="productBid" th:onclick="|location.href='/bid/bid?productId=' + ${calculate.productId}|">
+                        <img class="historyImage" th:src="${calculate.productImageUrl}" alt="상품 대표 이미지"/>
+                        <span th:text="${calculate.productName}">상품 A</span>
+                    </td>
+                    <td th:text="${T(java.lang.String).format('%,d', calculate.paymentAmount)}">50,000</td>
+                    <td th:text="${#temporals.format(calculate.paymentTime, 'yyyy-MM-dd HH:mm')}">2025-02-26 10:30</td>
+                    <td th:text="${calculate.orderStatus}">완료</td>
+                    <td>
+                        <button class="history-btn" style="cursor: pointer;"
+                                th:onclick="|location.href='/history/bought?id=' + ${calculate.productId}|">
+                            상세
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total-summary">
+                <p>💶 기간 내 결제 금액: <span th:text="${T(java.lang.String).format('%,d 원', totalAmount)}">0 원</span></p>
+            </div>
+        </div>
+        <!-- 정산 내역 테이블 (User == 판매자) -->
+        <div th:if="${filter == 'settlement'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>정산 ID</th>
+                    <th>상품명</th>
+                    <th>정산 금액</th>
+                    <th>정산 시간</th>
+                    <th>상태</th>
+                    <th>조치</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="calculate : ${calculateList}">
+                    <td th:text="${calculate.orderId}">1</td>
+                    <td class="productBid" th:onclick="|location.href='/bid/bid?productId=' + ${calculate.productId}|">
+                        <img class="historyImage" th:src="${calculate.productImageUrl}" alt="상품 대표 이미지"/>
+                        <span th:text="${calculate.productName}">상품 A</span>
+                    </td>
+                    <td th:text="${T(java.lang.String).format('%,d', calculate.paymentAmount)}">50,000</td>
+                    <td th:text="${#temporals.format(calculate.paymentTime, 'yyyy-MM-dd HH:mm')}">2025-02-26 10:30</td>
+                    <td th:text="${calculate.orderStatus}">완료</td>
+                    <td>
+                        <button class="history-btn" style="cursor: pointer;"
+                                th:onclick="|location.href='/history/sold?id=' + ${calculate.productId}|">
+                            상세
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total-summary">
+                <p>💷 기간 내 정산 금액: <span th:text="${T(java.lang.String).format('%,d 원', totalAmount)}">0 원</span></p>
+            </div>
+        </div>
+        <!-- 충전 내역 테이블 -->
+        <div th:if="${filter == 'charge'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>충전 ID</th>
+                    <th>충전 방식</th>
+                    <th>충전 금액</th>
+                    <th>충전 상태</th>
+                    <th>충전 시간</th>
+                    <th>영수증</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="charge : ${chargeList}">
+                    <td th:text="${charge.chargeId}">1</td>
+                    <td th:text="${charge.chargeType}">계좌이체</td>
+                    <td th:text="${T(java.lang.String).format('%,d', charge.amount)}">50,000</td>
+                    <td th:text="${charge.status}">완료</td>
+                    <td th:text="${#temporals.format(charge.createdAt, 'yyyy-MM-dd HH:mm')}">2025-02-26 10:30:00</td>
+                    <td>
+                        <a th:href="${charge.receiptUrl}" target="_blank" class="history-btn">영수증 보기</a>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+            <div class="total-summary">
+                <p>💵 기간 내 충전 금액: <span th:text="${T(java.lang.String).format('%,d 원', totalAmount)}">0 원</span></p>
+            </div>
+        </div>
+        <!-- 환급 내역 테이블 -->
+        <div th:if="${filter == 'withdraw'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>환급 ID</th>
+                    <th>환급 은행</th>
+                    <th>환급 계좌</th>
+                    <th>실 환급 금액</th>
+                    <th>완료 시간</th>
+                    <th>결과</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="withdraw : ${withdrawList}">
+                    <td th:text="${withdraw.withdrawId}">1</td>
+                    <td th:text="${withdraw.bank}">KB은행</td>
+                    <td th:text="${withdraw.account}">123-456-789</td>
+                    <td th:text="${T(java.lang.String).format('%,d', withdraw.netAmount)}">29,500</td>
+                    <td th:text="${#temporals.format(withdraw.withdrawAt, 'yyyy-MM-dd HH:mm')}">2025-02-26 11:00:00</td>
+                    <td th:text="${withdraw.requestStatus}">완료</td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="total-summary">
+                <p>💴 기간 내 환급 금액: <span th:text="${T(java.lang.String).format('%,d 원', totalAmount)}">0 원</span></p>
+            </div>
+        </div>
+
+
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <!-- 이전 페이지 버튼 (현재 페이지가 1보다 클 때만 표시) -->
+            <a th:if="${currentPage > 1}"
+               th:href="@{/cash/cash(filter=${filter}, page=${currentPage - 1}, startDate=${startDate}, endDate=${endDate})}">
+                <button><</button>
+            </a>
+
+            <!-- 페이지 번호 버튼 -->
+            <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/cash/cash(filter=${filter}, page=${i}, startDate=${startDate}, endDate=${endDate})}">
+                    <button th:text="${i}" th:classappend="${i == currentPage} ? ' active'"></button>
+                </a>
+            </span>
+
+            <!-- 다음 페이지 버튼 (현재 페이지가 총 페이지 수보다 작을 때만 표시) -->
+            <a th:if="${currentPage < totalPages}"
+               th:href="@{/cash/cash(filter=${filter}, page=${currentPage + 1}, startDate=${startDate}, endDate=${endDate})}">
+                <button>></button>
+            </a>
+        </div>
+    </main>
+</div>
+
+<!-- 충전 모달: 충전 금액 선택 + PortOne 결제 로직 -->
+<dialog id="chargeModal" layout:fragment="dialog">
+
+    <!-- 모달 닫기 버튼 -->
+    <button type="button" id="closeModalBtn" style="float: right;">X</button>
+    <h2> SSAUC 머니 충전</h2>
+
+    <!-- 로딩 표시 (모달 내부 로딩 다이얼로그) -->
+    <dialog id="loadingDialog" open>
+        <article aria-busy="true">결제 정보를 불러오는 중입니다.</article>
+    </dialog>
+
+    <main id="checkoutDialog" style="display: none">
+        <form id="checkoutForm">
+            <article>
+                <h3 id="itemName"></h3>
+                <!-- 드롭다운으로 충전 금액 선택 -->
+                <div>
+                    <label for="amountSelect">충전 금액 선택:</label><br/>
+                    <select id="amountSelect">
+                        <option value="custom" selected>직접 입력</option>
+                        <option value="5000">5,000원</option>
+                        <option value="10000">10,000원</option>
+                        <option value="30000">30,000원</option>
+                        <option value="50000">50,000원</option>
+                        <option value="100000">100,000원</option>
+                        <option value="500000">500,000원</option>
+                    </select>
+                    <!-- 직접 입력 필드 (1000원 단위) -->
+                    <input
+                            type="number"
+                            id="customAmount"
+                            class=""
+                            placeholder="1000원 단위 입력"
+                            step="1000"
+                            min="1000"
+                    />
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <label>충전 후 SSAUC 머니:</label>
+                    <span id="displayPrice">0원</span>
+                </div>
+            </article>
+            <div id="chargeErrorMsg" class="error-msg"></div>
+            <button id="checkoutButton" type="submit">충전하기</button>
+        </form>
+    </main>
+</dialog>
+
+<!-- 환급 모달 -->
+<dialog id="withdrawModal" layout:fragment="dialog2">
+    <!-- 모달 닫기 버튼 -->
+    <button type="button" id="closeWithdrawModalBtn" style="float: right;">X</button>
+    <h2> 환급 신청 </h2>
+    <div class="refund-cash-info">
+        현재 보유 중인 머니:
+        <span id="currentCashRefund" th:text="${T(java.lang.String).format('%,d 원', user.cash)}">0 원</span>
+    </div>
+    <div class="withdraw-info">
+        이번 달 환급 횟수:
+        <span id="currentWithdrawCount" th:text="${currentWithdrawCount != null ? currentWithdrawCount + '회' : '0회'}">0회</span>
+    </div>
+    <p>월 3회까지 무료 환급 제공, 이후부터 수수료 1,000원이 적용됩니다.</p>
+    <form id="withdrawForm">
+        <div>
+            <label for="withdrawAmountSelect">환급 금액 선택:</label><br/>
+            <select id="withdrawAmountSelect">
+                <option value="custom" selected>직접 입력</option>
+                <option value="5000">5,000원</option>
+                <option value="10000">10,000원</option>
+                <option value="30000">30,000원</option>
+                <option value="50000">50,000원</option>
+                <option value="100000">100,000원</option>
+            </select>
+            <input type="number" id="withdrawCustomAmount" class="" placeholder="1000원 단위 입력" step="1000" min="1000">
+        </div>
+        <div>
+            <label for="withdrawBank">환급 대상 은행:</label><br/>
+            <select id="withdrawBank" required>
+                <option value="">선택하세요</option>
+                <option value="KB국민은행">KB국민은행</option>
+                <option value="신한은행">신한은행</option>
+                <option value="하나은행">하나은행</option>
+                <option value="우리은행">우리은행</option>
+                <option value="NH농협은행">NH농협은행</option>
+                <option value="IBK기업은행">IBK기업은행</option>
+                <option value="SC제일은행">SC제일은행</option>
+                <option value="대구은행">대구은행</option>
+                <option value="부산은행">부산은행</option>
+                <option value="광주은행">광주은행</option>
+                <option value="전북은행">전북은행</option>
+                <option value="경남은행">경남은행</option>
+                <option value="수협은행">수협은행</option>
+                <option value="우체국">우체국</option>
+            </select>
+        </div>
+        <div>
+            <label for="withdrawAccount">환급 대상 계좌번호:</label><br/>
+            <input type="text" id="withdrawAccount" placeholder="계좌번호 입력" required>
+        </div>
+        <div style="margin-top:10px;">
+            <label>총 환급 금액:</label>
+            <span id="netWithdrawAmount">0원</span>
+        </div>
+        <div id="withdrawErrorMsg" class="error-msg"></div>
+        <button type="submit" id="withdrawSubmitButton">환급 신청</button>
+    </form>
+</dialog>
+
+<!-- Custom Alert Modal Markup -->
+<div id="customAlert" class="custom-alert" layout:fragment="alert">
+    <div class="custom-alert-content">
+        <p id="customAlertMessage"></p>
+        <button id="customAlertOk">확인</button>
+    </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+
+    // Custom Alert 함수 정의 (native alert 대신 사용)
+    function customAlert(message, callback) {
+        const alertBox = document.getElementById("customAlert");
+        const alertMessage = document.getElementById("customAlertMessage");
+        const alertOk = document.getElementById("customAlertOk");
+        alertMessage.textContent = message;
+        alertBox.style.display = "block";
+        alertOk.onclick = function() {
+            alertBox.style.display = "none";
+            if (callback) {
+                callback();
+            }
+        }
+    }
+
+    // ====== 충전 모달 처리 ======
+    const openChargeModalBtn = document.getElementById("openChargeModal");
+    const chargeModal = document.getElementById("chargeModal");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    let currentCash = /*[[${user.cash}]]*/ 0;
+
+    openChargeModalBtn.addEventListener("click", () => {
+        // 모달 열기
+        chargeModal.showModal();
+        // PortOne 결제 로직 실행
+        checkout.load();
+        document.getElementById("chargeErrorMsg").style.visibility = "hidden";
+    });
+
+    closeModalBtn.addEventListener("click", () => {
+        chargeModal.close();
+        resetModal(); // 선택값 초기화
+    });
+
+    function resetModal() {
+        document.getElementById("amountSelect").value = "custom";
+        document.getElementById("customAmount").value = "";
+        document.getElementById("customAmount").classList.remove("hidden2");
+        document.getElementById("displayPrice").textContent = currentCash.toLocaleString() + "원";
+        document.getElementById("chargeErrorMsg").style.visibility = "hidden";
+    }
+
+    // ====== 충전 모달 안에서 실행 ======
+    const checkout = new Checkout();
+    function Checkout() {
+        let item = null;
+        const amountSelect = document.getElementById("amountSelect");
+        const customAmount = document.getElementById("customAmount");
+        const displayPrice = document.getElementById("displayPrice");
+        const failMessage = document.getElementById("failMessage");
+
+        // 1. SDK, API 데이터 로드
+        this.load = async () => {
+            // PortOne 로딩 대기
+            const waitPortOne = new Promise((resolve) => {
+                const polling = setInterval(() => {
+                    if (window.PortOne != null) {
+                        clearInterval(polling);
+                        resolve();
+                    }
+                }, 50);
+            });
+
+            // /cash/api/info 엔드포인트로부터 아이템 정보 로드
+            let data;
+            try {
+                const res = await fetch("/cash/api/info");
+                data = await res.json();
+            } catch (err) {
+                console.error(err);
+            }
+            item = data || { name: "쏙머니 충전", currency: "KRW"};
+
+            await waitPortOne;
+
+            // 로딩 다이얼로그 닫고 메인 표시
+            document.getElementById("loadingDialog").open = false;
+            document.getElementById("checkoutDialog").style.display = "block";
+
+            // 화면 초기화
+            showCheckout();
+        }
+
+        // 2. 결제 화면 초기화
+        const showCheckout = () => {
+            document.getElementById("itemName").textContent = item.name || "쏙머니 충전";
+            // 초기화
+            item.price = 0;
+            // 표시: 현재 보유 쏙머니 + 충전할 금액 (초기엔 0)
+            displayPrice.textContent = (currentCash).toLocaleString() + "원";
+
+            // 드롭다운 이벤트
+            amountSelect.addEventListener("change", handleAmountChange);
+            customAmount.addEventListener("input", handleAmountChange);
+
+            // 폼 제출 이벤트
+            document.getElementById("checkoutDialog").onsubmit = async (e) => {
+                e.preventDefault();
+                await handlePayment();
+            };
+
+            // 실패/성공 다이얼로그 닫기 버튼
+            for (const dialogButton of document.getElementsByClassName("closeDialog")) {
+                dialogButton.onclick = () => {
+                    dialogButton.parentElement.parentElement.open = false;
+                };
+            }
+        }
+
+        // 3. 금액 변경 로직
+        function handleAmountChange() {
+            let baseAmount = 0;
+            if (amountSelect.value === "") {
+                baseAmount = 0;
+            } else if (amountSelect.value === "custom") {
+                customAmount.classList.remove("hidden2");
+                baseAmount = parseInt(customAmount.value) || 0;
+            } else {
+                customAmount.classList.add("hidden2");
+                baseAmount = parseInt(amountSelect.value);
+            }
+
+            item.price = baseAmount > 0 ? baseAmount : 0;
+            displayPrice.textContent = (currentCash + item.price).toLocaleString() + "원";
+            document.getElementById("chargeErrorMsg").style.visibility = "hidden";
+        }
+
+        // 4. 결제 요청
+        async function handlePayment() {
+            if (item.price <= 0) {
+                document.getElementById("chargeErrorMsg").innerText = "충전 금액을 선택해주세요.";
+                document.getElementById("chargeErrorMsg").style.visibility = "visible";
+                return;
+            }
+            setWaitingPayment(true);
+
+            // 먼저 모달을 완전히 닫음(숨김)
+            chargeModal.close();
+
+            // 고유 paymentId
+            function randomId() {
+                return [...crypto.getRandomValues(new Uint32Array(2))]
+                    .map((word) => word.toString(16).padStart(8, "0"))
+                    .join("");
+            }
+            const paymentId = randomId();
+
+            // PortOne.requestPayment()
+            const payment = await PortOne.requestPayment({
+                storeId: "store-ed1c07e7-1d27-45f6-8265-15ae6fbe6383",
+                channelKey: "channel-key-d906dd09-8d9f-4658-8ccd-c1b7b69be824",
+                paymentId: paymentId,
+                orderName: item.name,
+                totalAmount: item.price,
+                currency: item.currency || "KRW",
+                payMethod: "CARD",
+            });
+
+            if (payment.code !== undefined) {
+                // 결제 실패
+                setWaitingPayment(false);
+                failMessage.textContent = payment.message;
+                customAlert("결제 실패: \n" + payment.message);
+
+                return;
+            }
+
+            // 결제 성공 → 서버에 결제 완료 요청
+            const completeResponse = await fetch("/cash/api/complete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    paymentId: payment.paymentId,
+                    amount: item.price  // 사용자가 선택한 충전 금액
+                })
+            });
+
+            setWaitingPayment(false);
+            if (completeResponse.ok) {
+                // 결제 완료
+                // customAlert에 콜백 함수를 추가하여, 사용자가 확인 버튼을 누른 후에 location.reload()가 실행
+                customAlert("결제 성공!", () => { location.reload(); });
+            } else {
+                const errText = await completeResponse.text();
+                // failMessage.textContent = errText;
+                customAlert("결제 실패: \n" + errText);
+            }
+        }
+
+        // 버튼 비활성화/활성화
+        function setWaitingPayment(isWaiting) {
+            document.getElementById("checkoutButton").disabled = isWaiting;
+        }
+    }
+
+
+    // ====== 환급 모달 처리 ======
+    const refundButton = document.querySelector(".refund"); // 환급 버튼 (cash-box 내)
+    const withdrawModal = document.getElementById("withdrawModal");
+    const closeWithdrawModalBtn = document.getElementById("closeWithdrawModalBtn");
+    const withdrawForm = document.getElementById("withdrawForm");
+    const withdrawAmountSelect = document.getElementById("withdrawAmountSelect");
+    const withdrawCustomAmount = document.getElementById("withdrawCustomAmount");
+    const netWithdrawAmountSpan = document.getElementById("netWithdrawAmount");
+
+    // 환급 버튼 클릭 시 환급 모달 열기
+    refundButton.addEventListener("click", () => {
+        withdrawModal.showModal();
+        document.getElementById("withdrawErrorMsg").style.visibility = "hidden";
+    });
+
+    // 모달 닫기 버튼
+    closeWithdrawModalBtn.addEventListener("click", () => {
+        withdrawModal.close();
+        resetWithdrawModal();
+    });
+
+    function resetWithdrawModal() {
+        withdrawAmountSelect.value = "custom";
+        withdrawCustomAmount.value = "";
+        netWithdrawAmountSpan.textContent = "0원";
+        document.getElementById("withdrawErrorMsg").style.visibility = "hidden";
+    }
+
+    // 환급 금액 선택 변경 이벤트 등록
+    withdrawAmountSelect.addEventListener("change", handleWithdrawAmountChange);
+    withdrawCustomAmount.addEventListener("input", handleWithdrawAmountChange);
+
+    function handleWithdrawAmountChange() {
+        let baseAmount = 0;
+        if (withdrawAmountSelect.value === "custom") {
+            withdrawCustomAmount.classList.remove("hidden2");
+            baseAmount = parseInt(withdrawCustomAmount.value) || 0;
+        } else {
+            withdrawCustomAmount.classList.add("hidden2");
+            baseAmount = parseInt(withdrawAmountSelect.value);
+        }
+        // 월 3회까지 무료, 3회 이상이면 수수료 1000원 적용 (즉, 현재 횟수가 3 이상이면)
+        let currentCount = parseInt(document.getElementById("currentWithdrawCount").textContent) || 0;
+        let commission = currentCount >= 3 ? 1000 : 0;
+        let net = baseAmount - commission;
+        netWithdrawAmountSpan.textContent = net.toLocaleString() + "원";
+        document.getElementById("withdrawErrorMsg").style.visibility = "hidden";
+    }
+
+    // 환급 신청 폼 제출 처리
+    withdrawForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let amount = 0;
+        if (withdrawAmountSelect.value === "custom") {
+            amount = parseInt(withdrawCustomAmount.value) || 0;
+        } else {
+            amount = parseInt(withdrawAmountSelect.value);
+        }
+
+        // 환급 금액이 사용자가 가진 머니(currentCash)보다 초과하면 안 됨.
+        if (amount > currentCash) {
+            document.getElementById("withdrawErrorMsg").innerText = "환급 신청 금액은 보유한 쏙머니 이하이어야 합니다.";
+            document.getElementById("withdrawErrorMsg").style.visibility = "visible";
+            return;
+        }
+
+        let currentCount = parseInt(document.getElementById("currentWithdrawCount").textContent) || 0;
+        let commission = currentCount >= 3 ? 1000 : 0;
+
+        // 환급 요청 금액이 수수료보다 작거나 같으면 예외 처리
+        if (amount <= commission) {
+            document.getElementById("withdrawErrorMsg").innerText = "환급 요청 금액이 수수료보다 작거나 같습니다. 환급 요청 금액을 수정해주세요.";
+            document.getElementById("withdrawErrorMsg").style.visibility = "visible";
+            return;
+        }
+
+        const bank = document.getElementById("withdrawBank").value;
+        const account = document.getElementById("withdrawAccount").value;
+        if(amount <= 0 || bank === "" || account.trim() === "") {
+            document.getElementById("withdrawErrorMsg").innerText = "모든 항목을 정확히 입력해주세요.";
+            document.getElementById("withdrawErrorMsg").style.visibility = "visible";
+            return;
+        }
+        // POST 요청으로 환급 신청
+        try {
+            const response = await fetch("/cash/api/withdraw", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    amount: amount,
+                    bank: bank,
+                    account: account
+                })
+            });
+            if(response.ok) {
+                withdrawModal.close();
+                customAlert("환급 요청이 접수되었습니다.", () => { location.reload(); });
+            } else {
+                const errText = await response.text();
+                customAlert("환급 요청 실패: " + errText);
+            }
+        } catch (error) {
+            withdrawModal.close();
+            location.reload(); // 내역 갱신 등 필요 시
+            console.error(error);
+            customAlert("환급 요청 중 오류가 발생했습니다.", () => { location.reload(); });
+        }
+    });
+</script>
+
+</body>
+</html>

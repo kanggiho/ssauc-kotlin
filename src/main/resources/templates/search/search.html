@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>검색 페이지</title>
+  <!-- 검색 페이지 전용 CSS -->
+  <link rel="stylesheet" th:href="@{/css/search.css}" />
+  <!-- 검색 페이지 전용 JS -->
+  <script th:src="@{/js/search.js}" defer></script>
+</head>
+<body>
+
+<!-- 최상단 로고 영역 (좌우 50px 여백) -->
+<div class="top-logo-bar">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">
+      <!-- 필요하신 로고 이미지로 교체 -->
+      <img src="/img/index/ssauc_logo2.png" alt="로고" style="width: 200px; height: 100px"/>
+    </a>
+  </div>
+</div>
+
+<!-- 검색 영역: 중앙 정렬, 검색 입력창 500px, 높이 50px + 검색 버튼, X 버튼 (각 50×50px) -->
+<div class="search-area">
+  <form id="search-form" action="/plp" method="GET" class="search-form">
+    <input
+            type="text"
+            id="search-input"
+            name="keyword"
+            placeholder="검색어를 입력하세요"
+            class="search-input"
+    />
+    <button type="submit" id="searchIcon" class="icon-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Magnifying_glass_icon.svg/768px-Magnifying_glass_icon.svg.png"
+           alt="검색 아이콘" width="40px" height="40px">
+    </button>
+    <button type="button" class="close-btn" id="closeBtn">X</button>
+  </form>
+</div>
+
+<!-- 최근 검색어 영역 (검색창 다음 줄, 왼쪽 시작 동일) -->
+<section class="recent-search-section">
+  <h2>최근 검색어</h2>
+  <ul id="recent-searches" class="recent-searches-list"></ul>
+</section>
+
+<!-- 인기 검색어 영역 -->
+<section class="popular-search-section">
+  <h2>인기 검색어</h2>
+  <div class="popular-search-lists">
+    <ul id="popular-searches-left" class="popular-searches-left"></ul>
+    <ul id="popular-searches-right" class="popular-searches-right"></ul>
+  </div>
+</section>
+</body>
+</html>

@@ -1,0 +1,257 @@
+/* SSAUC 머니 요약 */
+.cash-summary {
+    display: flex;
+    gap: 10px;
+}
+
+.cash-box {
+    background-color: black;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cash-box p {
+    font-size: 16px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.cash-box-content {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+/* SSAUC 머니 금액 */
+.cash-box h2 {
+    font-size: 30px;
+    font-weight: bold;
+}
+
+/* 충전, 환급 버튼 */
+.cash-buttons {
+    display: flex;
+    gap: 20px;
+    margin-top: 8px;
+}
+
+.cash-buttons button {
+    padding: 6px 14px;
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* 사용 내역 헤더 */
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.history-header h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 조회 기간 스타일 */
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.date-filter label {
+    font-weight: bold;
+}
+
+.date-filter input {
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+.search-btn {
+    padding: 5px 10px;
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.total-summary {
+    text-align: right;  /* 오른쪽 정렬 */
+    margin-top: 10px;   /* 테이블과 약간의 간격 */
+    padding-right: 20px; /* 오른쪽 여백 (원하는 만큼 조절) */
+    font-size: 16px;    /* 폰트 크기 */
+    font-weight: bold;  /* 강조 효과 */
+}
+.total-summary p {
+    margin: 0;
+}
+
+/* 모달(dialog) 스타일 */
+/* 모달(dialog) 스타일: 중앙 정렬 및 아름다운 디자인 */
+#chargeModal, #withdrawModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    max-width: 90%;
+    background-color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1050; /* 다른 요소보다 위에 표시 */
+}
+
+/* 모달 백드롭 스타일 */
+#chargeModal::backdrop,
+#withdrawModal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* 충전 모달 내부 폼 요소 */
+#chargeModal label,
+#withdrawModal label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+#chargeModal select,
+#chargeModal input[type="number"],
+#withdrawModal select,
+#withdrawModal input[type="number"],
+#withdrawModal input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#checkoutButton,
+#withdrawSubmitButton {
+    width: 50%;
+    padding: 10px;
+    font-size: 1rem;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+#checkoutButton:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
+
+dialog {
+    width: 500px;
+    max-width: 90%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 20px;
+}
+dialog::backdrop {
+    background: rgba(0,0,0,0.3);
+    pointer-events: none;
+}
+.hidden2 {
+    display: none;
+}
+#amountSelect, #customAmount {
+    width: 200px;
+    margin-top: 10px;
+    font-size: 1rem;
+}
+#checkoutButton {
+    margin-top: 20px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+#loadingDialog {
+    border: 1px solid #aaa;
+    padding: 20px;
+}
+
+#closeModalBtn,
+#closeWithdrawModalBtn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    font-size: 1.5rem;
+    text-align: center;
+    line-height: 40px; /* 버튼 높이와 동일 */
+    cursor: pointer;
+}
+
+/* 🌟 추가: 에러 메시지 스타일 */
+.error-msg {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    min-height: 30px;
+    visibility: hidden;
+}
+
+.custom-alert {
+    display: none; /* 기본은 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    z-index: 3000;
+}
+
+.custom-alert-content {
+    background: #fff;
+    border-radius: 8px;
+    width: 300px;
+    margin: 15% auto; /* 화면 중앙에 오도록 */
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.custom-alert-content p {
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #333;
+}
+
+.custom-alert-content button {
+    padding: 8px 16px;
+    background-color: #007BFF;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+.custom-alert-content button:hover {
+    background-color: #0056b3;
+}

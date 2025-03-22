@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+  <meta charset="UTF-8">
+  <title>구매 내역 상세</title>
+  <!-- 필요한 CSS, JS, CDN 등 -->
+  <link rel="stylesheet" href="/css/mypage.css">
+  <script src="/js/smartApiCodes.js"></script>
+  <style>
+    /* 캐러셀 전체 영역 및 각 슬라이드의 고정 높이 설정 */
+    .carousel-inner,
+    .carousel-item {
+      height: 300px;
+      width: 300px;
+      position: relative;
+      margin: 0 auto;
+    }
+    /* 캐러셀 슬라이드 이미지 스타일 */
+    .carousel-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+      width: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      position: absolute;
+    }
+
+    .carousel-control-prev {
+      left: 0;
+    }
+
+    .carousel-control-next {
+      right: 0;
+    }
+
+    .card-body {
+      padding-bottom: 0 !important;
+    }
+
+    .tracking {
+      margin-bottom: 16px;
+    }
+    .tracking-area {
+      margin-top: -24px;  /* 위로 조금 당기기 */
+    }
+    /* 스마트택배 배송 조회 버튼 */
+    .smartapi-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #17a2b8; /* 파란색 계열의 정보색상 */
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    /* 거래 완료 버튼 */
+    .complete-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #28a745;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      margin-right: 16px;
+    }
+    .complete-btn.completed {
+      background-color: #ccc;
+      color: #666;
+      cursor: pointer;
+      border: 1px solid #aaa;
+    }
+  </style>
+</head>
+<body>
+<div class="container2" layout:fragment="content">
+    <!-- 왼쪽 Sidebar (mypage 그대로) -->
+    <div class="sidebar" th:replace="~{mypage/mypage :: sidebar}"></div>
+    <!-- 오른쪽 메인 컨텐츠 -->
+    <div class="main2">
+      <h2 class="mb-4">구매 상세 내역</h2>
+
+      <!-- Section 1 -->
+      <div class="card mb-4">
+        <div class="card-header fw-bold">구매 상품 정보</div>
+        <div class="card-body">
+          <div class="row align-items-center">
+            <!-- 왼쪽: 상품 정보 -->
+            <div class="col-md-7">
+              <p>
+                <strong>상품 이름:</strong>
+                <span class="productBid"
+                      th:text="${boughtDetail.productName}"
+                      th:onclick="|location.href='/bid/bid?productId=' + ${boughtDetail.productId}|">
+                </span>
+              </p>
+              <p><strong>경매 시작가:</strong> <span th:text="${boughtDetail.startPrice}">10000</span></p>
+              <p><strong>등록 시간:</strong> <span
+                      th:text="${#temporals.format(boughtDetail.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-02-05 14:30:00</span>
+              </p>
+              <p><strong>거래 방식:</strong> <span
+                      th:text="${boughtDetail.dealType == 0 ? '🧑🏻 직거래' : (boughtDetail.dealType == 1 ? '🚚 택배거래' : '🧑🏻🚚 직거래, 택배거래')}">거래 방식</span>
+              </p>
+              <hr/>
+              <p>
+                <strong>판매자:</strong>
+                <span class="productBid"
+                      th:text="${boughtDetail.sellerName}"
+                      th:attr="data-sellername=${boughtDetail.sellerName}"
+                      onclick="handleSellerClick(event)">user</span>
+              </p>
+              <p><strong>구매가:</strong> <span th:text="${boughtDetail.totalPrice}">50,000 원</span></p>
+              <p><strong>구매 시간:</strong> <span
+                      th:text="${#temporals.format(boughtDetail.orderDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 16:45:00</span>
+              </p>
+              <p><strong>거래 완료 시간:</strong> <span
+                      th:text="${#temporals.format(boughtDetail.completedDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 17:00:00</span>
+              </p>
+            </div>
+            <!-- 오른쪽: 상품 이미지 Carousel -->
+            <div class="col-md-5">
+              <div id="carouselSold" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                  <div th:each="image, iterStat : ${carouselImages}"
+                       class="carousel-item"
+                       th:classappend="${iterStat.index == 0} ? ' active' : ''">
+                    <img th:src="@{${image.url}}" class="d-block w-100" th:alt="${image.alt}"/>
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselSold"
+                        data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">이전</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselSold"
+                        data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">다음</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="card mb-4">
+        <div class="card-header fw-bold">배송 요청 정보</div>
+        <div class="card-body">
+          <p><strong>수령인 이름:</strong> <span th:text="${boughtDetail.recipientName}">홍길동</span></p>
+          <p><strong>수령인 연락처:</strong> <span th:text="${boughtDetail.recipientPhone}">010-1234-5678</span></p>
+          <p><strong>우편번호:</strong> <span th:text="${boughtDetail.postalCode}">12345</span></p>
+          <p><strong>배송 주소:</strong> <span th:text="${boughtDetail.deliveryAddress}">서울특별시 강남구 테헤란로 123</span>
+          </p>
+          <!-- 운송장 및 배송 조회 영역 -->
+          <div class="tracking mt-3 d-flex align-items-center">
+            <span class="tracking-label fw-bold">운송장 정보:</span>
+            <button id="trackingBtn" class="btn btn-primary btn-sm ms-2" onclick="loadTracking()">운송장 정보 불러오기</button>
+            <span id="trackingText" class="ms-2" style="display: none;"></span>
+            <button class="smartapi-btn ms-auto" onclick="submitTrackingForm()">배송 조회</button>
+            <!-- 숨겨진 배송 조회 Form 추가 (target="_blank"로 새 창에서 결과 출력) -->
+            <form id="smartTrackingForm" action="/history/tracking-proxy" method="post" target="_blank" style="display: none;">
+              <div class="form-group">
+                <label for="t_code">택배사 코드</label>
+                <input type="text" class="form-control" name="t_code" id="t_code" value="">
+              </div>
+              <div class="form-group">
+                <label for="t_invoice">운송장 번호</label>
+                <input type="text" class="form-control" name="t_invoice" id="t_invoice" value="">
+              </div>
+              <button type="submit" class="btn btn-default">조회하기</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- 거래 완료 영역 -->
+      <div class="tracking-area d-flex">
+        <button id="completeBtn" class="complete-btn ms-auto" onclick="completeTransaction()"
+                th:classappend="${boughtDetail.completedDate != null} ? ' completed' : ''">거래 완료</button>
+      </div>
+  </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+
+  let registeredTracking = /*[[${boughtDetail.deliveryStatus}]]*/ "";
+
+  // 운송장 정보 불러오기
+  function loadTracking() {
+    if (registeredTracking.trim() !== "") {
+      document.getElementById("trackingBtn").style.display = "none"; // 버튼 숨김
+      const trackingText = document.getElementById("trackingText");
+      let raw = registeredTracking.trim();
+      if (raw.includes("/")) {
+        const parts = raw.split("/");
+        const code = parts[0];
+        const number = parts[1];
+        let courierName = "";
+        // 국내 택배사 목록에서 코드 검색
+        domesticCouriers.some(function(courier) {
+          if (courier.code === code) {
+            courierName = courier.name;
+            return true;
+          }
+          return false;
+        });
+        // 국내 목록에 없으면 국제 택배사 목록에서 검색
+        if (!courierName) {
+          internationalCouriers.some(function(courier) {
+            if (courier.code === code) {
+              courierName = courier.name;
+              return true;
+            }
+            return false;
+          });
+        }
+        if (courierName) {
+          trackingText.textContent = "택배사: " + courierName + ", 운송장번호: " + number;
+        } else {
+          // 해당 코드에 매칭되는 택배사를 찾지 못하면 원본 그대로 표시
+          trackingText.textContent = raw;
+        }
+      } else {
+        trackingText.textContent = registeredTracking;
+      }
+      trackingText.style.display = "inline"; // 텍스트 표시
+    } else {
+      alert("운송장 정보가 등록되어 있지 않습니다.");
+    }
+  }
+
+  // 등록된 운송장 정보를 바탕으로 스마트택배 API 프록시 호출
+  function submitTrackingForm() {
+    // registeredTracking 변수는 서버에서 전달된 배송정보
+    let tracking = registeredTracking.trim();
+    if (tracking === "배송준비") {
+      alert("아직 운송장 정보가 등록되어 있지 않습니다.");
+      return;
+    }
+    if (!tracking.includes("/")) {
+      alert("운송장 정보 형식이 올바르지 않습니다.");
+      return;
+    }
+    // "/" 구분자로 분리하여 택배사 코드와 운송장번호를 추출
+    const parts = tracking.split("/");
+    const t_code = parts[0];
+    const t_invoice = parts[1];
+    // hidden form의 input 값 채우기
+    document.getElementById("t_code").value = t_code;
+    document.getElementById("t_invoice").value = t_invoice;
+    // API KEY는 미리 설정해 둔 값 사용 (또는 필요에 따라 동적으로 설정)
+    // Form 제출 (새 창에서 열림)
+    document.getElementById("smartTrackingForm").submit();
+  }
+
+  // 거래 완료 기능
+  function completeTransaction() {
+    const completeBtn = document.getElementById("completeBtn");
+    if (completeBtn.classList.contains("completed")) {
+      alert("이미 완료되었습니다.");
+      return;
+    }
+
+    if (!confirm("정말 거래를 완료하시겠습니까?")) {
+      return;
+    }
+
+    const orderId = /*[[${boughtDetail.orderId}]]*/ 0;
+
+    fetch('/history/bought/complete?orderId=' + orderId, {
+      method: 'POST'
+    })
+            .then(response => response.text())
+            .then(data => {
+              if(data.trim() === "완료") {
+                completeBtn.classList.add("completed");
+                alert("거래 완료 처리되었습니다.");
+                location.reload();
+              } else {
+                alert("거래 완료 처리에 실패했습니다.");
+              }
+            })
+            .catch(error => {
+              console.error("Error:", error);
+              alert("오류가 발생했습니다.");
+            });
+  }
+
+</script>
+</body>
+</html>

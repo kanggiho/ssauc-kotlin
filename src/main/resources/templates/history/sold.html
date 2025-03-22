@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>판매 내역 상세</title>
+    <!-- 필요한 CSS, JS, CDN 등 -->
+    <link rel="stylesheet" href="/css/mypage.css">
+    <script src="/js/smartApiCodes.js"></script>
+    <style>
+        /* 캐러셀 전체 영역 및 각 슬라이드의 고정 높이 설정 */
+        .carousel-inner,
+        .carousel-item {
+            height: 300px;
+            width: 300px;
+            position: relative;
+            margin: 0 auto;
+        }
+        /* 캐러셀 슬라이드 이미지 스타일 */
+        .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            position: absolute;
+        }
+
+        .carousel-control-prev {
+            left: 0;
+        }
+
+        .carousel-control-next {
+            right: 0;
+        }
+
+        .tracking-number {
+            margin-top: 16px;
+        }
+
+        .card-body {
+            padding-bottom: 0 !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container2" layout:fragment="content">
+        <!-- 왼쪽 Sidebar (mypage 그대로) -->
+        <div class="sidebar" th:replace="~{mypage/mypage :: sidebar}"></div>
+        <!-- 오른쪽 메인 컨텐츠 -->
+        <div class="main2">
+            <h2 class="mb-4">판매 상세 내역</h2>
+
+            <!-- Section 1: 직거래 및 배송 장소 (Product Info) -->
+            <div class="card mb-4">
+                <div class="card-header fw-bold">판매 상품 정보</div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <!-- 왼쪽: 상품 정보 -->
+                        <div class="col-md-7">
+                            <p>
+                                <strong>상품 이름:</strong>
+                                <span class="productBid"
+                                      th:text="${soldDetail.productName}"
+                                      th:onclick="|location.href='/bid/bid?productId=' + ${soldDetail.productId}|">
+                                </span>
+                            </p>
+                            <p><strong>경매 시작가:</strong> <span th:text="${soldDetail.startPrice}">10000</span></p>
+                            <p><strong>등록 시간:</strong> <span
+                                    th:text="${#temporals.format(soldDetail.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-02-05 14:30:00</span>
+                            </p>
+                            <p><strong>거래 방식:</strong> <span
+                                    th:text="${soldDetail.dealType == 0 ? '🧑🏻 직거래' : (soldDetail.dealType == 1 ? '🚚 택배거래' : '🧑🏻🚚 직거래, 택배거래')}">거래 방식</span>
+                            </p>
+                            <hr>
+                            <p>
+                                <strong>구매자:</strong>
+                                <span class="productBid"
+                                      th:text="${soldDetail.buyerName}"
+                                      th:attr="data-sellername=${soldDetail.buyerName}"
+                                      onclick="handleSellerClick(event)">user</span>
+                            </p>
+                            <p><strong>판매가:</strong> <span th:text="${soldDetail.totalPrice}">50,000 원</span></p>
+                            <p><strong>판매 시간:</strong> <span
+                                    th:text="${#temporals.format(soldDetail.orderDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 16:45:00</span>
+                            </p>
+                            <p><strong>거래 완료 시간:</strong> <span
+                                    th:text="${#temporals.format(soldDetail.completedDate, 'yyyy-MM-dd HH:mm:ss')}">2025-02-06 17:00:00</span>
+                            </p>
+                        </div>
+                        <!-- 오른쪽: 상품 이미지 Carousel -->
+                        <div class="col-md-5">
+                            <div id="carouselSold" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div th:each="image, iterStat : ${carouselImages}"
+                                         class="carousel-item"
+                                         th:classappend="${iterStat.index == 0} ? ' active' : ''">
+                                        <img th:src="@{${image.url}}" class="d-block w-100" th:alt="${image.alt}"/>
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carouselSold"
+                                        data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">이전</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carouselSold"
+                                        data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">다음</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: 배송지, 수령인 정보 및 운송장 등록 -->
+            <div class="card mb-4">
+                <div class="card-header fw-bold">배송 요청 정보</div>
+                <div class="card-body">
+                    <p><strong>수령인 이름:</strong> <span th:text="${soldDetail.recipientName}">홍길동</span></p>
+                    <p><strong>수령인 연락처:</strong> <span th:text="${soldDetail.recipientPhone}">010-1234-5678</span></p>
+                    <p><strong>우편번호:</strong> <span th:text="${soldDetail.postalCode}">12345</span></p>
+                    <p><strong>배송 주소:</strong> <span th:text="${soldDetail.deliveryAddress}">서울특별시 강남구 테헤란로 123</span>
+                    </p>
+                    <!-- 운송장 등록 영역 -->
+                    <div class="tracking mt-3">
+                        <span class="fw-bold">운송장 정보 등록:</span>
+                        <button class="btn btn-primary btn-sm" onclick="registerTracking()"
+                                th:text="'운송장 등록'">
+                            운송장 등록
+                        </button>
+                        <p class="tracking-number">
+                            <strong>등록한 운송장 정보:</strong>
+                            <span id="trackingNo" th:attr="data-raw-tracking=${soldDetail.deliveryStatus}"></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+</div>
+
+<!-- 배송 운송장 등록 모달 HTML -->
+<div class="modal fade" id="trackingModal" tabindex="-1" aria-labelledby="trackingModalLabel" aria-hidden="true" layout:fragment="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trackingModalLabel">운송장 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">택배사 유형 선택:</label>
+                    <div>
+                        <button id="domesticBtn" type="button" class="btn btn-secondary">국내 택배</button>
+                        <button id="internationalBtn" type="button" class="btn btn-secondary">국제 택배</button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="courierSelect" class="form-label">택배사 선택:</label>
+                    <select id="courierSelect" class="form-select"></select>
+                </div>
+                <div class="mb-3">
+                    <label for="trackingInput" class="form-label">운송장 번호 입력:</label>
+                    <input type="text" id="trackingInput" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveTrackingBtn" type="button" class="btn btn-primary">등록하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTrackingDisplay();
+    });
+    function updateTrackingDisplay() {
+        const trackingSpan = document.getElementById('trackingNo');
+        const rawTracking = trackingSpan.getAttribute('data-raw-tracking');
+        if(rawTracking && rawTracking.includes('/')) {
+            const parts = rawTracking.split('/');
+            const code = parts[0];
+            const number = parts[1];
+            let courierName = '';
+            // 국내 택배사 배열에서 코드 검색
+            domesticCouriers.some(function(courier) {
+                if(courier.code === code) {
+                    courierName = courier.name;
+                    return true;
+                }
+                return false;
+            });
+            // 국내에 없으면 국제 택배사 배열에서 검색
+            if(!courierName) {
+                internationalCouriers.some(function(courier) {
+                    if(courier.code === code) {
+                        courierName = courier.name;
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            if(courierName) {
+                trackingSpan.textContent = '택배사: ' + courierName + ', 운송장번호: ' + number;
+            } else {
+                // 찾지 못하면 raw 값 그대로 표시
+                trackingSpan.textContent = rawTracking;
+            }
+        }
+    }
+
+    // 모달 열기
+    function registerTracking() {
+        // 원본 tracking 값(data-raw-tracking)으로 모달 필드 미리 채우기
+        const trackingSpan = document.getElementById('trackingNo');
+        const rawTracking = trackingSpan.getAttribute('data-raw-tracking');
+        if(rawTracking && rawTracking.includes('/')){
+            const parts = rawTracking.split('/');
+            const code = parts[0];
+            const number = parts[1];
+            // 택배 코드가 국내 목록에 있으면 국내로, 아니면 국제로 설정
+            let isDomestic = domesticCouriers.some(courier => courier.code === code);
+            if(isDomestic){
+                setCourierFilter('domestic');
+            } else {
+                setCourierFilter('international');
+            }
+            // drop-down에서 해당 코드 선택 및 입력창에 운송장번호 채우기
+            document.getElementById('courierSelect').value = code;
+            document.getElementById('trackingInput').value = number;
+        } else {
+            setCourierFilter('domestic');
+            document.getElementById('trackingInput').value = '';
+        }
+        const trackingModal = new bootstrap.Modal(document.getElementById('trackingModal'));
+        trackingModal.show();
+    }
+
+    // 택배 유형에 따라 <select> 옵션 채우는 함수
+    function setCourierFilter(filter) {
+        let couriers = [];
+        if (filter === 'domestic') {
+            couriers = domesticCouriers;
+        } else {
+            couriers = internationalCouriers;
+        }
+        const courierSelect = document.getElementById('courierSelect');
+        courierSelect.innerHTML = '';  // 기존 옵션 초기화
+        couriers.forEach((courier) => {
+            const option = document.createElement('option');
+            option.value = courier.code;
+            option.text = courier.name;
+            courierSelect.appendChild(option);
+        });
+    }
+
+    // 필터 버튼 클릭 이벤트 등록
+    document.getElementById('domesticBtn').addEventListener('click', function(){
+        setCourierFilter('domestic');
+    });
+    document.getElementById('internationalBtn').addEventListener('click', function(){
+        setCourierFilter('international');
+    });
+
+    // 모달 내 '등록하기' 버튼 클릭 이벤트: 선택한 택배사 코드와 운송장 번호 결합 후 저장
+    document.getElementById('saveTrackingBtn').addEventListener('click', function(){
+        const orderId = /*[[${soldDetail.orderId}]]*/ 0;
+        const trackingNumber = document.getElementById('trackingInput').value.trim();
+        if(trackingNumber === ''){
+            alert("운송장 번호를 입력하세요.");
+            return;
+        }
+        const courierSelect = document.getElementById('courierSelect');
+        const courierCode = courierSelect.value;
+        const combinedTracking = courierCode + '/' + trackingNumber;
+        fetch('/history/sold/update-tracking?orderId=' + orderId + '&newTracking=' + encodeURIComponent(combinedTracking), {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if(data.updated){
+                    // data-raw-tracking 속성 업데이트
+                    const trackingSpan = document.getElementById("trackingNo");
+                    trackingSpan.setAttribute('data-raw-tracking', combinedTracking);
+                    // 표시 텍스트도 갱신 (위의 DOMContentLoaded 처리 로직과 동일하게 적용)
+                    let courierName = '';
+                    domesticCouriers.some(function(courier) {
+                        if(courier.code === courierCode){
+                            courierName = courier.name;
+                            return true;
+                        }
+                        return false;
+                    });
+                    if(!courierName) {
+                        internationalCouriers.some(function(courier) {
+                            if(courier.code === courierCode){
+                                courierName = courier.name;
+                                return true;
+                            }
+                            return false;
+                        });
+                    }
+                    if(courierName) {
+                        trackingSpan.textContent = '택배사: ' + courierName + ', 운송장번호: ' + trackingNumber;
+                    }
+                    document.querySelector('button[onclick="registerTracking()"]').textContent = "운송장 수정";
+                    alert("운송장 번호가 업데이트되었습니다.");
+                    // 모달 닫기
+                    const modalEl = document.getElementById('trackingModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                } else {
+                    alert("운송장 번호 업데이트에 실패했습니다.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("오류가 발생했습니다.");
+            });
+    });
+
+    <!-- 등록된 운송장 번호 표시 형식을 변경하는 스크립트 추가 -->
+    document.addEventListener('DOMContentLoaded', function() {
+        const trackingSpan = document.getElementById('trackingNo');
+        const rawTracking = trackingSpan.getAttribute('data-raw-tracking');
+        if(rawTracking && rawTracking.includes('/')) {
+            const parts = rawTracking.split('/');
+            const code = parts[0];
+            const number = parts[1];
+            let courierName = '';
+            domesticCouriers.some(function(courier) {
+                if(courier.code === code){
+                    courierName = courier.name;
+                    return true;
+                }
+                return false;
+            });
+            if(!courierName) {
+                internationalCouriers.some(function(courier) {
+                    if(courier.code === code){
+                        courierName = courier.name;
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            if(courierName) {
+                trackingSpan.textContent = '택배사: ' + courierName + ', 운송장번호: ' + number;
+            }
+        }
+    });
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>신고 내역</title>
+    <!-- 스타일시트 연결 -->
+    <link rel="stylesheet" href="/css/mypage.css">
+</head>
+<body>
+
+<div class="history-container" layout:fragment="content">
+    <!-- 왼쪽 사이드바 (mypage와 동일) -->
+    <div th:replace="~{mypage/mypage :: sidebar}"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="history-main">
+        <!-- 페이지 제목 -->
+        <h2>신고 내역</h2>
+
+        <!-- 필터 섹션 -->
+        <div class="filter-section">
+            <div class="filter-buttons">
+                <a th:href="@{/history/report(filter='product')}"
+                   class="filter-btn" th:classappend="${filter=='product'} ? ' active' : ''">
+                    상품 신고
+                </a>
+                <a th:href="@{/history/report(filter='user')}"
+                   class="filter-btn" th:classappend="${filter=='user'} ? ' active' : ''">
+                    유저 신고
+                </a>
+            </div>
+        </div>
+
+        <!-- 상품 신고 리스트 -->
+        <div th:if="${filter=='product'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>신고 대상</th>
+                    <th>신고 사유</th>
+                    <th>신고 시간</th>
+                    <th>처리 시간</th>
+                    <th>처리 상태</th>
+                    <th>조치</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="report : ${list}">
+                    <td class="productBid" th:onclick="|location.href='/bid/bid?productId=' + ${report.productId}|">
+                        <img class="historyImage" th:src="${report.productImageUrl}" alt="상품 대표 이미지"/>
+                        <span th:text="${report.productName}">상품 A</span>
+                    </td>
+                    <td th:text="${report.reportReason}">사유</td>
+                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm:ss')}">신고 시간</td>
+                    <td th:text="${report.processedAt != null ? #temporals.format(report.processedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}">처리 시간</td>
+                    <td th:text="${report.status}">상태</td>
+                    <td>
+                        <button class="history-btn" style="cursor: pointer;"
+                                th:onclick="|location.href='/history/reported?filter=product&id=' + ${report.reportId}|">
+                            상세
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 유저 신고 리스트 -->
+        <div th:if="${filter=='user'}">
+            <table class="history-table">
+                <thead>
+                <tr>
+                    <th>신고 대상</th>
+                    <th>신고 사유</th>
+                    <th>신고 시간</th>
+                    <th>처리 시간</th>
+                    <th>처리 상태</th>
+                    <th>조치</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="report : ${list}">
+                    <td>
+                        <img class="historyImage" th:src="${report.profileImageUrl}" alt="프로필 이미지"/>
+                        <span class="productBid"
+                              th:text="${report.reportedUserName}"
+                              th:attr="data-sellername=${report.reportedUserName}"
+                              onclick="handleSellerClick(event)">user</span>
+                    </td>
+                    <td th:text="${report.reportReason}">사유</td>
+                    <td th:text="${#temporals.format(report.reportDate, 'yyyy-MM-dd HH:mm')}">신고 시간</td>
+                    <td th:text="${report.processedAt != null ? #temporals.format(report.processedAt, 'yyyy-MM-dd HH:mm') : '-'}">처리 시간</td>
+                    <td th:text="${report.status}">상태</td>
+                    <td>
+                        <button class="history-btn" style="cursor: pointer;"
+                                th:onclick="|location.href='/history/reported?filter=user&id=' + ${report.reportId}|">
+                            상세
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${currentPage > 1}" th:href="@{/history/report(filter=${filter}, page=${currentPage - 1})}">
+                <button>&lt;</button>
+            </a>
+            <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/history/report(filter=${filter}, page=${i})}">
+                    <button th:text="${i}" th:classappend="${i == currentPage} ? ' active' : ''"></button>
+                </a>
+            </span>
+            <a th:if="${currentPage < totalPages}" th:href="@{/history/report(filter=${filter}, page=${currentPage + 1})}">
+                <button>&gt;</button>
+            </a>
+        </div>
+    </main>
+</div>
+
+<script>
+</script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+  <meta charset="UTF-8">
+  <title>회원 탈퇴</title>
+  <link rel="stylesheet" th:href="@{/css/withdraw.css}">
+  <script th:src="@{/js/withdraw.js}" defer></script>
+</head>
+<body>
+<div class="withdraw-container" layout:fragment="content">
+  <section class="withdraw-section">
+    <h2>회원 탈퇴</h2>
+    <form id="withdrawForm" class="withdraw-form">
+      <!-- 비밀번호 입력 -->
+      <div class="form-group">
+        <div class="input-row">
+          <label for="password">비밀번호 <span class="required">*</span></label>
+          <input type="password" id="password" name="password" placeholder="비밀번호 입력" required>
+        </div>
+        <div class="error-msg" id="passwordError"></div>
+      </div>
+
+      <!-- 비밀번호 확인 입력 -->
+      <div class="form-group">
+        <div class="input-row">
+          <label for="confirmPassword">비밀번호 확인 <span class="required">*</span></label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 재입력" required>
+        </div>
+        <div class="error-msg" id="confirmPasswordError"></div>
+      </div>
+
+      <!-- 버튼 영역 -->
+      <div class="button-row">
+        <button type="submit" class="submit-btn">회원 탈퇴</button>
+        <button type="button" id="cancelBtn" class="cancel-btn">취소</button>
+      </div>
+
+      <!-- 서버 응답 에러 메시지 (fetch 실패 시 표시) -->
+      <div class="error-msg" id="withdrawErrorMsg"></div>
+    </form>
+  </section>
+</div>
+</body>
+</html>

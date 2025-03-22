@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 정보 확인</title>
+    <link rel="stylesheet" th:href="@{/css/info.css}">
+    <!-- 평판 그래프를 위한 Chart.js (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="member-info-container" layout:fragment="content">
+
+    <div class="info-graph-container">
+        <!-- 기본 회원 정보 섹션 -->
+        <section class="basic-info">
+            <div class="basic-info-header">
+                <img th:src="@{${user.profileImage}}" alt="프로필 이미지" class="profile-image">
+                <h2 th:text="${user.userName}">User Name</h2>
+            </div>
+            <div class="basic-info-details">
+                <div class="info-item">
+                    <span class="info-icon">🏅</span>
+                    <span>신뢰도: <strong th:text="${user.reputation}">0</strong> 점</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">🗺️</span>
+                    <span>지역: <strong th:text="${user.location}">서울</strong></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">🗓️</span>
+                    <span>가입일: <strong th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">날짜</strong></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">⏰</span>
+                    <span>마지막 로그인: <strong th:text="${#temporals.format(user.lastLogin, 'yyyy-MM-dd   HH')} + 시">날짜</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 평판 변화 그래프 섹션 -->
+        <section class="reputation-graph">
+            <h3 class="reputation-graph-header">
+                <div class="header-left">
+                    <span class="section-title-icon">📊</span>
+                    <span>신뢰도 변화 추이</span>
+                </div>
+                <div class="header-right">
+                    <label for="periodSelect" class="period-label">기간:</label>
+                    <select id="periodSelect" class="period-select">
+                        <option value="7">최근 1주일</option>
+                        <option value="30">최근 1개월</option>
+                        <option value="all">전체</option>
+                    </select>
+                </div>
+            </h3>
+            <canvas id="reputationChart"></canvas>
+        </section>
+    </div>
+
+    <!-- 리뷰 요약 섹션 -->
+    <section class="review-summary">
+        <h4>
+            <img src="/img/mypage/sparkle_cropped.png" alt="sparkle" class="sparkle-icon">
+            <span th:text="${user.userName} + '님에 대한 리뷰 요약'">리뷰 요약</span>
+            <span class="tooltip-container">
+                <span class="info-icon">ⓘ</span>
+                <div class="tooltip-box">
+                  <ul>
+                    <li>이 요약은 AI가 자동으로 만들었어요.</li>
+                    <li>부정확하거나 어색한 표현 등이 있을 수 있어요.</li>
+                  </ul>
+                </div>
+            </span>
+        </h4>
+        <div class="summary-box">
+            <p th:if="${user.reviewSummary != null}" th:text="${user.reviewSummary}">리뷰 요약 내용</p>
+            <p th:if="${user.reviewSummary == null}">아직 리뷰가 충분하지 않네요. 리뷰를 작성해보시는 건 어떨까요?</p>
+        </div>
+    </section>
+
+    <!-- 평판 점수 계산 방식 섹션 -->
+    <section class="reputation-calculation">
+        <h3>
+            <span class="section-title-icon">📝</span>
+            신뢰도 점수 계산 방식
+        </h3>
+        <p>여러 가지 거래 활동과 평가 결과들이 복합적으로 반영되어 신뢰도 점수가 정해집니다.</p>
+        <p>시간이 지나면 최근의 거래나 활동이 더 크게 반영되어, 신뢰도의 변화가 점진적으로 이루어집니다.</p>
+        <div class="calculation-list">
+            <div class="increase">
+                <h4>
+                    <span class="section-title-icon">📈</span>
+                    신뢰도를 높이는 요소
+                </h4>
+                <p>원활한 거래와 활발한 활동</p>
+                <p>거래 상대의 긍정적인 평가</p>
+                <p>신속한 주문 처리 등이 있을 때</p>
+            </div>
+            <div class="decrease">
+                <h4>
+                    <span class="section-title-icon">📉</span>
+                    신뢰도를 낮추는 요소
+                </h4>
+                <p>오랜 기간 미접속한 경우</p>
+                <p>거래 상대의 부정적인 평가</p>
+                <p>고객 신고 등에 대해 확인된 사례</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    // 컨트롤러에서 reputationData로 전달된 평판 변화 데이터
+    let reputationData = /*[[${reputationData}]]*/ [];
+
+    // 하루당 하나의 점만 찍히도록 날짜별로 그룹화해서 마지막 데이터만 사용
+    let dailyDataMap = new Map();
+    reputationData.forEach(function (item) {
+        let date = new Date(item.createdAt);
+        let dateKey = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+        dailyDataMap.set(dateKey, item); // 동일 날짜면 마지막 item으로 덮어쓰기
+    });
+
+    // 전체 평판 기록 날짜 키 정렬 (오름차순)
+    let sortedDateKeys = Array.from(dailyDataMap.keys()).sort(function (a, b) {
+        return new Date(a) - new Date(b);
+    });
+
+    // 차트를 업데이트하는 함수 (기간 선택 UI 반영)
+    function updateChart() {
+        let periodSelect = document.getElementById('periodSelect');
+        let periodValue = periodSelect.value; // "7", "30", "all" 중 하나 선택
+        let filteredDateKeys;
+
+        if (periodValue === 'all') {
+            // 전체 데이터를 사용
+            filteredDateKeys = sortedDateKeys;
+        } else {
+            let daysRange = parseInt(periodValue); // 예: 7 또는 30
+            let now = new Date();
+            // 기본 기준은 현재 날짜
+            let baseEndDate = now;
+            // 최근 daysRange 내에 기록이 하나라도 있는지 체크
+            let hasRecentRecord = sortedDateKeys.some(dateKey => new Date(dateKey) >= new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysRange));
+            if (!hasRecentRecord && sortedDateKeys.length > 0) {
+                // 최근 기록이 없으면, 마지막 기록 날짜를 기준으로 설정
+                baseEndDate = new Date(sortedDateKeys[sortedDateKeys.length - 1]);
+            }
+            let baseStartDate = new Date(baseEndDate.getFullYear(), baseEndDate.getMonth(), baseEndDate.getDate() - daysRange);
+            // baseStartDate 이상, baseEndDate 이하의 데이터만 필터링
+            filteredDateKeys = sortedDateKeys.filter(function(dateKey) {
+                let date = new Date(dateKey);
+                return date >= baseStartDate && date <= baseEndDate;
+            });
+        }
+
+        // 라벨 및 점수 배열 생성 (날짜 키 "YYYY-M-D" → "MM-DD")
+        let labels = filteredDateKeys.map(function (dateKey) {
+            let parts = dateKey.split('-');
+            return parts[1] + '-' + parts[2];
+        });
+        let scores = filteredDateKeys.map(function (dateKey) {
+            return dailyDataMap.get(dateKey).newScore;
+        });
+
+        // 차트 데이터 업데이트
+        reputationChart.data.labels = labels;
+        reputationChart.data.datasets[0].data = scores;
+        reputationChart.update();
+    }
+
+    let ctx = document.getElementById('reputationChart').getContext('2d');
+    let reputationChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [], // 초기 라벨은 빈 배열
+            datasets: [{
+                label: '신뢰도',
+                data: [], // 초기 데이터는 빈 배열
+                fill: true,
+                borderColor: '#c8b8ff',
+                backgroundColor: '#e0d9ff',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: '날짜'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: '점수'
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // 페이지 로드 시 초기 차트 업데이트
+    updateChart();
+    // 기간 선택 드롭다운 변경 시 차트 업데이트
+    document.getElementById('periodSelect').addEventListener('change', updateChart);
+</script>
+</body>
+</html>

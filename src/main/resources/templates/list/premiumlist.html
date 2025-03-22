@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <link rel="stylesheet" href="/css/premiumlist.css">
+</head>
+
+<div class="container" layout:fragment="content">
+
+    <!-- 최근 본 상품 박스 -->
+    <div class="floating-box" th:if="${#authentication != null && #authentication.name != 'anonymousUser'}">
+        <h6>최근 본 물품</h6>
+        <!-- 스크롤 영역 -->
+        <div class="recent-items-container">
+            <!-- 최근 본 상품 목록 반복 -->
+            <div th:each="view : ${recentViews}">
+                <a th:href="@{/bid/bid(productId=${view.product.productId})}" class="recent-item">
+                    <img th:src="${view.product.imageUrl}" alt="상품 이미지">
+                </a>
+            </div>
+        </div>
+        <!-- TOP 버튼 -->
+        <button id="topBtn" class="top-btn hide">TOP</button>
+    </div>
+
+    <!-- 검색 바 -->
+    <div class="d-flex justify-content-between align-items-center search-bar">
+        <span>총 <strong class="text-danger">693</strong> 개</span>
+        <input type="text" class="form-control" placeholder="현재 카테고리에서 검색">
+    </div>
+
+    <hr>
+
+    <!-- 경매 리스트 -->
+    <div class="auction-list">
+        <!-- 상품 1 -->
+        <div class="auction-item">
+            <span class="text-muted">101</span>
+            <img th:src="@{/img/index/cheese.png}" alt="경매 상품">
+            <div class="auction-info">
+                <a href="#" class="auction-title">['만만'한 경매] 1919년 5월 미국 발행, 독립운동가 정한경의 글이 수록된 잡지 [ASIA] 1책</a>
+                <p class="auction-meta">시작가 : 10,000 원</p>
+                <p class="auction-meta">입찰수 : 1회 | 조회수 : 87회</p>
+                <p class="auction-meta">⌛ 마감까지 : 8일 21시간</p>
+                <p class="auction-price">현재가 : 10,000 원</p>
+            </div>
+            <div class="premiumbtn">
+                <button class="btn btn-dark">상세보기</button>
+                <button class="wishlist-btn"><i class="bi bi-heart"></i> 관심상품등록</button>
+            </div>
+        </div>
+
+        <!-- 상품 2 -->
+        <div class="auction-item">
+            <span class="text-muted">102</span>
+            <img th:src="@{/img/index/cheese.png}" alt="경매 상품">
+            <div class="auction-info">
+                <a href="#" class="auction-title">['만만'한 경매] 1937년 8월 14일자, ‘홍원’에 대한 특집기사를 비롯해 이기영 소설 ‘어머니’가 수록된 [조선일보] 1점(띠지 포함)</a>
+                <p class="auction-meta">시작가 : 10,000 원</p>
+                <p class="auction-meta">입찰수 : 1회 | 조회수 : 70회</p>
+                <p class="auction-meta">⌛ 마감까지 : 8일 21시간</p>
+                <p class="auction-price">현재가 : 10,000 원</p>
+            </div>
+
+            <div class="premiumbtn">
+                <button class="btn btn-dark">상세보기</button>
+                <button class="wishlist-btn"><i class="bi bi-heart"></i> 관심상품등록</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+</html>

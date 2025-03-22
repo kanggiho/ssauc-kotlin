@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <title>SSAUC 로그인</title>
+    <!-- login.js 먼저 로드해도 되고 defer 속성 사용 -->
+    <script th:src="@{/js/login.js}" defer></script>
+    <link rel="stylesheet" th:href="@{/css/login.css}">
+</head>
+<body>
+<div layout:fragment="content" class="login-container">
+    <!-- 왼쪽: 로그인 폼 -->
+    <div class="login-left">
+        <h2>로그인</h2>
+
+        <form id="login-form" th:action="@{/login}" method="post">
+            <!-- 아이디(이메일) -->
+            <label for="email" class="login-label">아이디(이메일)</label>
+            <input type="text" id="email" name="email"
+                   class="login-input" placeholder="아이디(이메일)를 입력하세요"
+                   th:value="${param.email}">
+            <!-- 아이디 에러 메시지 -->
+            <div id="email-error" class="login-error-msg"></div>
+
+            <!-- 비밀번호 -->
+            <label for="password" class="login-label">비밀번호</label>
+            <input type="password" id="password" name="password"
+                   class="login-input" placeholder="비밀번호를 입력하세요">
+            <!-- 비밀번호 에러 메시지 + 서버 로그인 실패 메시지 표시 -->
+            <div id="password-error" class="login-error-msg"></div>
+
+            <!-- 로그인 버튼 -->
+            <button type="submit" class="login-button">로그인</button>
+        </form>
+
+        <!-- 하단 링크들 -->
+        <div class="login-links">
+            <a th:href="@{/find-id}">아이디 찾기</a> |
+            <a th:href="@{/reset-password}">비밀번호 재설정</a> |
+            <a th:href="@{/signup}">회원가입</a>
+        </div>
+
+        <!-- 소셜 로그인 -->
+        <div class="login-social">
+            <div class="login-social-item" style="cursor: pointer;"
+                 onclick="location.href='/oauth2/authorization/kakao'">
+                <img src="/img/login/kakao_logo.png" alt="카카오" class="login-social-icon">
+                <span>카카오 로그인</span>
+            </div>
+            <div class="login-social-item" style="cursor: pointer;"
+                 onclick="location.href='/oauth2/authorization/naver'">
+                <img src="/img/login/naver_logo.png" alt="네이버" class="login-social-icon">
+                <span>네이버 로그인</span>
+            </div>
+            <div class="login-social-item" style="cursor: pointer;"
+                 onclick="location.href='/oauth2/authorization/google'">
+                <img src="/img/login/google_logo.png" alt="구글" class="login-social-icon">
+                <span>구글 로그인</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 오른쪽: 광고 이미지 (예시) -->
+    <div class="login-right">
+        <img src="/img/login/advertisement.PNG" alt="광고 이미지" class="login-ad-image">
+    </div>
+</div>
+</body>
+</html>

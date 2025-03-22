@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+
+    <style>
+        a {
+            text-decoration: none;
+        }
+        .product-card {
+            border: none;
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: scale(1.05);
+        }
+        .product-card img {
+            border-radius: 8px;
+            max-height: 200px;
+            object-fit: cover;
+        }
+        .product-title {
+            color: black;
+            font-size: 1rem;
+            font-weight: bold;
+            display: -webkit-box;
+            -webkit-line-clamp: 1; /* 최대 1줄 */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            height: 1.4em; /* 1줄 높이 유지 */
+            margin-bottom: 7px;
+        }
+
+
+
+    </style>
+</head>
+
+<div class="container" layout:fragment="content">
+
+    <!-- 최근 본 상품 박스 -->
+    <div class="floating-box" th:if="${#authentication != null && #authentication.name != 'anonymousUser'}">
+        <h6>최근 본 물품</h6>
+        <!-- 스크롤 영역 -->
+        <div class="recent-items-container">
+            <!-- 최근 본 상품 목록 반복 -->
+            <div th:each="view : ${recentViews}">
+                <a th:href="@{/bid/bid(productId=${view.product.productId})}" class="recent-item">
+                    <img th:src="${view.product.imageUrl}" alt="상품 이미지">
+                </a>
+            </div>
+        </div>
+        <!-- TOP 버튼 -->
+        <button id="topBtn" class="top-btn hide">TOP</button>
+    </div>
+
+
+    <!-- 캐러셀 배너 -->
+    <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <img th:src="@{/img/index/banner.png}" class="d-block w-100" alt="배너 1">
+            </div>
+            <div class="carousel-item">
+                <img th:src="@{/img/index/banner.png}" class="d-block w-100" alt="배너 2">
+            </div>
+            <div class="carousel-item">
+                <img th:src="@{/img/index/banner.png}" class="d-block w-100" alt="배너 3">
+            </div>
+        </div>
+
+        <!-- 이전 / 다음 버튼 -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- 인기 카테고리 슬라이더 -->
+    <div id="categoryCarousel" class="carousel slide category-carousel" data-bs-ride="carousel">
+        <h3 class="fw-bold">주요 카테고리</h3>
+        <div class="carousel-inner">
+            <!-- 첫 번째 슬라이드 -->
+            <div class="carousel-item active">
+                <div class="category-group">
+                    <a th:href="@{/list/category(categoryId=1)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <p>디지털기기</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=2)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-lamp"></i>
+                        </div>
+                        <p>가구/인테리어</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=3)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-bag-heart"></i>
+                        </div>
+                        <p>유아동</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=4)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <p>여성의류</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=5)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-handbag"></i>
+                        </div>
+                        <p>여성잡화</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=6)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <p>남성패션/잡화</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=7)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-houses"></i>
+                        </div>
+                        <p>생활가전</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=8)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-house-door"></i>
+                        </div>
+                        <p>생활/주방</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 두 번째 슬라이드 -->
+            <div class="carousel-item">
+                <div class="category-group">
+                    <a th:href="@{/list/category(categoryId=9)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-bicycle"></i>
+                        </div>
+                        <p>스포츠/레저</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=10)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-controller"></i>
+                        </div>
+                        <p>취미/게임/음반</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=11)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-gem"></i>
+                        </div>
+                        <p>뷰티/미용</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=12)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-flower1"></i>
+                        </div>
+                        <p>식물</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=13)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-basket"></i>
+                        </div>
+                        <p>가공식품</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=14)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-heart-pulse"></i>
+                        </div>
+                        <p>건강기능식품</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=15)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-piggy-bank"></i>
+                        </div>
+                        <p>반려동물용품</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=16)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-ticket-detailed"></i>
+                        </div>
+                        <p>티켓/교환권</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 세 번째 슬라이드 -->
+            <div class="carousel-item">
+                <div class="category-group">
+                    <a th:href="@{/list/category(categoryId=17)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <p>도서</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=18)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-book-half"></i>
+                        </div>
+                        <p>유아도서</p>
+                    </a>
+
+                    <a th:href="@{/list/category(categoryId=19)}" class="category-item">
+                        <div class="category-icon">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        <p>기타 중고물품</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 이전 / 다음 버튼 -->
+        <button class="carousel-control-prev" type="button" data-bs-target="#categoryCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#categoryCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+
+    <!-- BestItem -->
+    <div class="container mt-4">
+        <h3 class="mb-3" id="best_item">BEST ITEM</h3>
+        <a th:href="@{/list/list}" class="view-all">
+            <p style="text-align: end">전체보기</p>
+        </a>
+
+        <!-- 상품 리스트 -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+            <div class="col" th:each="product : ${hotsProducts}">
+                <div class="card product-card">
+                    <!-- 이미지 URL과 alt 속성은 product 속성에 맞게 수정 -->
+                    <a th:href="@{/bid/bid(productId=${product.productId})}">
+                    <img th:src="@{${product.imageUrl}}" th:alt="${product.name}">
+                    <div class="card-body">
+                        <p class="product-title" th:text="${product.name}">상품명</p>
+                        <!-- 가격은 포맷팅 필요 시 Thymeleaf 유틸리티를 사 용할 수 있습니다 -->
+                        <p class="product-price" th:text="${T(java.lang.String).format('%,d', product.price)}">가격</p>
+                        <!-- 추가 정보: 입찰 횟수, 남은 시간, 위치, 좋아요 수 등 -->
+                        <p class="product-info" th:text="'입찰 ' + ${product.bidCount} + '회 | ⏳ ' + ${@dateUtils.formatRemainingTime(product.endAt)}">입찰 정보</p>
+                        <p class="product-info" th:text="${product.seller.location} + ' | ❤️ ' + ${product.likeCount}">상품 추가정보</p>
+                    </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Premium Section 배너 -->
+    <div class="container premium-section bg-light">
+        <div class="premium-text">
+            <h2>SSAUC's Premium</h2>
+            <button class="btn premium-btn mt-3">바로가기</button>
+        </div>
+        <div id="premiumCarousel" class="carousel slide premium-carousel" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active premium-carousel-item">
+                    <img th:src="@{/img/index/premium1.jpg}" class="d-block w-100" alt="책 이미지 1">
+                </div>
+                <div class="carousel-item premium-carousel-item">
+                    <img th:src="@{/img/index/premium2.png}" class="d-block w-100" alt="책 이미지 2">
+                </div>
+                <div class="carousel-item premium-carousel-item">
+                    <img th:src="@{/img/index/premium3.jpg}" class="d-block w-100" alt="책 이미지 3">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#premiumCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#premiumCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SSAUC's Pick -->
+    <div class="container mt-4">
+        <h3 class="mb-3" id="ssaucs_pick">SSAUC's Pick</h3>
+        <a th:href="@{/list/list}" class="view-all">
+            <p style="text-align: end">전체보기</p>
+        </a>
+
+        <!-- 상품 리스트 -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+            <div class="col" th:each="product : ${ssaucsPickProducts}">
+                <div class="card product-card">
+                    <!-- 이미지 URL과 alt 속성은 product 속성에 맞게 수정 -->
+                    <a th:href="@{/bid/bid(productId=${product.productId})}">
+                    <img th:src="@{${product.imageUrl}}" th:alt="${product.name}">
+                    <div class="card-body">
+                        <p class="product-title" th:text="${product.name}">상품명</p>
+                        <!-- 가격은 포맷팅 필요 시 Thymeleaf 유틸리티를 사 용할 수 있습니다 -->
+                        <p class="product-price" th:text="${T(java.lang.String).format('%,d', product.price)}">가격</p>
+                        <!-- 추가 정보: 입찰 횟수, 남은 시간, 위치, 좋아요 수 등 -->
+                        <p class="product-info" th:text="'입찰 ' + ${product.bidCount} + '회 | ⏳ ' + ${@dateUtils.formatRemainingTime(product.endAt)}">입찰 정보</p>
+                        <p class="product-info" th:text="${product.seller.location} + ' | ❤️ ' + ${product.likeCount}">상품 추가정보</p>
+                    </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 끝나는 div -->
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // TOP 버튼 스크롤 감지
+    const topBtn = document.getElementById("topBtn");
+
+    window.addEventListener("scroll", function() {
+        if (window.scrollY > 200) {
+            topBtn.classList.remove("hide");
+        } else {
+            topBtn.classList.add("hide");
+        }
+    });
+
+    // TOP 버튼 클릭 시 맨 위로 이동
+    topBtn.addEventListener("click", function() {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const categoryCards = document.querySelectorAll('.category-card');
+
+        categoryCards.forEach(card => {
+            card.addEventListener("click", function() {
+                document.querySelector('.category-card.active')?.classList.remove('active');
+                this.classList.add('active');
+            });
+        });
+    });
+</script>
+</html>

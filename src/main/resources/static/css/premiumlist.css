@@ -1,0 +1,107 @@
+/* 검색 바 스타일 */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    margin-top: 1em;
+}
+
+.floating-box {
+    position: fixed;
+    margin-bottom: 20em;
+    right: 20px;
+    bottom: 80px; /* TOP 버튼과 간격 */
+    width: 120px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.floating-box h6 {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+/* 스크롤 영역을 담당하는 컨테이너 */
+.recent-items-container {
+    max-height: 250px; /* 여기서 원하는 높이로 조정 (예: 7개 정도 보이게) */
+    overflow-y: auto;   /* 세로 스크롤 활성화 */
+}
+
+/* 필요하다면 이미지 크기나 여백 조절 */
+.recent-item img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+
+.search-bar input {
+    flex: 1;
+    max-width: 300px;
+}
+
+/* 경매 리스트 스타일 */
+.auction-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.auction-item img {
+    width: 120px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.auction-info {
+    flex: 1;
+}
+
+.auction-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0056b3;
+}
+
+.auction-price {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.auction-meta {
+    font-size: 14px;
+    color: gray;
+}
+
+/* 버튼 스타일 */
+.btn-dark {
+    width: 100px;
+}
+
+.wishlist-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.wishlist-btn i {
+    color: red;
+}
+
+.premiumbtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}

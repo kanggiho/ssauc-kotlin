@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <title>2단계 인증</title>
+    <!-- SUIT 폰트 (CDN) -->
+    <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/stylesheet.css" rel="stylesheet"/>
+    <!-- 커스텀 CSS -->
+    <link rel="stylesheet" th:href="@{/css/twoFactor.css}"/>
+</head>
+<body>
+<div class="login-wrapper">
+    <div class="logo-image-container">
+        <div class="logo-image-area">
+            <img th:src="@{/img/index/ssauc_logo2.png}"
+                 alt="브랜드 로고 이미지" style="width: 200px; height: 100px;"
+                 class="logo-image2"/>
+            <h2>관리자 모드</h2>
+        </div>
+    </div>
+    <h2 class="auth-label">Google Authenticator 코드 입력</h2>
+    <div class="spacer"></div>
+    <div class="form-container">
+        <form action="/admin/two-factor" method="post">
+            <input type="text" name="code" placeholder="인증 코드" required>
+            <button type="submit" class="check-btn">인증</button>
+        </form>
+    </div>
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}"></p>
+    </div>
+</div>
+</body>
+</html>

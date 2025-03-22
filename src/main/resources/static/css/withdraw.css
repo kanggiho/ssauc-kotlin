@@ -1,0 +1,76 @@
+.withdraw-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.withdraw-section {
+    padding: 50px;
+    text-align: center;
+}
+.withdraw-section h2 {
+    margin-bottom: 30px;
+}
+
+/* 라벨과 인풋(체크 버튼 없음)을 한 줄에 배치 */
+.withdraw-form .input-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.withdraw-form .input-row label {
+    width: 30%;
+    font-weight: bold;
+    text-align: left;
+    margin-top: 25px;
+}
+.withdraw-form .input-row input {
+    width: 70%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    margin-top: 25px;
+    border-radius: 4px;
+}
+.required {
+    color: red;
+}
+
+/* 에러 메시지: 인풋 시작 위치(라벨 너비와 동일)부터 정렬 */
+.withdraw-form .error-msg {
+    margin-left: 0%;
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 00px;
+    display: block;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 40px;
+}
+.submit-btn,
+.cancel-btn {
+    border: 1px solid #000;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+}
+.submit-btn {
+    background-color: #000;
+    color: white;
+}
+.submit-btn:hover {
+    background-color: red;
+}
+.cancel-btn {
+    background-color: #fff;
+    color: #000;
+}
+.cancel-btn:hover {
+    background-color: #f2f2f2;
+    color: #000;
+}

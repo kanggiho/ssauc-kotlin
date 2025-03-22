@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Google Authenticator 등록</title>
+  <!-- SUIT 폰트 (CDN) -->
+  <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/variable/stylesheet.css" rel="stylesheet"/>
+  <!-- 커스텀 CSS -->
+  <link rel="stylesheet" th:href="@{/css/enroll.css}"/>
+</head>
+<body>
+<div class="login-wrapper">
+  <div class="logo-image-container">
+    <div class="logo-image-area">
+      <img th:src="@{/img/index/ssauc_logo2.png}"
+           alt="브랜드 로고 이미지" style="width: 200px; height: 100px;"
+           class="logo-image2"/>
+      <h2>관리자 모드</h2>
+    </div>
+  </div>
+  <h2 class="auth-label">Google Authenticator 등록</h2>
+  <p class="instruction">아래 QR 코드를 스캔하여 앱에 등록하세요.</p>
+  <div class="qr-container">
+    <img th:src="${qrUrl}" alt="QR 코드" class="qr-image">
+  </div>
+  <!-- 30px 여백 -->
+  <div class="spacer"></div>
+  <!-- 등록 후 인증 코드 입력 -->
+  <div class="form-container">
+    <form action="/admin/verify-enroll" method="post">
+      <input type="text" name="code" placeholder="인증 코드" required>
+      <button type="submit" class="check-btn">등록 완료</button>
+    </form>
+  </div>
+
+  <div th:if="${error}">
+    <p th:text="${error}"></p>
+  </div>
+</div>
+</body>
+</html>

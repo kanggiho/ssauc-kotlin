@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>파일 보기</title>
+</head>
+<body>
+<h1>업로드된 파일</h1>
+<!-- 업로드한 파일이 이미지일 경우 출력 -->
+<img th:src="${fileUrl}" alt="S3 파일" style="max-width: 600px;"/>
+<br>
+<a th:href="@{/s3}">S3 테스트 홈으로 돌아가기</a>
+</body>
+</html>

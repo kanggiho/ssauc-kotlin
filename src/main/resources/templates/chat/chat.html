@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <!-- 필요한 css,js,cdn 등등 추가하기 (layout.html에서 이미 Bootstrap 5를 로드했다고 가정) -->
+</head>
+
+<div class="container" layout:fragment="content">
+    <!-- 필요한 태그 추가하기 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h2 class="mb-4">상품 채팅방</h2>
+        </div>
+    </div>
+
+    <!-- 상품 정보 표시 (예시) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <!-- 예: Controller에서 model.addAttribute("productName", ...), model.addAttribute("productId", ...) -->
+                    <h5 class="card-title" th:text="'상품명: ' + ${productName}">상품명: 예시상품</h5>
+                    <p class="card-text" th:text="'상품 ID: ' + ${productId}">상품 ID: --</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 채팅 영역 -->
+    <div class="row">
+        <div class="col-12 col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <strong>실시간 채팅</strong>
+                </div>
+                <div class="card-body" id="chatArea" style="height: 400px; overflow-y: auto;">
+                    <!-- 실시간 메시지 표시 영역 -->
+                </div>
+                <div class="card-footer">
+                    <div class="input-group">
+                        <input type="text" id="msgInput" class="form-control" placeholder="메시지를 입력하세요">
+                        <button class="btn btn-primary" onclick="sendMessage()">전송</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SockJS & STOMP 라이브러리 (필요 시 layout.html 대신 여기서 로드 가능) -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <script>
+        // 1. URL 파라미터에서 productId 추출 (예: chat/chat?productId=15)
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('productId');
+
+        // 2. JWT에서 buyerId 추출 (예시로 하드코딩)
+        //    실제로는 SecurityContext나 쿠키 등을 통해 JWT에서 userId를 가져오세요.
+        const buyerId = [[${buyerId}]];
+
+        // 3. 채팅방 ID (서버에서 생성 후 받아옴)
+        let chatRoomId = null;
+
+        // 채팅방 생성 (이미 존재하면 재활용하는 로직이 필요할 수 있음)
+        async function createChatRoom() {
+            try {
+                const response = await fetch(`/api/chat/rooms?productId=${productId}&buyerId=${buyerId}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    chatRoomId = data.chatRoomId;
+                    console.log("채팅방 생성 완료 (ID):", chatRoomId);
+                    connectStomp(); // STOMP 연결
+                } else {
+                    console.error("채팅방 생성 실패");
+                }
+            } catch (error) {
+                console.error("Error creating chat room:", error);
+            }
+        }
+
+        // 4. STOMP 연결
+        let stompClient = null;
+        function connectStomp() {
+            const socket = new SockJS(window.location.origin + '/ws-stomp');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log("STOMP Connected:", frame);
+
+                // 채팅방 구독
+                stompClient.subscribe(`/sub/chat/room/${chatRoomId}`, function (message) {
+                    const body = JSON.parse(message.body);
+                    addMessage(body.senderId + " : " + body.message);
+                });
+
+                // 이전 메시지 불러오기
+                loadOldMessages();
+            });
+        }
+
+        // 5. 이전 메시지 불러오기
+        async function loadOldMessages() {
+            try {
+                const res = await fetch(`/api/chat/rooms/${chatRoomId}/messages`);
+                if (res.ok) {
+                    const messages = await res.json();
+                    messages.forEach(msg => {
+                        addMessage(msg.senderId + " : " + msg.message);
+                    });
+                } else {
+                    console.error("메시지 불러오기 실패");
+                }
+            } catch (err) {
+                console.error("Error loading old messages:", err);
+            }
+        }
+
+        // 6. 메시지 전송
+        function sendMessage() {
+
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const dto = {
+                chatRoomId: chatRoomId,
+                senderId: buyerId,
+                message: text
+            };
+            stompClient.send('/pub/chat/message', {}, JSON.stringify(dto));
+            input.value = '';
+        }
+
+        // 7. 채팅 영역에 메시지 추가
+        function addMessage(content) {
+            const chatArea = document.getElementById('chatArea');
+            const p = document.createElement('p');
+            p.innerText = content;
+            chatArea.appendChild(p);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // 8. 페이지 로드 시 체크
+        document.addEventListener("DOMContentLoaded", function() {
+            if (!productId) {
+                alert("잘못된 접근입니다. productId가 없습니다.");
+            } else {
+                // 채팅방 생성 후 소켓 연결
+                createChatRoom();
+            }
+        });
+    </script>
+</div>
+</html>

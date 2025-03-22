@@ -1,0 +1,58 @@
+<!-- user-info-modal.html (Thymeleaf Fragment) -->
+<div id="userInfoModal" class="modal hidden" th:fragment="userInfoModal">
+    <div class="modal-content">
+
+        <!-- 닫기 버튼 -->
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+
+
+        <!-- 기본 회원 정보 섹션 (info.html과 동일, 단 평판 점수 계산 방식 섹션 제외) -->
+        <section class="basic-info">
+            <div class="basic-info-header">
+                <img id="modalProfileImage" alt="프로필 이미지" class="profile-image">
+                <h2 id="modalUserName">User Name</h2>
+            </div>
+            <div class="basic-info-details">
+                <div class="info-item">
+                    <span class="info-icon">🏅</span>
+                    <span>신뢰도: <strong id="modalReputation">0</strong> 점</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">🗺️</span>
+                    <span>지역: <strong id="modalLocation">지역</strong></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">🗓️</span>
+                    <span>가입일: <strong id="modalCreatedAt">날짜</strong></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-icon">⏰</span>
+                    <span>마지막 로그인: <strong id="modalLastLogin">날짜</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <!-- 리뷰 요약 섹션 (툴팁 포함) -->
+        <section class="review-summary">
+            <h4>
+                <img src="/img/mypage/sparkle_cropped.png" alt="sparkle" class="sparkle-icon">
+                <span id="modalReviewTitle">리뷰 요약</span>
+                <span class="tooltip-container">
+                    <span class="info-icon">ⓘ</span>
+                    <div class="tooltip-box">
+                      <ul>
+                        <li>이 요약은 AI가 자동으로 만들었어요.</li>
+                        <li>부정확하거나 어색한 표현 등이 있을 수 있어요.</li>
+                      </ul>
+                    </div>
+                </span>
+            </h4>
+            <div class="summary-box">
+                <p id="modalReviewSummary">로딩 중...</p>
+            </div>
+        </section>
+    </div>
+</div>
+

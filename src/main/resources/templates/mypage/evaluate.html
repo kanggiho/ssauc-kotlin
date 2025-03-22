@@ -1,0 +1,205 @@
+<!-- evaluate.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <meta charset="UTF-8">
+    <title>거래 리뷰 작성</title>
+    <link rel="stylesheet" href="/css/evaluate.css">
+</head>
+<body>
+
+<div class="evaluation-container" layout:fragment="content">
+    <!-- 상대방 이름과 상품명은 컨트롤러에서 모델로 전달 -->
+    <h2 class="evaluation-title">
+        <span class="productBid"
+              th:text="${otherUserName}"
+              th:attr="data-sellername=${otherUserName}"
+              onclick="handleSellerClick(event)"></span>
+        <span th:text="'님과의 거래는 어땠나요?'"></span>
+    </h2>
+    <p class="product-name">
+        상품명:
+        <span class="productBid"
+              th:data-href="|${evaluationDto.transactionType=='구매' ? '/history/bought?id=' : '/history/sold?id='}${evaluationDto.productId}|"
+              th:text="${productName}"
+              onclick="location.href=this.dataset.href">
+        </span>
+    </p>
+    <!-- 타임리프 폼 바인딩을 활용한 폼 -->
+    <form id="evaluationForm" th:object="${evaluationDto}">
+        <!-- 주문/상품 식별자와 거래 유형은 숨겨진 필드로 전달 -->
+        <input type="hidden" th:field="*{orderId}"/>
+        <input type="hidden" th:field="*{productId}"/>
+        <input type="hidden" th:field="*{transactionType}"/>
+
+        <div class="evaluation-content">
+            <!-- 평가 항목 (실제 입력은 아래 라디오 버튼을 통해 진행) -->
+            <div class="evaluation-options" th:switch="*{transactionType}">
+                <!-- 구매인 경우 -->
+                <div th:case="'구매'">
+                    <h3>대화 매너는 어땠나요?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q1}" value="negative" required/> 😐 아쉬워요
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q1}" value="positive"/> 😊 친절했어요
+                        </label>
+                    </div>
+                    <h3>상품 상태는 어땠나요?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q2}" value="negative" required/> 💔 설명과 달라요
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q2}" value="positive"/> ✨ 마음에 들어요
+                        </label>
+                    </div>
+                    <h3>가격은 적절했나요?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q3}" value="negative" required/> 🤑 비쌌어요
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q3}" value="positive"/> 🤩 합리적이에요
+                        </label>
+                    </div>
+                </div>
+                <!-- 판매인 경우 -->
+                <div th:case="'판매'">
+                    <h3>대화 매너는 어땠나요?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q1}" value="negative" required/> 😐 아쉬워요
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q1}" value="positive"/> 😊 친절했어요
+                        </label>
+                    </div>
+                    <h3>가격 협상 과정은?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q2}" value="negative" required/> 🥶 무리한 요청
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q2}" value="positive"/> 😍 깔끔한 거래
+                        </label>
+                    </div>
+                    <h3>상품 수령 후 피드백은?</h3>
+                    <div class="option-row">
+                        <label class="option-btn negative">
+                            <input type="radio" th:field="*{q3}" value="negative" required/> 🚫 연락 두절
+                        </label>
+                        <label class="option-btn positive">
+                            <input type="radio" th:field="*{q3}" value="positive"/> 💬 빠른 피드백
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세 후기 입력 -->
+            <div class="evaluation-text">
+                <h3>상세 후기를 남겨주세요.</h3>
+                <textarea th:field="*{reviewContent}" class="review-input"
+                          placeholder="거래 중 느낀 점을 자유롭게 작성해주세요." maxlength="300"></textarea>
+                <div class="char-counter">0/300</div>
+            </div>
+
+        </div>
+        <!-- 완료 버튼 -->
+        <div class="button-container">
+            <button type="button" class="submit-btn">완료</button>
+        </div>
+    </form>
+</div>
+
+<!-- 리뷰 데이터 수집 후 fetch API를 통해 JSON으로 전송 -->
+<script layout:fragment="script">
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const reviewInput = document.querySelector("textarea[name='reviewContent']");
+        const charCounter = document.querySelector(".char-counter");
+
+        // 텍스트 입력시 글자 수 업데이트
+        reviewInput.addEventListener("input", function(){
+            const currentLength = reviewInput.value.length;
+            charCounter.textContent = `${currentLength}/300`;
+        });
+
+        const submitButton = document.querySelector(".submit-btn");
+
+        if (submitButton) {
+            submitButton.addEventListener("click", async (e) => {
+                e.preventDefault();
+
+                // 폼 데이터 수집
+                const orderId = document.querySelector("input[name='orderId']").value;
+                const productId = document.querySelector("input[name='productId']").value;
+                const transactionType = document.querySelector("input[name='transactionType']").value;
+
+                const q1Elem = document.querySelector("input[name='q1']:checked");
+                const q2Elem = document.querySelector("input[name='q2']:checked");
+                const q3Elem = document.querySelector("input[name='q3']:checked");
+
+                if (!q1Elem || !q2Elem || !q3Elem) {
+                    alert("모든 평가 항목을 선택해주세요.");
+                    return;
+                }
+                const q1 = q1Elem.value;
+                const q2 = q2Elem.value;
+                const q3 = q3Elem.value;
+                const reviewContent = document.querySelector("textarea[name='reviewContent']").value;
+
+                if (reviewContent.trim().length < 10) {
+                    alert("상세 후기는 최소 10자 이상 입력해주세요.");
+                    return;
+                }
+
+                // baseScore 계산: 기본 +1점에 각 항목에 대해
+                // positive: +0.5, negative: -0.5로 가정
+                const scoreValue = (q1 === "positive" ? 0.5 : -0.5)
+                    + (q2 === "positive" ? 0.5 : -0.5)
+                    + (q3 === "positive" ? 0.5 : -0.5);
+                const baseScore = 1 + scoreValue;
+
+                // 평가 데이터를 객체로 구성
+                const evaluationData = {
+                    orderId: parseInt(orderId),
+                    productId: parseInt(productId),
+                    transactionType: transactionType,
+                    q1: q1,
+                    q2: q2,
+                    q3: q3,
+                    reviewContent: reviewContent,
+                    baseScore: baseScore
+                };
+
+                try {
+                    const response = await fetch('/mypage/evaluate/submit', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(evaluationData)
+                    });
+                    if (response.ok) {
+                        alert("리뷰를 작성했습니다.");
+                        window.location.href = "/mypage/evaluation?filter=written";
+                    } else {
+                        alert("제출에 실패했습니다.");
+                    }
+                } catch (error) {
+                    console.error("Error during evaluation submission:", error);
+                    alert("제출 중 오류가 발생했습니다.");
+                }
+            });
+        } else {
+            console.error("완료 버튼을 찾을 수 없습니다.");
+        }
+    });
+</script>
+
+</body>
+</html>

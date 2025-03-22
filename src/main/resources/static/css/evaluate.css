@@ -1,0 +1,135 @@
+/* 리뷰 평가 페이지 스타일 */
+.evaluation-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.evaluation-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-size: 16px;
+    color: gray;
+    margin-bottom: 20px;
+}
+
+.productBid {
+    cursor: pointer;
+    color: #66a6ff;
+}
+
+.evaluation-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.evaluation-options, .evaluation-text {
+    flex: 1;
+    padding: 20px 20px 5px 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background-color: white;
+}
+
+.evaluation-options h3,
+.evaluation-text h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.evaluation-options h3:nth-of-type(2),
+.evaluation-options h3:nth-of-type(3) {
+    margin-top: 30px; /* 특정 요소에만 여백 적용 */
+}
+
+.char-counter {
+    text-align: right;   /* 텍스트 오른쪽 정렬 */
+    font-size: 14px;     /* 글자 크기 조정 */
+    color: gray;         /* 색상 변경 (더 부드러운 느낌) */
+}
+
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.option-btn {
+    width: 48%;
+    padding: 8px;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 14px;
+    border: 1px solid black;
+}
+
+.negative {
+    background-color: white;
+    border-color: #ff8888;
+}
+
+.negative:hover {
+    background-color: #ff8888;
+}
+
+.positive {
+    background-color: white;
+    border-color: #88cc88;
+}
+
+.positive:hover {
+    background-color: #88cc88;
+}
+
+.review-input {
+    width: 100%;
+    height: 250px; /* 높이 증가 */
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 5px;
+    resize: none;
+}
+
+.button-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.submit-btn {
+    padding: 10px 50px;
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background-color: #f9f9f9;
+}
+
+/* 🌟🌟🌟🌟🌟 라디오 버튼 숨기기 */
+label.option-btn input[type="radio"] {
+    display: none;
+}
+
+/* 🌟🌟🌟🌟🌟 positive 선택 시 스타일 적용 */
+label.option-btn.positive:has(input[type="radio"]:checked) {
+    background-color: #88cc88;
+    border-color: #88cc88;
+    color: white;
+}
+
+/* 🌟🌟🌟🌟🌟 negative 선택 시 스타일 적용 */
+label.option-btn.negative:has(input[type="radio"]:checked) {
+    background-color: #ff8888;
+    border-color: #ff8888;
+    color: white;
+}

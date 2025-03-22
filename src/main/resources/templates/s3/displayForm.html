@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>파일 표시</title>
+</head>
+<body>
+<h1>표시할 파일 URL 입력</h1>
+<form method="post" th:action="@{/s3/display}">
+    <label for="fileUrl">파일 URL: </label>
+    <input type="text" name="fileUrl" placeholder="https://..."/>
+    <button type="submit">표시</button>
+</form>
+<br>
+<a th:href="@{/s3}">S3 테스트 홈으로 돌아가기</a>
+</body>
+</html>

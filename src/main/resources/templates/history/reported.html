@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+  <meta charset="UTF-8">
+  <title>신고 상세 내역</title>
+  <link rel="stylesheet" href="/css/mypage.css">
+  <style>
+    .card { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<div class="container2" layout:fragment="content">
+    <!-- 왼쪽 사이드바 (mypage와 동일) -->
+      <div th:replace="~{mypage/mypage :: sidebar}"></div>
+    <!-- 오른쪽 메인 컨텐츠 -->
+    <div class="main2">
+      <h2 class="mb-4">신고 상세 내역</h2>
+      <!-- 신고 내역 카드 -->
+      <div class="card mb-4">
+        <div class="card-header fw-bold">신고 내역</div>
+        <div class="card-body">
+          <!-- 신고 대상: 상품 신고와 유저 신고 구분 -->
+          <div th:if="${reportDetail.type == 'product'}">
+            <p>
+              <strong>신고 대상:</strong>
+              <span class="productBid"
+                    th:text="${reportDetail.productName}"
+                    th:onclick="|location.href='/bid/bid?productId=' + ${reportDetail.productId}|">
+              </span>
+            </p>
+          </div>
+          <div th:if="${reportDetail.type == 'user'}">
+            <p>
+              <strong>신고 대상:</strong>
+              <span class="productBid"
+                    th:text="${reportDetail.reportedUserName}"
+                    th:attr="data-sellername=${reportDetail.reportedUserName}"
+                    onclick="handleSellerClick(event)">user</span>
+            </p>
+          </div>
+          <p>
+            <strong>신고 사유:</strong>
+            <span th:text="${reportDetail.reportReason}">신고 사유</span>
+          </p>
+          <p>
+            <strong>신고 내용:</strong>
+          </p>
+          <p th:text="${reportDetail.details}">신고 내용</p>
+          <p>
+            <strong>신고 시간:</strong>
+            <span th:text="${#temporals.format(reportDetail.reportDate, 'yyyy-MM-dd HH:mm')}">신고 시간</span>
+          </p>
+        </div>
+      </div>
+      <!-- 처리 결과 카드 -->
+      <div class="card">
+        <div class="card-header fw-bold">처리 결과</div>
+        <div class="card-body">
+          <p>
+            <strong>처리 상태:</strong>
+            <span th:text="${reportDetail.status}">처리 상태</span>
+          </p>
+          <p>
+            <strong>처리 시간:</strong>
+            <span th:if="${reportDetail.processedAt != null}"
+                  th:text="${#temporals.format(reportDetail.processedAt, 'yyyy-MM-dd HH:mm')}">처리 시간</span>
+            <span th:if="${reportDetail.processedAt == null}"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+
+</script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+/* 마이페이지 하위 페이지들에 적용 */
+.container2 {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    gap: 40px;
+}
+.main2 {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.main2 h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 마이페이지 전체 컨테이너 */
+.mypage-container {
+    display: flex; /* 사이드바와 메인 콘텐츠를 가로 배치 */
+    width: 100%;
+    max-width: 1200px; /* 최대 너비 제한 */
+    margin: 40px auto; /* 중앙 정렬 */
+    gap: 40px; /* 사이드바와 메인 콘텐츠 간격 */
+}
+
+/* ========================== */
+/* 사이드바 스타일링 */
+/* ========================== */
+.mypage-sidebar {
+    width: 168px;  /* 기존 비율 유지 */
+    background-color: black;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 프로필 영역 */
+.profile {
+    text-align: center;
+    margin-bottom: 20px;
+    text-decoration: none; /* 밑줄 제거 */
+    color: white; /* 기본 색상 유지 */
+}
+
+.profile img {
+    width: 100px; /* 프로필 이미지 크기 */
+    height: 100px;
+    border-radius: 50%; /* 원형 프로필 */
+    background-color: gray;
+}
+
+.username {
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* 사이드바 메뉴 */
+.menu h3 {
+    font-size: 14px;
+    margin-top: 15px;
+    font-weight: bold;
+    text-align: left;
+    width: 100%;
+    border-bottom: 1px solid white;
+    padding-bottom: 5px;
+}
+
+.menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+    text-align: left;
+    width: 100%;
+}
+
+.menu ul li {
+    margin: 8px 0;
+}
+
+.menu ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 13px;
+}
+
+/* ========================== */
+/* 메인 컨텐츠 스타일링 */
+/* ========================== */
+.mypage-main {
+    flex-grow: 1; /* 메인 콘텐츠가 남은 공간을 차지하도록 설정 */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 상단 요약 정보 */
+.mypage-summary {
+    display: flex;
+    gap: 10px; /* 신뢰도와 SSAUC 머니 박스 간격 */
+}
+
+/* 요약 박스 공통 스타일 */
+.mypage-box {
+    background-color: black;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1; /* 두 박스가 동일한 크기를 가지도록 설정 */
+    text-align: center;
+}
+
+/* SSAUC 머니 박스 스타일 */
+.mypage-box.money, .mypage-box.trust-score {
+    text-decoration: none; /* 밑줄 제거 */
+    color: white; /* 기본 색상 유지 */
+    display: block; /* 블록 요소로 설정하여 박스 유지 */
+}
+
+.mypage-box p {
+    font-size: 14px;
+}
+
+.mypage-box h2 {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* ========================== */
+/* 거래 현황 박스 */
+/* ========================== */
+.transaction-status {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+.transaction-status h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* 판매/구매 현황의 컨텐츠 박스 */
+.status-box {
+    height: 120px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+
+/* 마이페이지 사이드바를 사용하는 페이지에 전체 적용 */
+.historyImage {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* 필터 섹션 */
+
+/* 전체 레이아웃 */
+.history-container {
+    display: flex;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    gap: 40px;
+}
+
+/* 메인 컨텐츠 */
+.history-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 페이지 제목 */
+.history-main h2 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* 콘텐츠 테이블 */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table thead {
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+}
+
+.history-table th {
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    padding: 12px;
+    text-align: center;
+    border-bottom: 2px solid black;
+}
+
+.history-table td {
+    padding: 12px;
+    text-align: center;
+}
+
+.history-table th, .history-table td {
+    vertical-align: middle;
+}
+
+.history-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.productBid {
+    cursor: pointer;
+    color: #66a6ff;
+}
+
+.filter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 15px;
+}
+
+.filter-btn {
+    width: 45%;
+    padding: 6px 12px;
+    border: 1px solid black;
+    border-radius: 8px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    font-size: 15px;
+    text-align: center;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.filter-btn.active {
+    background-color: black;
+    color: white;
+}
+
+/* 페이지네이션 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.pagination button {
+    padding: 5px 10px;
+    border: 1px solid black;
+    background-color: white;
+    cursor: pointer;
+}
+
+.pagination .active {
+    background-color: black;
+    color: white;
+}
+
+.history-btn {
+    padding: 6px 14px;
+    border: 1px solid black;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+}
+

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <link rel="stylesheet" th:href="@{/css/likelist.css}">
+</head>
+
+<div class="container" layout:fragment="content">
+
+    <div class="container mt-4">
+        <h2 class="title">좋아요</h2>
+
+        <!-- 상품 리스트 -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+
+            <!-- 상품 1 -->
+            <div class="col" th:each="product : ${likelist}">
+                <div class="card product-card">
+                    <button class="icon-btn" th:data-product-id="${product.productId}" onclick="toggleHeart(this)">
+                        <i th:class="${product.liked} ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                    </button>
+                    <a th:href="@{/bid/bid(productId=${product.productId})}">
+                        <img th:src="${product.imageUrl}">
+                        <div class="card-body">
+                            <p class="product-title" th:text="${product.name}"></p>
+                            <p class="product-price" th:text="${product.price}"></p>
+                            <p class="product-info">[[${product.bidCount}]] | [[${product.gap}]]</p>
+                            <p class="product-info">
+                                [[${product.location}]] | ❤️ <span class="like-count" th:text="${product.likeCount}"></span>
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination-container" th:if="${!likelist.isEmpty()}">
+            <div class="pagination">
+                <!-- 이전 페이지 버튼 -->
+                <a th:if="${likelist.hasPrevious()}" th:href="@{/list/list(page=${likelist.number - 1})}" class="page-link">&lt;</a>
+
+                <!-- 페이지 번호 (5개씩 표시) -->
+                <th:block th:with="start=${(likelist.number / 5) * 5}, end=${T(java.lang.Math).min(start + 4, likelist.totalPages - 1)}">
+                    <a th:each="i : ${#numbers.sequence(start, end)}"
+                       th:href="@{/list/list(page=${i})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == likelist.number} ? 'active' : ''"
+                       class="page-link">
+                    </a>
+                </th:block>
+
+                <!-- 다음 페이지 버튼 -->
+                <a th:if="${likelist.hasNext()}" th:href="@{/list/list(page=${likelist.number + 1})}" class="page-link">&gt;</a>
+            </div>
+        </div>
+
+        <div th:if="${likelist.isEmpty()}">
+            <h4 class="likelist-none">좋아요 한 항목이 없습니다.</h4>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        var isLoggedIn = /*[[${user != null and user.userId != null}]]*/ false;
+
+        function toggleHeart(button) {
+            // 로그인 여부 체크: 로그인 안 되어 있으면 메시지 표시 후 리턴
+            if (!isLoggedIn || isLoggedIn === "false") {
+                // confirm 창의 기본 버튼은 브라우저에 따라 "확인"/"취소"로 표시됩니다.
+                // "확인"을 누르면 true, "취소"(혹은 아니오)를 누르면 false 반환.
+                if (confirm("로그인 후 이용할 수 있습니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                    // 사용자가 확인을 누른 경우 로그인 페이지로 이동
+                    window.location.href = '/login';
+                }
+                return; // 로그인하지 않았다면 이후 동작 중단
+            }
+
+            const productId = button.getAttribute("data-product-id"); // 상품 아이디 받기
+            const icon = button.querySelector("i");
+            const card = button.closest(".product-card");
+            const likeCountElement = card.querySelector(".like-count");
+
+            // 현재 좋아요 수 파싱 (쉼표 제거 후 정수 변환)
+            let currentCount = parseInt(likeCountElement.textContent.replace(/,/g, ''), 10) || 0;
+
+            fetch("/api/like", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    productId: productId,
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.liked) {
+                        icon.classList.remove("bi-heart");
+                        icon.classList.add("bi-heart-fill")
+                        currentCount++;
+                    } else {
+                        icon.classList.remove("bi-heart-fill");
+                        icon.classList.add("bi-heart");
+                        currentCount = Math.max(0, currentCount - 1);
+                    }
+
+                    likeCountElement.textContent = currentCount.toLocaleString();
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+
+</div>
+</html>

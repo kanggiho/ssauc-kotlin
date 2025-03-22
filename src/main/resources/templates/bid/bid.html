@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layout.html">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        /* 캐러셀 전체 영역과 각 슬라이드의 고정 높이 설정 (예: 500px) */
+        .carousel-inner,
+        .carousel-item {
+            height: 500px;
+        }
+
+        /* 이미지에 고정 높이와 너비 설정 및 object-fit 속성 적용 */
+        .carousel-item img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            display: block;
+        }
+        .floating-box {
+            position: fixed;
+            margin-bottom: 20em;
+            right: 20px;
+            bottom: 80px; /* TOP 버튼과 간격 */
+            width: 120px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .floating-box h6 {
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
+        /* 스크롤 영역을 담당하는 컨테이너 */
+        .recent-items-container {
+            max-height: 250px; /* 여기서 원하는 높이로 조정 (예: 7개 정도 보이게) */
+            overflow-y: auto;   /* 세로 스크롤 활성화 */
+        }
+
+        /* 필요하다면 이미지 크기나 여백 조절 */
+        .recent-item img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 5px;
+        }
+
+        .productBid {
+            cursor: pointer;
+            color: #66a6ff;
+        }
+
+    </style>
+    <div class="container" layout:fragment="content">
+
+        <!-- 최근 본 상품 박스 -->
+        <div class="floating-box" th:if="${#authentication != null && #authentication.name != 'anonymousUser'}">
+            <h6>최근 본 물품</h6>
+            <!-- 스크롤 영역 -->
+            <div class="recent-items-container">
+                <!-- 최근 본 상품 목록 반복 -->
+                <div th:each="view : ${recentViews}">
+                    <a th:href="@{/bid/bid(productId=${view.product.productId})}" class="recent-item">
+                        <img th:src="${view.product.imageUrl}" alt="상품 이미지">
+                    </a>
+                </div>
+            </div>
+            <!-- TOP 버튼 -->
+            <button id="topBtn" class="top-btn hide">TOP</button>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <!-- 상품 이미지 영역 -->
+                <div class="col-md-6 d-flex flex-column align-items-center">
+
+                    <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <div th:each="image, iterStat : ${carouselImages}"
+                                 class="carousel-item"
+                                 th:classappend="${iterStat.index == 0} ? ' active' : ''">
+                                <img th:src="@{${image.url}}" class="d-block w-100" th:alt="${image.alt}"/>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
+                                data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">이전</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls"
+                                data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">다음</span>
+                        </button>
+                    </div>
+                    <!-- 판매자 정보 -->
+                    <div class="mt-3 d-flex align-items-center w-100">
+                        <img th:src="${inform.getProfileImage()}" class="rounded-circle" width="50" height="50"
+                             alt="판매자 프로필">
+                        <div class="ms-3">
+                            <p class="mb-0 fw-bold">
+                                <span class="productBid"
+                                      th:text="${inform.getUserName()}"
+                                      th:attr="data-sellername=${inform.getUserName()}"
+                                      onclick="handleSellerClick(event)"></span>
+                            </p>
+
+
+                            <p class="mb-0 text-muted">판매자 점수: <span th:text="${inform.getReputation()}+'점'">100점</span>
+                            </p>
+                        </div>
+                        <button class="btn btn-primary ms-auto" id="chattingBtn">채팅하기</button>
+                    </div>
+                </div>
+
+                <!-- 상품 정보 및 경매 상세 -->
+                <div class="col-md-6">
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="fw-bold" th:text="${inform.getName()}" id="product_na">상품명</h2>
+                        <h5 style="color: red; margin-left: 300px; margin-top: 10px"
+                            th:if="${tempMaxBidUser == tokenName and product.status != '판매완료'}" th:text="'현재 최고가 입찰중!'" class="fw-bold"></h5>
+                        <div>
+                            <!-- 관심품목: 채워진 하트 아이콘 -->
+                            <button class="btn btn-outline-secondary btn-sm me-2" title="관심품목" id="interestBtn">
+                                <i id="interestIcon"
+                                   th:class="${isLikeProduct} ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                            </button>
+                            <!-- 신고하기: 경고 삼각형 아이콘 (사이렌 대체) -->
+                            <button class="btn btn-outline-danger btn-sm" title="신고하기" id="reportBtn">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <p class="text-muted fs-5">현재가 <strong class="text-danger"
+                                                           th:text="${T(java.lang.String).format('%,d 원', inform.getTempPrice())}">0원</strong>
+                    </p>
+
+                    <div class="border p-3 rounded bg-light">
+                        <br>
+                        <p><strong>남은 시간 : </strong><span id="timer">3일 14시간 55분 56초</span></p>
+
+                        <!-- 입찰 수와 체크박스 영역 (d-flex로 좌우 배치) -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="mb-0"><strong>입찰 수 :</strong> <span
+                                        th:text="${inform.getBidCount()}+'회'">0회</span></p>
+                            </div>
+                            <div>
+                                <div class="form-check form-check-inline" th:if="${inform.dealType==0}">
+                                    <a>🧑🏻 직거래 가능</a>
+                                </div>
+                                <div class="form-check form-check-inline" th:if="${inform.dealType==1}">
+                                    <a>🚚 택배거래 가능</a>
+                                </div>
+                                <div class="form-check form-check-inline" th:if="${inform.dealType==2}">
+                                    <a>🧑🏻🚚 직거래, 택배거래 가능</a>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- 얇은 회색 선 -->
+                        <hr class="my-2" style="border-color: #ddd;">
+
+                        <p class="mb-0"><strong>최소 입찰 단위 : </strong><span
+                                th:text="${T(java.lang.String).format('%,d 원', inform.getMinIncrement())}">1,000원</span>
+                        </p>
+                        <br>
+
+                        <p><strong>즉시 구매가 : </strong><span
+                                th:text="${T(java.lang.String).format('%,d 원', inform.getPrice())}">60,000원</span></p>
+                        <div class="mt-3 d-flex align-items-center">
+                            <label for="desiredBid" class="me-2"><strong>희망 입찰가 :</strong></label>
+                            <input type="number" id="desiredBid" class="form-control w-50" placeholder="입찰가 입력">
+                            <label style="margin-left: 20px" id="ableBid"></label>
+                        </div>
+                        <p class="mt-2"><strong>예상 구매가 : </strong><span id="estimatedPrice">0원</span>(구매 수수료 포함)</p>
+                        <p class="mt-2"><strong>최고 입찰자 : </strong><span id="maxBidUser"
+                                                                        th:text="${tempMaxBidUser}"></span></p>
+
+
+                    </div>
+
+
+                    <div class="mt-3">
+                        <!-- 즉시 구매 버튼을 최상단으로 배치하여 우선순위 강조 -->
+                        <button class="btn btn-danger w-100 py-2 mb-2" id="tempBuyBtn">즉시 구매하기</button>
+
+                        <!-- 입찰 관련 버튼 그룹화 -->
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-dark flex-grow-1 py-2" id="bidBtn">입찰하기</button>
+                            <button class="btn btn-success flex-grow-1 py-2" id="autoBidBtn">자동입찰</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 상품 상세 정보 섹션 -->
+                <div class="container mt-5">
+                    <h3 class="mb-4">상품 상세 정보</h3>
+                    <!-- 탭 메뉴 -->
+                    <ul class="nav nav-tabs" id="productTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
+                                    data-bs-target="#description" type="button" role="tab" aria-controls="description"
+                                    aria-selected="true">
+                                설명
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs"
+                                    type="button" role="tab" aria-controls="specs" aria-selected="false">
+                                정보
+                            </button>
+                        </li>
+                    </ul>
+                    <!-- 탭 컨텐츠 -->
+                    <div class="tab-content" id="productTabContent">
+                        <!-- 설명 탭 -->
+                        <div class="tab-pane fade show active p-3" id="description" role="tabpanel"
+                             aria-labelledby="description-tab">
+                            <p th:text="${inform.getDescription()}"></p>
+                        </div>
+                        <!-- 사양 탭 -->
+                        <div class="tab-pane fade p-3" id="specs" role="tabpanel" aria-labelledby="specs-tab">
+                            <table class="table table-striped">
+                                <tbody>
+                                <tr>
+                                    <th scope="row">상품명</th>
+                                    <td th:text="${inform.name}">상품명</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">판매자 이름</th>
+                                    <td th:text="${inform.userName}">판매자 이름</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">거래 주소</th>
+                                    <td th:text="${inform.location}">거래 주소</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">조회수</th>
+                                    <td th:text="${inform.viewCount}">조회수</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">좋아요 수</th>
+                                    <td th:text="${inform.likeCount}">좋아요 수</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 유사한 상품 섹션 -->
+            <div class="container mt-5">
+                <h3 class="mb-4">이 상품과 유사한 상품</h3>
+                <!-- row-cols-*와 함께 align-items-stretch로 모든 col이 동일 높이로 확장 -->
+                <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4 align-items-stretch">
+                    <div class="col" th:each="similarProduct : ${similarProducts}">
+                        <!-- 카드 전체 높이를 100%로 설정 -->
+                        <div class="card h-100 shadow-sm">
+                            <!-- 이미지 영역에 고정 높이 지정 + object-fit으로 균일하게 맞춤 -->
+                            <img th:src="@{${similarProduct.imageUrl}}" class="card-img-top"
+                                 alt="유사 상품 이미지" style="height: 200px; object-fit: cover;"
+                                 onerror="this.src='/images/default-product.png'">
+
+                            <!-- 카드 본문을 flex 컨테이너로 만들어, 내용이 부족해도 하단에 버튼 고정 가능 -->
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title text-truncate" th:text="${similarProduct.name}">상품명</h5>
+                                <p class="card-text text-danger fw-bold"
+                                   th:text="${T(java.lang.String).format('%,d 원', similarProduct.price)}">0원</p>
+
+                                <!-- 아래쪽에 배치할 내용은 mt-auto로 카드 하단에 붙임 -->
+                                <div class="mt-auto">
+                                    <a th:href="@{/bid/bid(productId=${similarProduct.productId})}"
+                                       class="btn btn-primary w-100">상품 보기</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <script>
+
+
+            // Thymeleaf를 사용하여 inform.totalTime 값을 자바스크립트 변수에 할당 (초 단위)
+            var totalTime = [[${inform.totalTime}]];
+            var productId = "[[${productId}]]";
+            var bidCount = [[${inform.bidCount}]];
+            var productStatus = "[[${product.status}]]";
+
+            function updateTimer() {
+                // totalTime이 음수가 되면 타이머 종료
+                if (totalTime < 0 || productStatus === "판매완료") {
+                    clearInterval(timerInterval);
+                    document.getElementById("timer").textContent = "종료";
+
+                    // 즉시 구매, 입찰, 자동입찰 버튼 비활성화
+                    document.getElementById("tempBuyBtn").disabled = true;
+                    document.getElementById("bidBtn").disabled = true;
+                    document.getElementById("autoBidBtn").disabled = true;
+
+                    return;
+                }
+
+                // 남은 시간을 일/시간/분/초로 계산
+                var days = Math.floor(totalTime / (24 * 3600));
+                var hours = Math.floor((totalTime % (24 * 3600)) / 3600);
+                var minutes = Math.floor((totalTime % 3600) / 60);
+                var seconds = totalTime % 60;
+
+                // 표시 형식 (예: "3일 14시간 55분 56초")
+                var display = days + "일 " + hours + "시간 " + minutes + "분 " + seconds + "초";
+
+                // 타이머 요소에 표시
+                document.getElementById("timer").textContent = display;
+
+                // 초 단위 1씩 감소
+                totalTime--;
+            }
+
+            // 페이지 로드 후 1초마다 updateTimer 함수 호출
+            updateTimer(); // 첫 호출
+            var timerInterval = setInterval(updateTimer, 1000);
+
+            calculateFee()
+            bid()
+            autoBid()
+            buy()
+            report()
+            chatting()
+            like()
+
+
+            function ablePrice() {
+
+                var bidInput = document.getElementById("desiredBid");
+                var estimatedPriceElement = document.getElementById("estimatedPrice");
+
+                var immediatePrice = [[${inform.price}]];
+                var tempPrice = [[${inform.tempPrice}]];
+                var minIncrement = [[${inform.minIncrement}]];
+
+                var bidValue = parseInt(bidInput.value) || 0; // 값이 없으면 0 처리
+                var estimatedPrice = parseInt(parseFloat(bidValue) * 1.05); // 예상 가격 계산
+                estimatedPriceElement.textContent = estimatedPrice.toLocaleString() + " 원"; // 콤마 포함한 숫자 표시
+                if (bidValue < immediatePrice && (tempPrice + minIncrement) <= bidValue) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            function calculateFee() {
+
+                document.addEventListener("DOMContentLoaded", function () {
+                    var bidInput = document.getElementById("desiredBid");
+                    var estimatedPriceElement = document.getElementById("estimatedPrice");
+                    var ableBid = document.getElementById("ableBid");
+
+
+                    var immediatePrice = [[${inform.price}]];
+                    var tempPrice = [[${inform.tempPrice}]];
+                    var minIncrement = [[${inform.minIncrement}]];
+
+                    // 입력 값이 변경될 때 예상 구매가 업데이트
+                    bidInput.addEventListener("input", function () {
+                        var bidValue = parseInt(bidInput.value) || 0; // 값이 없으면 0 처리
+                        var estimatedPrice = parseInt(parseFloat(bidValue) * 1.05); // 예상 가격 계산
+                        estimatedPriceElement.textContent = estimatedPrice.toLocaleString() + " 원"; // 콤마 포함한 숫자 표시
+                        if (bidValue < immediatePrice && (tempPrice + minIncrement) <= bidValue) {
+                            ableBid.innerText = "가능한 가격 입니다.";
+                            ableBid.style.color = "green";
+                        } else {
+                            ableBid.innerText = "불가능한 가격 입니다.";
+                            ableBid.style.color = "red";
+                        }
+
+                    });
+                });
+
+            }
+
+            // 입찰기능 구현
+            function bid() {
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    var bidBtn = document.getElementById("bidBtn");
+
+                    var tokenId = "[[${tokenId}]]";
+                    var sellerId = "[[${sellerId}]]";
+
+                    if (tokenId === sellerId) {
+                        bidBtn.innerText = "수정하기";
+                    }
+
+                    bidBtn.addEventListener("click", function () {
+
+                        var bidAmount = parseInt(document.getElementById("desiredBid").value) || 0;
+
+
+                        if (tokenId === "guest") {
+                            if (confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 확인 버튼을 누르면 로그인 페이지로 이동
+                                window.location.href = "/login";
+                            }
+                        } else {
+                            if (tokenId === sellerId) {
+                                // 판매자인 경우, 입찰 건수가 있으면 수정 불가능, 없으면 수정 페이지로 이동
+                                if (bidCount > 0) {
+                                    alert("이미 입찰중이라 수정이 불가능합니다.");
+                                } else {
+                                    window.location.href = "/product/update?productId=" + productId;
+                                }
+                            } else if ("[[${tempMaxBidUser}]]" === "[[${tokenName}]]") {
+                                alert("현재 최고가 입찰 중 입니다.")
+                            } else {
+
+                                // axios를 사용하여 입찰 요청 전송
+                                if (ablePrice()) {
+                                    axios.post('/bid/place', {
+                                        productId: productId,
+                                        userId: tokenId,
+                                        bidAmount: bidAmount
+                                    })
+                                        .then(function (response) {
+                                            if (response.status === 200) {
+                                                // 작업 실행: 예를 들어, 현재가 업데이트, 입찰 수 증가 등
+                                                alert(response.data);
+                                                window.location.reload();
+                                            }
+                                        })
+                                        .catch(function (error) {
+                                            alert("입찰 처리 중 오류가 발생했습니다.");
+                                            console.error(error);
+                                        });
+                                } else {
+                                    alert("구매 가능한 값을 입력해주세요.");
+                                }
+
+
+                            }
+                        }
+
+                    });
+                });
+            }
+
+            // 자동 입찰 기능 구현
+
+            function autoBid() {
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    var autoBidBtn = document.getElementById("autoBidBtn");
+
+                    var tokenId = "[[${tokenId}]]";
+                    var sellerId = "[[${sellerId}]]";
+
+                    if (tokenId === sellerId) {
+                        autoBidBtn.innerText = "삭제하기";
+                    }
+
+                    autoBidBtn.addEventListener("click", function () {
+
+                        if (tokenId === "guest") {
+                            if (confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 확인 버튼을 누르면 로그인 페이지로 이동
+                                window.location.href = "/login";
+                            }
+                        } else if ("[[${tempMaxBidUser}]]" === "[[${tokenName}]]") {
+                            alert("현재 최고가 입찰 중 입니다.")
+                        } else {
+                            if (tokenId === sellerId) {
+                                // 판매자인 경우, 입찰 건수가 있으면 삭제 불가능, 없으면 삭제 요청 진행
+                                if (bidCount > 0) {
+                                    alert("이미 입찰중이라 삭제가 불가능합니다.");
+                                } else {
+                                    if (confirm("정말로 상품을 삭제하시겠습니까?")) {
+                                        axios.post('/product/delete', {productId: productId})
+                                            .then(function (response) {
+                                                alert(response.data);
+                                                window.location.href = "/";
+                                            })
+                                            .catch(function (error) {
+                                                alert("삭제 처리 중 오류가 발생했습니다.");
+                                                console.error(error);
+                                            });
+                                    }
+                                }
+                            } else {
+                                // 자동입찰 모달 띄우기
+                                var autoBidModal = new bootstrap.Modal(document.getElementById('autoBidModal'));
+                                autoBidModal.show();
+
+                            }
+                        }
+
+                    });
+
+                    // 모달 내 확인 버튼 클릭 처리
+                    document.getElementById("autoBidConfirmBtn").addEventListener("click", function () {
+                        var maxBidInput = document.getElementById("maxBidAmount");
+
+                        var immediatePrice = [[${inform.price}]];
+                        var tempPrice = [[${inform.tempPrice}]];
+                        var minIncrement = [[${inform.minIncrement}]];
+
+                        var maxBidAmount = parseInt(maxBidInput.value) || 0;
+                        if (maxBidAmount < immediatePrice && (tempPrice + minIncrement) <= maxBidAmount) {
+                            // axios를 이용해 자동입찰 요청 전송
+                            axios.post('/bid/auto', {
+                                productId: productId,
+                                userId: tokenId,
+                                maxBidAmount: maxBidAmount
+                            })
+                                .then(function (response) {
+                                    alert(response.data);
+                                    // 필요시 현재가 업데이트 등 후처리
+                                    // 모달 닫기
+                                    var autoBidModal = bootstrap.Modal.getInstance(document.getElementById('autoBidModal'));
+                                    autoBidModal.hide();
+                                    window.location.reload();
+                                })
+                                .catch(function (error) {
+                                    alert("자동 입찰 처리 중 오류가 발생했습니다.");
+                                    console.error(error);
+                                });
+                        } else {
+                            alert("올바른 값을 입력해주세요.");
+                        }
+
+                    });
+
+                });
+            }
+
+            // 즉시 구매하기 기능 구현
+            function buy() {
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    var tempBuyBtn = document.getElementById("tempBuyBtn");
+
+                    var tokenId = "[[${tokenId}]]";
+                    var sellerId = "[[${sellerId}]]";
+
+                    tempBuyBtn.addEventListener("click", function () {
+
+                        if (tokenId === "guest") {
+                            if (confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 확인 버튼을 누르면 로그인 페이지로 이동
+                                window.location.href = "/login";
+                            }
+                        } else {
+                            if (tokenId === sellerId) {
+                                alert("본인 물건은 즉시구매 할 수 없습니다.");
+                            } else {
+                                // 즉시구매
+                                window.location.href = "/order/order?productId=" + [[${productId}]];
+                            }
+                        }
+                    });
+                });
+            }
+
+            // 신고하기 기능 구현
+            function report() {
+
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    var reportBtn = document.getElementById("reportBtn");
+                    var tokenId = "[[${tokenId}]]";
+                    var sellerId = "[[${sellerId}]]";
+
+                    reportBtn.addEventListener("click", function () {
+
+                        if (tokenId === "guest") {
+                            if (confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 확인 버튼을 누르면 로그인 페이지로 이동
+                                window.location.href = "/login";
+                            }
+                        } else {
+                            if (tokenId === sellerId) {
+                                alert("본인 물건은 신고 할 수 없습니다.");
+                            } else {
+                                // 즉시구매
+                                window.location.href = "/bid/report?reported=" + [[${productId}]];
+                            }
+                        }
+                    });
+                });
+
+            }
+
+            // 채팅하기 기능구현
+            function chatting() {
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    var chattingBtn = document.getElementById("chattingBtn");
+                    var tokenId = "[[${tokenId}]]";
+                    var sellerId = [[${sellerId}]];
+                    var productId = [[${productId}]];
+
+                    chattingBtn.addEventListener("click", function () {
+
+                        if (tokenId === "guest") {
+                            if (confirm("로그인이 필요한 기능입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 확인 버튼을 누르면 로그인 페이지로 이동
+                                window.location.href = "/login";
+                            }
+                        } else {
+                            if (tokenId === sellerId) {
+                                alert("본인과 채팅 할 수 없습니다.");
+                            } else {
+                                // 채팅방
+                                window.location.href = "/chat/mychat?userId=" + tokenId + "&productId=" + productId;
+                            }
+                        }
+
+                    });
+
+
+                });
+
+            }
+
+            // 상품 좋아요 기능 구현
+            function like() {
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    document.getElementById("interestBtn").addEventListener("click", function () {
+
+                        var isLoggedIn = [[${tokenId != 'guest'}]];
+
+                        if (!isLoggedIn || isLoggedIn === "false") {
+                            // confirm 창의 기본 버튼은 브라우저에 따라 "확인"/"취소"로 표시됩니다.
+                            // "확인"을 누르면 true, "취소"(혹은 아니오)를 누르면 false 반환.
+                            if (confirm("로그인 후 이용할 수 있습니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                                // 사용자가 확인을 누른 경우 로그인 페이지로 이동
+                                window.location.href = '/login';
+                            }
+                            return; // 로그인하지 않았다면 이후 동작 중단
+                        }
+
+
+                        const icon = document.getElementById("interestIcon");
+
+
+                        fetch("/api/like", {
+                            method: "POST",
+                            headers: {"Content-Type": "application/json"},
+                            body: JSON.stringify({
+                                productId: [[${productId}]]
+                            })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.liked) {
+                                    icon.classList.remove("bi-heart");
+                                    icon.classList.add("bi-heart-fill")
+                                } else {
+                                    icon.classList.remove("bi-heart-fill");
+                                    icon.classList.add("bi-heart");
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+
+                    });
+
+                });
+
+            }
+
+
+        </script>
+
+        <!-- 자동입찰 모달 (Bootstrap 5 Modal) -->
+        <div class="modal fade" id="autoBidModal" tabindex="-1" aria-labelledby="autoBidModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="autoBidModalLabel">자동 입찰 설정</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="닫기"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="maxBidAmount" class="form-label">최대 자동 입찰 금액</label>
+                            <input type="number" class="form-control" id="maxBidAmount" placeholder="최대 입찰 금액 입력">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="autoBidConfirmBtn">확인</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</html>
