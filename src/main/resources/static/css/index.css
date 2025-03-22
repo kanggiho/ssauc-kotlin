@@ -332,4 +332,30 @@
     .banner-card {
         height: 200px;
     }
+
+    .floating-box {
+        display: none;
+    }
+
+    .category-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 🔥 3개씩 고정 */
+        gap: 10px; /* 요소 간격 */
+    }
+
+    .category-item {
+        width: 100%;  /* 각 아이템이 동일한 너비 차지 */
+        text-align: center; /* 중앙 정렬 */
+    }
+
+    .category-icon {
+        font-size: 1.5rem; /* 아이콘 크기 조정 */
+        margin-bottom: 5px;
+    }
+
+    .category-item p {
+        font-size: 0.9rem; /* 폰트 크기 조정 */
+        margin: 0;
+    }
+
 }

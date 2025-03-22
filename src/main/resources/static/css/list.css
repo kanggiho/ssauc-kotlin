@@ -311,3 +311,12 @@ body {
 .canBid span {
     margin-left: 5px;
 }
+
+@media (max-width: 768px) {
+    .floating-box {
+        display: none;
+    }
+    .sidebar {
+        display: none !important; /* 🔥 강제 숨김 */
+    }
+}

@@ -38,7 +38,7 @@
                 <!-- 우측: 검색창, 좋아요, 장바구니 아이콘 -->
                 <div class="d-flex align-items-center">
                     <!-- 검색폼 -->
-                    <form action="/search" method="GET" class="d-flex me-3 w-100">
+                    <form action="/search" method="GET" class="d-flex me-3 w-100  search-container">
                         <button type="submit" class="btn btn-light border w-100 d-flex align-items-center px-3">
                             <input type="search" name="keyword" placeholder="검색어를 입력해주세요"
                                    aria-label="검색" class="border-0 w-100" style="outline: none;">
@@ -154,13 +154,13 @@
 
                         <!-- 인증되지 않은 경우 -->
                         <a th:if="${#authentication == null or #authentication.name == 'anonymousUser'}"
-                           th:href="@{/login}" class="me-3 text-dark">
+                           th:href="@{/login}" class="me-3 text-dark" style="margin-top: -2px; margin-left: -7px">
                             <i class="bi bi-chat-dots"></i>
                         </a>
 
                         <!-- 인증된 경우 -->
                         <a th:if="${#authentication != null and #authentication.name != 'anonymousUser'}"
-                           th:href="@{/chat/mychat(userId=${#authentication.principal.userId})}" class="me-3 text-dark">
+                           th:href="@{/chat/mychat(userId=${#authentication.principal.userId})}" class="me-3 text-dark" style="margin-top: -2px; margin-left: -7px">
                             <i class="bi bi-chat-dots"></i>
                         </a>
 
@@ -221,9 +221,6 @@
                                 </div>
                             </div>
                         </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="@{/list/premiumlist}">프리미엄 경매</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">이용가이드</a>

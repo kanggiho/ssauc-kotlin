@@ -56,6 +56,39 @@
             color: #66a6ff;
         }
 
+        @media (max-width: 768px) {
+            .floating-box {
+                display: none;
+            }
+            .user-info {
+                margin-bottom: 40px; /* 사용자 정보와 상품명 사이 여백 추가 */
+            }
+
+            .recommended-product .card {
+                width: 100%; /* 카드의 전체 너비를 조정 */
+                max-width: 150px; /* 최대 너비 설정 */
+                margin: 0 auto; /* 가운데 정렬 */
+            }
+
+            .recommended-product .card img {
+                height: 120px; /* 이미지 높이 조정 */
+                object-fit: cover; /* 이미지 비율 유지 */
+            }
+
+            .recommended-product .card-body {
+                padding: 10px; /* 카드 내부 여백 조정 */
+            }
+
+            .recommended-product .card-title {
+                font-size: 14px; /* 상품명 폰트 크기 조정 */
+            }
+
+            .recommended-product .card-text {
+                font-size: 12px; /* 가격 정보 폰트 크기 조정 */
+            }
+
+        }
+
     </style>
     <div class="container" layout:fragment="content">
 
@@ -100,7 +133,7 @@
                         </button>
                     </div>
                     <!-- 판매자 정보 -->
-                    <div class="mt-3 d-flex align-items-center w-100">
+                    <div class="mt-3 d-flex align-items-center w-100 user-info">
                         <img th:src="${inform.getProfileImage()}" class="rounded-circle" width="50" height="50"
                              alt="판매자 프로필">
                         <div class="ms-3">
@@ -262,7 +295,7 @@
             </div>
 
             <!-- 유사한 상품 섹션 -->
-            <div class="container mt-5">
+            <div class="container mt-5 recommended-product">
                 <h3 class="mb-4">이 상품과 유사한 상품</h3>
                 <!-- row-cols-*와 함께 align-items-stretch로 모든 col이 동일 높이로 확장 -->
                 <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4 align-items-stretch">

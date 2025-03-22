@@ -632,3 +632,62 @@ body {
     border-radius: 50%;
     display: none;
 }
+
+/* ================== 모바일 전용 헤더 스타일 ================== */
+@media (max-width: 768px) {
+    #stickyHeader {
+        display: flex;
+        flex-direction: column;
+        padding: 10px 15px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 검색창 한 줄 차지 */
+    .search-container {
+        display: none !important;
+    }
+
+    /* 정보 (로그인/회원가입/알림/좋아요/채팅) */
+    .user-menu {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .user-menu a {
+        font-size: 0.9rem;
+    }
+
+    /* 주요 기능 메뉴 */
+    .main-menu {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .main-menu a {
+        text-align: center;
+        flex: 1;
+        font-weight: bold;
+        padding: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    /* 상품 등록 버튼 */
+    .register-btn {
+        width: 100%;
+        background-color: #000;
+        color: #fff;
+        text-align: center;
+        padding: 10px 0;
+        border-radius: 5px;
+    }
+
+    .lnb {
+        display: none !important; /* 모바일에서는 LNB 숨김 */
+    }
+}

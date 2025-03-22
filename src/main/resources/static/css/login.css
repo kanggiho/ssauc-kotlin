@@ -135,3 +135,32 @@
 .disabled-input {
     background-color: #e9ecef !important;
 }
+
+/* 📱 반응형 웹 설정 (모바일 기준) */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column; /* 🔥 모바일에서는 세로 레이아웃으로 변경 */
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .login-left {
+        max-width: 100%; /* 🔥 모바일에서는 전체 너비 사용 */
+        width: 100%;
+        padding: 20px;
+    }
+
+    .login-right {
+        display: none; /* 🔥 모바일에서는 광고 이미지 숨김 */
+    }
+
+    .login-input,
+    .login-button {
+        width: 100%; /* 🔥 입력창과 버튼도 전체 너비 사용 */
+    }
+
+    .login-links,
+    .login-social {
+        text-align: center;
+    }
+}
