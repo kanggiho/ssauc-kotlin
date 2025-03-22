@@ -36,7 +36,7 @@
                 </a>
 
                 <!-- 우측: 검색창, 좋아요, 장바구니 아이콘 -->
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center info-form">
                     <!-- 검색폼 -->
                     <form action="/search" method="GET" class="d-flex me-3 w-100  search-container">
                         <button type="submit" class="btn btn-light border w-100 d-flex align-items-center px-3">
@@ -288,12 +288,22 @@
 <script>
     window.addEventListener("scroll", function () {
         let header = document.getElementById("stickyHeader");
+
+        // 모바일에서는 고정 해제
+        if (window.innerWidth <= 768) {
+            header.classList.remove("fixed-top", "shadow");
+            return;
+        }
+
+        // PC 버전에서는 스크롤 고정 유지
         if (window.scrollY > 100) {
             header.classList.add("fixed-top", "shadow");
         } else {
             header.classList.remove("fixed-top", "shadow");
         }
     });
+
+
 
     function removeNotification(notificationId, btn) {
         console.log("removeNotification called, id=", notificationId);
