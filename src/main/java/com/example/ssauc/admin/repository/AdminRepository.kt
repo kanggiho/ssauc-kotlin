@@ -1,12 +1,11 @@
-package com.example.ssauc.admin.repository;
+package com.example.ssauc.admin.repository
 
-import com.example.ssauc.admin.entity.Admin;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.example.ssauc.admin.entity.Admin
+import org.springframework.data.jpa.repository.JpaRepository
+import java.util.*
 
-import java.util.Optional;
+interface AdminRepository : JpaRepository<Admin?, Long?> {
+    fun findByEmail(email: String?): Optional<Admin?>?
 
-public interface AdminRepository extends JpaRepository<Admin, Long> {
-    Optional<Admin> findByEmail(String email);
-
-    Optional<Admin> findByEmailAndPassword(String email, String password);
+    fun findByEmailAndPassword(email: String?, password: String?): Optional<Admin?>?
 }

@@ -1,11 +1,10 @@
-package com.example.ssauc.user.cash.entity;
+package com.example.ssauc.user.cash.entity
 
+import com.example.ssauc.user.login.entity.Users
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
-import com.example.ssauc.user.login.entity.Users;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -14,35 +13,34 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "charge")
-public class Charge {
-
+class Charge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "charge_id")
-    private Long chargeId;
+    public var chargeId: Long? = null
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    public val user: Users? = null
 
     @Column(name = "imp_uid", length = 255)
-    private String impUid;
+    public var impUid: String? = null
 
     @Column(name = "charge_type", length = 50)
-    private String chargeType;
+    public var chargeType: String? = null
 
-    private Long amount;
+    public val amount: Long? = null
 
     @Column(name = "status", length = 50)
-    private String status;
+    public var status: String? = null
 
     @Column(columnDefinition = "TEXT")
-    private String details;
+    public var details: String? = null
 
     @Column(name = "receipt_url", length = 255)
-    private String receiptUrl;
+    public var receiptUrl: String? = null
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    public var createdAt: LocalDateTime? = null
 }
 

@@ -1,11 +1,10 @@
-package com.example.ssauc.user.main.entity;
+package com.example.ssauc.user.main.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.product.entity.Product;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.product.entity.Product
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
 @Entity
 @Builder
@@ -14,21 +13,20 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecentlyViewed {
-
+class RecentlyViewed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long recentlyId;
+    private val recentlyId: Long? = null
 
     // 최근에 본 사용자
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private val user: Users? = null
 
     // 최근에 본 상품
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private val product: Product? = null
 
-    private LocalDateTime viewedAt;
+    private val viewedAt: LocalDateTime? = null
 }

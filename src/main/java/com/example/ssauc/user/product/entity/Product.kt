@@ -1,19 +1,17 @@
-package com.example.ssauc.user.product.entity;
+package com.example.ssauc.user.product.entity
 
-import com.example.ssauc.user.bid.entity.AutoBid;
-import com.example.ssauc.user.bid.entity.Bid;
-import com.example.ssauc.user.bid.entity.ProductReport;
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.main.entity.ProductLike;
-import com.example.ssauc.user.main.entity.RecentlyViewed;
-import com.example.ssauc.user.order.entity.Orders;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.user.bid.entity.AutoBid
+import com.example.ssauc.user.bid.entity.Bid
+import com.example.ssauc.user.bid.entity.ProductReport
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.main.entity.ProductLike
+import com.example.ssauc.user.main.entity.RecentlyViewed
+import com.example.ssauc.user.order.entity.Orders
+import jakarta.persistence.*
+import lombok.*
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDateTime
 
 @Entity
 @Builder
@@ -22,86 +20,82 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
-
+class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    var productId: Long? = null
 
     // 판매자 정보
     @ManyToOne
     @JoinColumn(name = "seller_id", nullable = false)
-    private Users seller;
+    var seller: Users? = null
 
     // 카테고리 정보
+    @JvmField
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    var category: Category? = null
 
     @Column(nullable = false, length = 200)
-    private String name;
+    var name: String? = null
 
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
-    private String description;        // 상품 설명
+    var description: String? = null // 상품 설명
 
     @Column(nullable = false)
-    private Long price;
+    var price: Long? = null
 
-    private Long tempPrice;
+    var tempPrice: Long? = null
 
-    private Long startPrice;
+    var startPrice: Long? = null
 
     @Column(name = "image_url", length = 500)
-    private String imageUrl;           // 이미지 주소
+    var imageUrl: String? = null // 이미지 주소
 
     @Column(length = 50)
-    private String status;
+    var status: String? = null
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    var createdAt: LocalDateTime? = null
 
     // 수정 시간: 엔티티가 업데이트될 때 자동으로 시간 갱신
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;   // 수정 시간
-    private LocalDateTime endAt;
+    var updatedAt: LocalDateTime? = null // 수정 시간
+    var endAt: LocalDateTime? = null
 
     @Column(name = "view_count")
-    private Long viewCount;            // 조회수
+    var viewCount: Long? = null // 조회수
 
-    private int dealType;
+    @JvmField
+    var dealType: Int = 0
 
     // 거래 유형 (0: 직거래, 1: 택배, 2: 둘 다 선택)
-    private int bidCount;
-    private int minIncrement;
-    private int likeCount;
-
-    public Integer getDealType() { return this.dealType; }
-    public Integer getBidCount() { return this.bidCount; }
-    public Integer getLikeCount() { return this.likeCount; }
-
+    @JvmField
+    var bidCount: Int = 0
+    var minIncrement: Int = 0
+    @JvmField
+    var likeCount: Int = 0
 
 
     // 연관 관계 설정
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var recentlyViewedProducts: List<RecentlyViewed>? = null
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RecentlyViewed> recentlyViewedProducts;
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var likedProducts: List<ProductLike>? = null
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductLike> likedProducts;
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var ReportProducts: List<ProductReport>? = null
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductReport> ReportProducts;
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var bids: List<Bid>? = null
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Bid> bids;
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var autoBids: List<AutoBid>? = null
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AutoBid> autoBids;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Orders> orders;
-
+    @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var orders: List<Orders>? = null
 }

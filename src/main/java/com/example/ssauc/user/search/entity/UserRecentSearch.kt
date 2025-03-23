@@ -1,11 +1,10 @@
-package com.example.ssauc.user.search.entity;
+package com.example.ssauc.user.search.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.login.entity.Users
+import jakarta.persistence.*
+import lombok.*
+import org.hibernate.annotations.CreationTimestamp
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "user_recent_search")
@@ -14,26 +13,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserRecentSearch {
-
+class UserRecentSearch {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private val id: Long? = null
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private Users user;
+    private val user: Users? = null
 
     @Column(name = "session_id")
-    private String sessionId;
+    private var sessionId: String? = null
 
     @Column(nullable = false)
-    private String keyword;
+    private var keyword: String? = null
 
     @CreationTimestamp
-    private LocalDateTime searchedAt;
+    private var searchedAt: LocalDateTime? = null
 
-    public void setSearchedAt(LocalDateTime searchedAt) {
-        this.searchedAt = searchedAt;
+    fun setSearchedAt(searchedAt: LocalDateTime?) {
+        this.searchedAt = searchedAt
     }
 }

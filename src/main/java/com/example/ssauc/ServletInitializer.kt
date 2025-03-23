@@ -1,13 +1,10 @@
-package com.example.ssauc;
+package com.example.ssauc
 
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 
-public class ServletInitializer extends SpringBootServletInitializer {
-
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(SsaucApplication.class);
+class ServletInitializer : SpringBootServletInitializer() {
+    override fun configure(application: SpringApplicationBuilder): SpringApplicationBuilder {
+        return application.sources(SsaucApplication::class.java)
     }
-
 }

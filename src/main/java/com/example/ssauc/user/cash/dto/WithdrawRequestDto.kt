@@ -1,11 +1,11 @@
-package com.example.ssauc.user.cash.dto;
+package com.example.ssauc.user.cash.dto
 
-import lombok.Data;
+import lombok.Data
 
 @Data
-public class WithdrawRequestDto {
+class WithdrawRequestDto {
     // 환급 신청 시 클라이언트에서 서버로 전달되는 정보
-    private Long amount;
-    private String bank;
-    private String account;
+    private val amount: Long? = null
+    private val bank: String? = null
+    private val account: String? = null
 }

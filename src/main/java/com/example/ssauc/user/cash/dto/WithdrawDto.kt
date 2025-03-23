@@ -1,18 +1,18 @@
-package com.example.ssauc.user.cash.dto;
+package com.example.ssauc.user.cash.dto
 
-import java.time.LocalDateTime;
-import lombok.*;
+import lombok.*
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WithdrawDto {
-    private Long withdrawId;
-    private String bank;
-    private String account;
-    private Long netAmount; // amount - commission
-    private LocalDateTime withdrawAt;
-    private String requestStatus; // withdrawAt != null ? "완료" : "처리중"
+class WithdrawDto {
+    private val withdrawId: Long? = null
+    private val bank: String? = null
+    private val account: String? = null
+    private val netAmount: Long? = null // amount - commission
+    private val withdrawAt: LocalDateTime? = null
+    private val requestStatus: String? = null // withdrawAt != null ? "완료" : "처리중"
 }

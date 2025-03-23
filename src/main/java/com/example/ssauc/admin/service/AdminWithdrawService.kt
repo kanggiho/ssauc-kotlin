@@ -1,42 +1,44 @@
-package com.example.ssauc.admin.service;
+package com.example.ssauc.admin.service
 
-import com.example.ssauc.admin.repository.AdminWithdrawRepository;
-import com.example.ssauc.user.cash.entity.Withdraw;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.admin.repository.AdminWithdrawRepository
+import com.example.ssauc.user.cash.entity.Withdraw
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
-public class AdminWithdrawService {
-
+class AdminWithdrawService {
     @Autowired
-    private AdminWithdrawRepository adminWithdrawRepository;
+    private val adminWithdrawRepository: AdminWithdrawRepository? = null
 
-    public Page<Withdraw> getWithdraws(int page, String sortField, String sortDir) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
-        Pageable pageable = PageRequest.of(page, 10, sort);
-        return adminWithdrawRepository.findAll(pageable);
+    fun getWithdraws(page: Int, sortField: String, sortDir: String): Page<Withdraw?> {
+        val sort = Sort.by(Sort.Direction.fromString(sortDir), sortField)
+        val pageable: Pageable = PageRequest.of(page, 10, sort)
+        return adminWithdrawRepository!!.findAll(pageable)
     }
 
-    public Page<Withdraw> searchWithdraws(String keyword, int page, String sortField, String sortDir) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.fromString(sortDir), sortField));
-        return adminWithdrawRepository.findByUser_UserNameContainingIgnoreCaseOrBankContainingIgnoreCaseOrAccountContainingIgnoreCase(keyword, keyword, keyword, pageable);
+    fun searchWithdraws(keyword: String?, page: Int, sortField: String, sortDir: String): Page<Withdraw?>? {
+        val pageable: Pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.fromString(sortDir), sortField))
+        return adminWithdrawRepository!!.findByUser_UserNameContainingIgnoreCaseOrBankContainingIgnoreCaseOrAccountContainingIgnoreCase(
+            keyword,
+            keyword,
+            keyword,
+            pageable
+        )
     }
 
-    public List<Withdraw> findAllWithdraws() {
-        return adminWithdrawRepository.findAll();
+    fun findAllWithdraws(): List<Withdraw?> {
+        return adminWithdrawRepository!!.findAll()
     }
 
-    public void processWithdraw(Long withdrawId) {
-        Withdraw withdraw = adminWithdrawRepository.findById(withdrawId)
-                .orElseThrow(() -> new RuntimeException("Withdraw record not found"));
-        withdraw.setWithdrawAt(LocalDateTime.now());
-        adminWithdrawRepository.save(withdraw);
+    fun processWithdraw(withdrawId: Long) {
+        val withdraw = adminWithdrawRepository!!.findById(withdrawId)
+            .orElseThrow { RuntimeException("Withdraw record not found") }!!
+        withdraw.withdrawAt = LocalDateTime.now()
+        adminWithdrawRepository.save(withdraw)
     }
 }

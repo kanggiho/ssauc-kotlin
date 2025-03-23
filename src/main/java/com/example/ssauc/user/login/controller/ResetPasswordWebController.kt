@@ -1,15 +1,14 @@
-package com.example.ssauc.user.login.controller;
+package com.example.ssauc.user.login.controller
 
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.GetMapping
 
 @Controller
-public class ResetPasswordWebController {
-
+class ResetPasswordWebController {
     @GetMapping("/reset-password")
-    public String resetPasswordForm(Model model) {
+    fun resetPasswordForm(model: Model?): String {
         // "login/reset-password.html" 템플릿을 렌더링
-        return "login/reset-password";
+        return "login/reset-password"
     }
 }

@@ -1,40 +1,35 @@
-package com.example.ssauc.user.chat.dto;
+package com.example.ssauc.user.chat.dto
 
-import com.example.ssauc.user.chat.entity.ChatRoom;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRoomDto {
-    private Long chatRoomId;
-    private String productName;
-    private Long buyerId;
-    private Long sellerId;
+class ChatRoomDto {
+    private val chatRoomId: Long? = null
+    private val productName: String? = null
+    private val buyerId: Long? = null
+    private val sellerId: Long? = null
 
 
-    private String productImage;    // ➡️ 상품 이미지 추가
-    private Long productPrice;    // ➡️ 상품 가격 추가
-    private String productStatus;   // ➡️ 상품 상태 추가
+    private val productImage: String? = null // ➡️ 상품 이미지 추가
+    private val productPrice: Long? = null // ➡️ 상품 가격 추가
+    private val productStatus: String? = null // ➡️ 상품 상태 추가
 
 
-    private String otherUserName;
-    private Long otherUserId;
+    private val otherUserName: String? = null
+    private val otherUserId: Long? = null
 
-    private boolean banned;
-
-
-
-//    public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
-//        ChatRoomDto dto = new ChatRoomDto();
-//        dto.setChatRoomId(chatRoom.getChatRoomId());
-//        dto.setProductName(chatRoom.getProduct().getName());
-//        dto.setBuyerId(chatRoom.getBuyer().getUserId());
-//        dto.setSellerId(chatRoom.getProduct().getSeller().getUserId());
-//        return dto;
-//    }
+    private val banned = false //    public static ChatRoomDto fromEntity(ChatRoom chatRoom) {
+    //        ChatRoomDto dto = new ChatRoomDto();
+    //        dto.setChatRoomId(chatRoom.getChatRoomId());
+    //        dto.setProductName(chatRoom.getProduct().getName());
+    //        dto.setBuyerId(chatRoom.getBuyer().getUserId());
+    //        dto.setSellerId(chatRoom.getProduct().getSeller().getUserId());
+    //        return dto;
+    //    }
 }

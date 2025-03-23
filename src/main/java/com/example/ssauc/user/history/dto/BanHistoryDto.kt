@@ -1,17 +1,16 @@
-package com.example.ssauc.user.history.dto;
+package com.example.ssauc.user.history.dto
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor
+import lombok.Data
+import lombok.NoArgsConstructor
+import java.time.LocalDateTime
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BanHistoryDto {
-    private Long banId;
-    private String blockedUserName;
-    private String profileImage;
-    private LocalDateTime blockedAt;
+class BanHistoryDto {
+    public val banId: Long? = null
+    public val blockedUserName: String? = null
+    public val profileImage: String? = null
+    public val blockedAt: LocalDateTime? = null
 }

@@ -1,13 +1,13 @@
-package com.example.ssauc.user.contact.dto;
+package com.example.ssauc.user.contact.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Chatbot {
-    private String sender;   // "USER" or "BOT"
-    private String message;  // 메시지 내용
+class Chatbot {
+    public val sender: String? = null // "USER" or "BOT"
+    public val message: String? = null // 메시지 내용
 }

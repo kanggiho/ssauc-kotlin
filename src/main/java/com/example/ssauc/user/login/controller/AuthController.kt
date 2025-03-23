@@ -1,91 +1,78 @@
-package com.example.ssauc.user.login.controller;
+package com.example.ssauc.user.login.controller
 
-import com.example.ssauc.user.login.dto.LoginResponseDTO;
-import com.example.ssauc.user.login.dto.UserRegistrationDTO;
-import com.example.ssauc.user.login.service.RefreshTokenService;
-import com.example.ssauc.user.login.service.UserService;
-
-import com.example.ssauc.user.login.util.JwtUtil;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletResponse
+import lombok.RequiredArgsConstructor
+import lombok.extern.slf4j.Slf4j
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.stereotype.Controller
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.util.*
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
-public class AuthController {
-
-    private final UserService userService;
-    private final JwtUtil jwtUtil;
-    private final RefreshTokenService refreshTokenService; // 주입 추가
+class AuthController {
+    private val userService: UserService? = null
+    private val jwtUtil: JwtUtil? = null
+    private val refreshTokenService: RefreshTokenService? = null // 주입 추가
 
     @GetMapping("/signup")
-    public String signupForm() {
+    fun signupForm(): String {
         // 회원가입 폼 (Thymeleaf 템플릿: templates/login/signup.html)
-        return "login/signup";
+        return "login/signup"
     }
 
     @PostMapping("/signup")
-    public String register(UserRegistrationDTO dto) {
-        String result = userService.register(dto);
-        if ("회원가입 성공".equals(result)) {
-            return "redirect:/login?success=true";
+    fun register(dto: UserRegistrationDTO): String {
+        val result: String = userService.register(dto)
+        if ("회원가입 성공" == result) {
+            return "redirect:/login?success=true"
         }
-        return "redirect:/signup?error=" + result;
+        return "redirect:/signup?error=$result"
     }
 
     @GetMapping("/login")
-    public String loginForm() {
+    fun loginForm(): String {
         // 로그인 폼 (Thymeleaf 템플릿: templates/login/login.html)
-        return "login/login";
+        return "login/login"
     }
 
     @PostMapping("/login")
-    public String doLogin(@RequestParam String email,
-                          @RequestParam String password,
-                          HttpServletResponse response) {
-        log.info("로그인 요청 - email: {}, password: {}", email, password);
-        Optional<LoginResponseDTO> loginResponseOpt = userService.login(email, password);
+    fun doLogin(
+        @RequestParam email: String,
+        @RequestParam password: String?,
+        response: HttpServletResponse
+    ): String {
+        AuthController.log.info("로그인 요청 - email: {}, password: {}", email, password)
+        val loginResponseOpt: Optional<LoginResponseDTO> = userService.login(email, password)
         if (loginResponseOpt.isPresent()) {
-            LoginResponseDTO loginResponse = loginResponseOpt.get();
+            val loginResponse: LoginResponseDTO = loginResponseOpt.get()
 
             // JWT 토큰 쿠키 설정
-            Cookie accessCookie = new Cookie("jwt_access", loginResponse.getAccessToken());
-            accessCookie.setHttpOnly(true);
-            accessCookie.setPath("/");
-            response.addCookie(accessCookie);
+            val accessCookie = Cookie("jwt_access", loginResponse.getAccessToken())
+            accessCookie.isHttpOnly = true
+            accessCookie.path = "/"
+            response.addCookie(accessCookie)
 
-            Cookie refreshCookie = new Cookie("jwt_refresh", loginResponse.getRefreshToken());
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setPath("/");
-            response.addCookie(refreshCookie);
+            val refreshCookie = Cookie("jwt_refresh", loginResponse.getRefreshToken())
+            refreshCookie.isHttpOnly = true
+            refreshCookie.path = "/"
+            response.addCookie(refreshCookie)
 
-            log.info("로그인 성공: {} -> jwt_access, jwt_refresh 쿠키 발급됨", email);
+            AuthController.log.info("로그인 성공: {} -> jwt_access, jwt_refresh 쿠키 발급됨", email)
 
             // (추가) SecurityContext에 인증 정보 설정
-            List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(email, null, authorities);
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-            log.info("SecurityContext에 직접 인증 정보 설정: {}", email);
+            val authorities: List<GrantedAuthority> = listOf<GrantedAuthority>(SimpleGrantedAuthority("ROLE_USER"))
+            val authToken: UsernamePasswordAuthenticationToken =
+                UsernamePasswordAuthenticationToken(email, null, authorities)
+            SecurityContextHolder.getContext().setAuthentication(authToken)
+            AuthController.log.info("SecurityContext에 직접 인증 정보 설정: {}", email)
 
-            return "redirect:/";
+            return "redirect:/"
         }
         // 로그인 실패 시 로그인 페이지로 리다이렉트 (리다이렉트 시 URL에 error=true를 붙여 에러 메시지를 표시)
-        return "redirect:/login?error=true&email=" + java.net.URLEncoder.encode(email, java.nio.charset.StandardCharsets.UTF_8);
+        return "redirect:/login?error=true&email=" + URLEncoder.encode(email, StandardCharsets.UTF_8)
     }
-
 }

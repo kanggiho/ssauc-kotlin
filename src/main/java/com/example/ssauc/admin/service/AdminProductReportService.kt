@@ -1,72 +1,66 @@
-package com.example.ssauc.admin.service;
+package com.example.ssauc.admin.service
 
-import com.example.ssauc.admin.repository.AdminProductReportRepository;
-import com.example.ssauc.user.bid.entity.ProductReport;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import com.example.ssauc.user.mypage.event.UserWarnedEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.admin.repository.AdminProductReportRepository
+import com.example.ssauc.user.bid.entity.ProductReport
+import com.example.ssauc.user.login.repository.UsersRepository
+import com.example.ssauc.user.mypage.event.UserWarnedEvent
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
-public class AdminProductReportService {
+class AdminProductReportService {
+    @Autowired
+    private val adminProductReportRepository: AdminProductReportRepository? = null
 
     @Autowired
-    private AdminProductReportRepository adminProductReportRepository;
+    private val userRepository: UsersRepository? = null
 
-    @Autowired
-    private UsersRepository userRepository;
+    var eventPublisher: ApplicationEventPublisher? = null
 
-    ApplicationEventPublisher eventPublisher;
-
-    public Page<ProductReport> getReports(int page, String sortField, String sortDir) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
-        return adminProductReportRepository.findAll(PageRequest.of(page, 10, sort));
+    fun getReports(page: Int, sortField: String, sortDir: String): Page<ProductReport?> {
+        val sort = Sort.by(Sort.Direction.fromString(sortDir), sortField)
+        return adminProductReportRepository!!.findAll(PageRequest.of(page, 10, sort))
     }
 
-    public ProductReport findProductReportById(Long reportId) {
-        return adminProductReportRepository.findById(reportId).orElse(null);
+    fun findProductReportById(reportId: Long): ProductReport? {
+        return adminProductReportRepository!!.findById(reportId).orElse(null)
     }
 
-    public boolean updateProductReportInfo(String action, long reportId) {
+    fun updateProductReportInfo(action: String, reportId: Long): Boolean {
+        val productReport = adminProductReportRepository!!.findById(reportId).orElse(null) ?: return false
 
-        ProductReport productReport = adminProductReportRepository.findById(reportId).orElse(null);
+        var temp = 0
 
-        if(productReport == null) return false;
-
-        int temp = 0;
-
-        if(action.equals("참작")){
-            temp = 0;
-        } else if (action.equals("경고")) {
-            temp= 1;
-        } else if (action.equals("제명")) {
-            temp = 3;
+        if (action == "참작") {
+            temp = 0
+        } else if (action == "경고") {
+            temp = 1
+        } else if (action == "제명") {
+            temp = 3
         }
 
 
         // productReport 업데이트
-        int updateProductReport = adminProductReportRepository.updateProductReportByReportId("처리완료", LocalDateTime.now() ,reportId);
+        val updateProductReport =
+            adminProductReportRepository.updateProductReportByReportId("처리완료", LocalDateTime.now(), reportId)
 
         // reportedUser 업데이트
-        int updateReportedUser = userRepository.updateUserByWarningCount(temp,productReport.getReportedUser().getUserId());
+        val updateReportedUser = userRepository!!.updateUserByWarningCount(temp, productReport.reportedUser!!.userId)
 
 
-        if(action.equals("경고")){
-            eventPublisher.publishEvent(new UserWarnedEvent(this, productReport.getReportedUser().getUserId()));
+        if (action == "경고") {
+            eventPublisher!!.publishEvent(UserWarnedEvent(this, productReport.reportedUser.userId))
         }
 
-        return updateProductReport == 1 && updateReportedUser == 1;
-
+        return updateProductReport == 1 && updateReportedUser == 1
     }
 
-    public List<ProductReport> findAllProductReports() {
-        return adminProductReportRepository.findAll();
+    fun findAllProductReports(): List<ProductReport?> {
+        return adminProductReportRepository!!.findAll()
     }
 }

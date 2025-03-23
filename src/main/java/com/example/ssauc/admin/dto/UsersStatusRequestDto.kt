@@ -1,13 +1,13 @@
-package com.example.ssauc.admin.dto;
+package com.example.ssauc.admin.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UsersStatusRequestDto {
-    private Long userId;
-    private String status;
+class UsersStatusRequestDto {
+    public val userId: Long? = null
+    public val status: String? = null
 }

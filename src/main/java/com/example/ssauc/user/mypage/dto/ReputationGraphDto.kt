@@ -1,14 +1,13 @@
-package com.example.ssauc.user.mypage.dto;
+package com.example.ssauc.user.mypage.dto
 
-import lombok.Builder;
-import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.Builder
+import lombok.Data
+import java.time.LocalDateTime
 
 @Data
 @Builder
-public class ReputationGraphDto {
+class ReputationGraphDto {
     // 평판 그래프 데이터 전달용
-    private LocalDateTime createdAt;
-    private Double newScore;
+    private val createdAt: LocalDateTime? = null
+    private val newScore: Double? = null
 }

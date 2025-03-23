@@ -1,11 +1,10 @@
-package com.example.ssauc.user.main.entity;
+package com.example.ssauc.user.main.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.product.entity.Product;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.product.entity.Product
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
 @Entity
 @Builder
@@ -14,27 +13,13 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductLike {
-
+class ProductLike(// 좋아요 한 사용자
+    @field:JoinColumn(name = "user_id", nullable = false) @field:ManyToOne private val user: Users, // 좋아요 한 상품
+    @field:JoinColumn(name = "product_id", nullable = false) @field:ManyToOne private val product: Product
+) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long likeId;
+    private val likeId: Long? = null
 
-    // 좋아요 한 사용자
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
-
-    // 좋아요 한 상품
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    private LocalDateTime likedAt;
-
-    public ProductLike(Users user, Product product) {
-        this.user = user;
-        this.product = product;
-        this.likedAt = LocalDateTime.now();
-    }
+    private val likedAt: LocalDateTime = LocalDateTime.now()
 }

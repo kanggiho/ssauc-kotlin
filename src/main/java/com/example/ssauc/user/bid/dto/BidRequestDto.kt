@@ -1,14 +1,14 @@
-package com.example.ssauc.user.bid.dto;
+package com.example.ssauc.user.bid.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class BidRequestDto {
-    private Long productId;
-    private String userId;
-    private int bidAmount;
+class BidRequestDto {
+    var productId: Long? = null
+    var userId: String? = null
+    var bidAmount: Int = 0
 }

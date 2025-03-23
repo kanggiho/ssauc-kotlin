@@ -1,11 +1,10 @@
-package com.example.ssauc.user.mypage.entity;
+package com.example.ssauc.user.mypage.entity
 
+import com.example.ssauc.user.login.entity.Users
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
-import com.example.ssauc.user.login.entity.Users;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Builder
@@ -14,21 +13,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_activity")
-public class UserActivity {
-
+class UserActivity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "activity_id")
-    private Long activityId;
+    private var activityId: Long? = null
 
     // 사용자 활동
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private val user: Users? = null
 
     @Column(name = "monthly_trade_count")
-    private Long monthlyTradeCount;
+    private var monthlyTradeCount: Long? = null
 
     @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    private var lastUpdated: LocalDateTime? = null
 }

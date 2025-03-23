@@ -1,16 +1,16 @@
-package com.example.ssauc.user.bid.dto;
+package com.example.ssauc.user.bid.dto
 
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.RequiredArgsConstructor
+import lombok.Setter
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 @AllArgsConstructor
-public class CarouselImage {
-    private String url;
-    private String alt;
+class CarouselImage {
+    var url: String? = null
+    var alt: String? = null
 }

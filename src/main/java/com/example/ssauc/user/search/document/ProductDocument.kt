@@ -1,87 +1,82 @@
-package com.example.ssauc.user.search.document;
+package com.example.ssauc.user.search.document
 
-import com.example.ssauc.user.product.entity.Product;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.product.entity.Product
+import com.fasterxml.jackson.annotation.JsonFormat
+import lombok.Data
+import org.springframework.data.annotation.Id
+import org.springframework.data.elasticsearch.annotations.*
+import java.time.LocalDateTime
 
 @Data
 @Document(indexName = "products")
 @Setting(settingPath = "elasticsearch/mappings/products_settings.json")
 @Mapping(mappingPath = "elasticsearch/mappings/products-mapping.json") // 자동완성 기능
-public class ProductDocument {
-
+class ProductDocument {
     @Id
     @Field(type = FieldType.Keyword)
-    private String productId;
+    private var productId: String? = null
 
     @Field(type = FieldType.Text, analyzer = "korean_analyzer")
-    private String category;
+    private var category: String? = null
 
     @Field(type = FieldType.Text, analyzer = "korean_analyzer")
-    private String name;
+    private var name: String? = null
 
     @Field(type = FieldType.Text, analyzer = "korean_analyzer")
-    private String description;
+    private var description: String? = null
 
     @Field(type = FieldType.Long)
-    private Long price;
+    private var price: Long? = null
 
-    @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Field(type = FieldType.Date, format = [], pattern = ["yyyy-MM-dd'T'HH:mm:ss"])
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime createdAt;
+    private var createdAt: LocalDateTime? = null
 
-    @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Field(type = FieldType.Date, format = [], pattern = ["yyyy-MM-dd'T'HH:mm:ss"])
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime updatedAt;
+    private var updatedAt: LocalDateTime? = null
 
-    @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime endAt;
+    @Field(type = FieldType.Date, format = [], pattern = ["yyyy-MM-dd'T'HH:mm:ss"])
+    private var endAt: LocalDateTime? = null
 
     @Field(type = FieldType.Long)
-    private Long viewCount;
+    private var viewCount: Long? = null
 
     @Field(type = FieldType.Integer)
-    private Integer dealType;
+    private var dealType: Int? = null
 
     @Field(type = FieldType.Integer)
-    private Integer bidCount;
+    private var bidCount: Int? = null
 
     @Field(type = FieldType.Integer)
-    private Integer likeCount;
+    private var likeCount: Int? = null
 
     @Field(type = FieldType.Text, analyzer = "edge_ngram_analyzer")
-    private String suggest;
+    private var suggest: String? = null
 
-    public ProductDocument(Product product) {
-        this.productId = (product.getProductId() != null)
-                ? String.valueOf(product.getProductId())
-                : null;
+    constructor(product: Product) {
+        this.productId = if ((product.productId != null)) product.productId.toString() else
+            null
 
         // ✅ 카테고리 변경: getCategory() → getCategory().getName()
-        this.category = (product.getCategory() != null) ? product.getCategory().getName() : null;
+        this.category = if ((product.getCategory() != null)) product.getCategory().getName() else null
 
-        this.name = product.getName();
-        this.description = product.getDescription();
-        this.price = product.getPrice();
-        this.createdAt = product.getCreatedAt();
-        this.updatedAt = product.getUpdatedAt();
-        this.endAt = product.getEndAt();
-        this.viewCount = product.getViewCount();
+        this.name = product.name
+        this.description = product.description
+        this.price = product.price
+        this.createdAt = product.createdAt
+        this.updatedAt = product.updatedAt
+        this.endAt = product.endAt
+        this.viewCount = product.viewCount
 
         // ✅ dealType, bidCount, likeCount는 int → Integer 변환 필요
-        this.dealType = product.getDealType();
-        this.bidCount = product.getBidCount();
-        this.likeCount = product.getLikeCount();
+        this.dealType = product.dealType
+        this.bidCount = product.bidCount
+        this.likeCount = product.likeCount
 
         // 자동완성을 위해 상품명을 기반으로 CompletionField 생성
-        this.suggest = product.getName();
+        this.suggest = product.name
     }
 
-    public ProductDocument() {
-        // unchanged
-    }
+    constructor()
 }

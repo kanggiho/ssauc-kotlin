@@ -1,18 +1,18 @@
-package com.example.ssauc.user.cash.dto;
+package com.example.ssauc.user.cash.dto
 
-import java.time.LocalDateTime;
-import lombok.*;
+import lombok.*
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChargeDto {
-    private Long chargeId;
-    private String chargeType;
-    private Long amount;
-    private String status;
-    private LocalDateTime createdAt;
-    private String receiptUrl;
+class ChargeDto {
+    private val chargeId: Long? = null
+    private val chargeType: String? = null
+    private val amount: Long? = null
+    private val status: String? = null
+    private val createdAt: LocalDateTime? = null
+    private val receiptUrl: String? = null
 }

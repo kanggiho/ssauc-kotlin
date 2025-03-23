@@ -1,10 +1,7 @@
-package com.example.ssauc.user.product.entity;
+package com.example.ssauc.user.product.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.List;
+import jakarta.persistence.*
+import lombok.*
 
 @Entity
 @Builder
@@ -13,18 +10,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Category {
-
+class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long categoryId;
+    var categoryId: Long? = null
 
 
     @Column(nullable = false, length = 100)
-    private String name;
+    var name: String? = null
 
     // 연관 관계 설정
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products;
+    @OneToMany(mappedBy = "category", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var products: List<Product>? = null
 }

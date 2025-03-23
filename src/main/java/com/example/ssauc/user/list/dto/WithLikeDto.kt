@@ -1,8 +1,7 @@
-package com.example.ssauc.user.list.dto;
+package com.example.ssauc.user.list.dto
 
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.*
+import java.time.LocalDateTime
 
 @Getter
 @Setter
@@ -10,16 +9,16 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WithLikeDto {
-    private Long productId;
-    private String imageUrl;
-    private String name;
-    private Long price;
-    private int bidCount;
-    private LocalDateTime endAt;
-    private LocalDateTime createdAt;
-    private String location;
-    private int likeCount;
-    private String status;
-    private boolean liked;
+class WithLikeDto {
+    private val productId: Long? = null
+    private val imageUrl: String? = null
+    private val name: String? = null
+    private val price: Long? = null
+    private val bidCount = 0
+    private val endAt: LocalDateTime? = null
+    private val createdAt: LocalDateTime? = null
+    private val location: String? = null
+    private val likeCount = 0
+    private val status: String? = null
+    private val liked = false
 }

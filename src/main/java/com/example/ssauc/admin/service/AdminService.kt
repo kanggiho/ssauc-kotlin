@@ -1,71 +1,67 @@
-package com.example.ssauc.admin.service;
+package com.example.ssauc.admin.service
 
+import com.example.ssauc.admin.entity.Admin
+import com.example.ssauc.admin.repository.AdminRepository
+import com.warrenstrange.googleauth.GoogleAuthenticator
+import com.warrenstrange.googleauth.GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder
+import lombok.extern.slf4j.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.stereotype.Service
+import java.util.*
 
-import com.example.ssauc.admin.entity.Admin;
-import com.example.ssauc.admin.repository.AdminRepository;
-import com.warrenstrange.googleauth.GoogleAuthenticator;
-import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;
-import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
-public class AdminService {
+class AdminService {
+    @Autowired
+    private val adminRepository: AdminRepository? = null
 
     @Autowired
-    private AdminRepository adminRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private val passwordEncoder: PasswordEncoder? = null
 
 
-    public Admin checkAddress(String email, String password) {
-        return adminRepository.findByEmailAndPassword(email, password).orElse(null);
+    fun checkAddress(email: String?, password: String?): Admin? {
+        return adminRepository!!.findByEmailAndPassword(email, password)!!.orElse(null)
     }
 
     //Google Authenticator 시크릿 키(google_secret) 생성
-    public Admin generateGoogleSecret(Admin admin) {
+    fun generateGoogleSecret(admin: Admin): Admin {
         // 라이브러리를 통해 Google Authenticator Key 생성
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        GoogleAuthenticatorKey key = gAuth.createCredentials();
+        val gAuth = GoogleAuthenticator()
+        val key = gAuth.createCredentials()
 
-        admin.setGoogleSecret(key.getKey());
-        admin.setTempKey(key);
-        return adminRepository.save(admin);
+        admin.setGoogleSecret(key.key)
+        admin.setTempKey(key)
+        return adminRepository!!.save(admin)
     }
 
     //2차 인증 코드 검증
-    public boolean verifyCode(Admin admin, int code) {
+    fun verifyCode(admin: Admin, code: Int): Boolean {
         if (admin.getGoogleSecret() == null) {
-            log.info("Google secret is null for admin: {}", admin.getAdminId());
-            return false;
+            AdminService.log.info("Google secret is null for admin: {}", admin.getAdminId())
+            return false
         }
 
         // 현재 서버 시간을 로그에 찍음 (ms 단위)
-        long currentTimeMillis = System.currentTimeMillis();
-        log.info("Server current time (ms): {}", currentTimeMillis);
+        val currentTimeMillis = System.currentTimeMillis()
+        AdminService.log.info("Server current time (ms): {}", currentTimeMillis)
 
         // GoogleAuthenticatorConfig를 사용하여 윈도우 사이즈 설정 (예: ±3 슬롯 허용)
-        GoogleAuthenticatorConfig config = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder()
-                .setWindowSize(3)
-                .build();
-        GoogleAuthenticator gAuth = new GoogleAuthenticator(config);
+        val config = GoogleAuthenticatorConfigBuilder()
+            .setWindowSize(3)
+            .build()
+        val gAuth = GoogleAuthenticator(config)
 
         // 인증 코드 검증 결과
-        boolean result = gAuth.authorize(admin.getGoogleSecret(), code);
-        log.info("Code verification result: {} for code: {}", result, code);
-        return result;
+        val result = gAuth.authorize(admin.getGoogleSecret(), code)
+        AdminService.log.info("Code verification result: {} for code: {}", result, code)
+        return result
     }
 
     //email로 관리자 조회
-    public Optional<Admin> findByEmail(String email) {
-        return adminRepository.findByEmail(email);
+    fun findByEmail(email: String?): Optional<Admin?>? {
+        return adminRepository!!.findByEmail(email)
     }
 }
 

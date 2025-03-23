@@ -1,6 +1,6 @@
-package com.example.ssauc.user.list.dto;
+package com.example.ssauc.user.list.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
@@ -8,15 +8,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class TempDto {
-    private Long productId; // 다 Product 테이블
-    private String imageUrl;
-    private String name;
-    private String price;
-    private String bidCount;
-    private String gap;
-    private String location; // Users 테이블
-    private String likeCount;
-    private boolean liked;
-    private String status;
+class TempDto {
+    private val productId: Long? = null // 다 Product 테이블
+    private val imageUrl: String? = null
+    private val name: String? = null
+    private val price: String? = null
+    private val bidCount: String? = null
+    private val gap: String? = null
+    private val location: String? = null // Users 테이블
+    private val likeCount: String? = null
+    private val liked = false
+    private val status: String? = null
 }

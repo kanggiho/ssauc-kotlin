@@ -1,13 +1,14 @@
-package com.example.ssauc.user.login.service;
+package com.example.ssauc.user.login.service
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import org.springframework.stereotype.Service;
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseToken
+import org.springframework.stereotype.Service
 
 @Service
-public class FirebaseService {
-    public FirebaseToken verifyIdToken(String idToken) throws FirebaseAuthException {
-        return FirebaseAuth.getInstance().verifyIdToken(idToken);
+class FirebaseService {
+    @Throws(FirebaseAuthException::class)
+    fun verifyIdToken(idToken: String?): FirebaseToken {
+        return FirebaseAuth.getInstance().verifyIdToken(idToken)
     }
 }

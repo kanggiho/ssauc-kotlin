@@ -1,100 +1,208 @@
-package com.example.ssauc.user.list.Service;
+package com.example.ssauc.user.list.Service
 
-import com.example.ssauc.user.list.dto.ListDto;
-import com.example.ssauc.user.list.dto.TempDto;
-import com.example.ssauc.user.list.dto.WithLikeDto;
-import com.example.ssauc.user.list.repository.ListRepository;
-import java.time.Duration;
-
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.user.list.dto.ListDto
+import com.example.ssauc.user.list.dto.TempDto
+import com.example.ssauc.user.list.dto.WithLikeDto
+import com.example.ssauc.user.list.repository.ListRepository
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.login.repository.UsersRepository
+import lombok.extern.slf4j.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
+import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
 
 @Slf4j
 @Service
-public class ListService {
+class ListService {
     @Autowired
-    private ListRepository listRepository;
-    private UsersRepository usersRepository;
+    private val listRepository: ListRepository? = null
+    private val usersRepository: UsersRepository? = null
 
     // JWT 현재 이메일을 기반으로 사용자 정보를 조회
-    public Users getCurrentUser(String email) {
-        return usersRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("사용자 정보가 없습니다.3"));
+    fun getCurrentUser(email: String?): Users {
+        return usersRepository!!.findByEmail(email)
+            .orElseThrow { RuntimeException("사용자 정보가 없습니다.3") }
     }
 
-    public Page<TempDto> list(Pageable pageable, Users user) {
+    fun list(pageable: Pageable, user: Users?): Page<TempDto> {
+        val list = if (user != null) {
+            listRepository!!.getWithLikeProductList(user.userId, pageable)
+        } else {
+            listRepository!!.getAllProductsWithoutUser(pageable) // 로그인 안 한 경우 전체 상품 목록
+        }
 
-        Page<WithLikeDto> list;
+        val tempList = list!!.content.stream().map { listDto: WithLikeDto? ->
+            val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+            val days = duration.toDays().toInt()
+            val hours = duration.toHours().toInt() % 24
+            val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+            var inform = "⏳ %d일 %d시간".formatted(days, hours)
+            val like = addCommas(listDto.getLikeCount().toString())
+            val price = addCommas(listDto.getPrice().toString())
+            val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val status = listDto.getStatus()
+
+            if (days < 0 || hours < 0 || status == "판매완료") { // 마감된 경우
+                inform = "⏳ 입찰 마감"
+            }
+            TempDto.builder()
+                .productId(listDto.getProductId())
+                .imageUrl(mainImage[0])
+                .name(listDto.getName())
+                .price(price)
+                .bidCount(bidCount)
+                .gap(inform)
+                .location(listDto.getLocation())
+                .likeCount(like)
+                .liked(user != null && listDto.isLiked()) // 로그인 안 하면 liked는 false로 설정
+                .status(listDto.getStatus())
+                .build()
+        }.toList()
+
+        return PageImpl(tempList, pageable, list.totalElements)
+    }
+
+    fun likelist(pageable: Pageable, user: Users): Page<TempDto> {
+        val list = listRepository!!.getLikeList(user.userId, pageable)
+
+
+        val tempList = list!!.content.stream().map { listDto: WithLikeDto? ->
+            val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+            val days = duration.toDays().toInt()
+            val hours = duration.toHours().toInt() % 24
+            val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+            var inform = "⏳ %d일 %d시간".formatted(days, hours)
+            val like = addCommas(listDto.getLikeCount().toString())
+            val price = addCommas(listDto.getPrice().toString())
+            val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val status = listDto.getStatus()
+
+            if (days < 0 || hours < 0 || status == "판매완료") { // 마감된 경우
+                inform = "⏳ 입찰 마감"
+            }
+            TempDto.builder()
+                .productId(listDto.getProductId())
+                .imageUrl(mainImage[0])
+                .name(listDto.getName())
+                .price(price)
+                .bidCount(bidCount)
+                .gap(inform)
+                .location(listDto.getLocation())
+                .likeCount(like)
+                .liked(listDto.isLiked())
+                .status(listDto.getStatus())
+                .build()
+        }.toList()
+
+        return PageImpl(tempList, pageable, list.totalElements)
+    }
+
+    fun categoryList(pageable: Pageable, user: Users?, categoryId: Long?): Page<TempDto> {
+        val list: Page<WithLikeDto?>?
 
         if (user != null) {
-            list = listRepository.getWithLikeProductList(user.getUserId(), pageable);
+            val id = user.userId
+            list = listRepository!!.getCategoryList(id, categoryId, pageable)
         } else {
-            list = listRepository.getAllProductsWithoutUser(pageable); // 로그인 안 한 경우 전체 상품 목록
+            list = listRepository!!.getCategoryListWithoutUser(categoryId, pageable)
         }
 
-        List<TempDto> tempList = list.getContent().stream().map(listDto -> {
-            Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
+        val tempList = list!!.content.stream().map { listDto: WithLikeDto? ->
+            val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+            val days = duration.toDays().toInt()
+            val hours = duration.toHours().toInt() % 24
+            val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+            var inform = "⏳ %d일 %d시간".formatted(days, hours)
+            val like = addCommas(listDto.getLikeCount().toString())
+            val price = addCommas(listDto.getPrice().toString())
+            val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val status = listDto.getStatus()
 
-            int days = (int) duration.toDays();
-            int hours = (int) duration.toHours() % 24;
-            String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-            String inform = "⏳ %d일 %d시간".formatted(days, hours);
-            String like = addCommas(String.valueOf(listDto.getLikeCount()));
-            String price = addCommas(listDto.getPrice().toString());
-            String[] mainImage = listDto.getImageUrl().split(",");
-            String status = listDto.getStatus();
-
-            if (days < 0 || hours < 0 || status.equals("판매완료")) { // 마감된 경우
-                inform = "⏳ 입찰 마감";
+            if (days < 0 || hours < 0 || status == "판매완료") { // 마감된 경우
+                inform = "⏳ 입찰 마감"
             }
+            TempDto.builder()
+                .productId(listDto.getProductId())
+                .imageUrl(mainImage[0])
+                .name(listDto.getName())
+                .price(price)
+                .bidCount(bidCount)
+                .gap(inform)
+                .location(listDto.getLocation())
+                .likeCount(like)
+                .liked(listDto.isLiked())
+                .status(listDto.getStatus())
+                .build()
+        }.toList()
 
-            return TempDto.builder()
-                    .productId(listDto.getProductId())
-                    .imageUrl(mainImage[0])
-                    .name(listDto.getName())
-                    .price(price)
-                    .bidCount(bidCount)
-                    .gap(inform)
-                    .location(listDto.getLocation())
-                    .likeCount(like)
-                    .liked(user != null && listDto.isLiked()) // 로그인 안 하면 liked는 false로 설정
-                    .status(listDto.getStatus())
-                    .build();
-        }).toList();
-
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
+        return PageImpl(tempList, pageable, list.totalElements)
     }
 
-    public Page<TempDto> likelist(Pageable pageable, Users user) {
-        Page<WithLikeDto> list = listRepository.getLikeList(user.getUserId(), pageable);;
+    fun getProductsByPrice(pageable: Pageable, user: Users?, minPrice: Int, maxPrice: Int): Page<TempDto> {
+        val list: Page<WithLikeDto?>?
 
-        List<TempDto> tempList = list.getContent().stream().map(listDto -> {
-            Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
+        if (user != null) {
+            val userId = user.userId
+            list = listRepository!!.findByPriceRange(userId, minPrice, maxPrice, pageable)
+        } else {
+            list = listRepository!!.findByPriceRangeWithUserId(minPrice, maxPrice, pageable)
+        }
 
-            int days = (int) duration.toDays();
-            int hours = (int) duration.toHours() % 24;
-            String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-            String inform = "⏳ %d일 %d시간".formatted(days, hours);
-            String like = addCommas(String.valueOf(listDto.getLikeCount()));
-            String price = addCommas(listDto.getPrice().toString());
-            String[] mainImage = listDto.getImageUrl().split(",");
-            String status = listDto.getStatus();
+        val tempList = list!!.content.stream().map { listDto: WithLikeDto? ->
+            val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+            val days = duration.toDays().toInt()
+            val hours = duration.toHours().toInt() % 24
+            val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+            var inform = "⏳ %d일 %d시간".formatted(days, hours)
+            val like = addCommas(listDto.getLikeCount().toString())
+            val price = addCommas(listDto.getPrice().toString())
+            val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val status = listDto.getStatus()
 
-            if (days < 0 || hours < 0 || status.equals("판매완료")) { // 마감된 경우
-                inform = "⏳ 입찰 마감";
+            if (days < 0 || hours < 0 || status == "판매완료") { // 마감된 경우
+                inform = "⏳ 입찰 마감"
             }
+            TempDto.builder()
+                .productId(listDto.getProductId())
+                .imageUrl(mainImage[0])
+                .name(listDto.getName())
+                .price(price)
+                .bidCount(bidCount)
+                .gap(inform)
+                .location(listDto.getLocation())
+                .likeCount(like)
+                .liked(listDto.isLiked())
+                .status(listDto.getStatus())
+                .build()
+        }.toList()
 
+        return PageImpl(tempList, pageable, list.totalElements)
+    }
 
-            return TempDto.builder()
+    fun getAvailableBidWithLike(pageable: Pageable, user: Users): Page<TempDto> {
+        val list = listRepository!!.getAvailableProductListWithLike(user.userId, pageable)
+
+        val tempList = list!!.content.stream()
+            .filter { listDto: WithLikeDto? ->  // 마감되지 않은 상품만 필터링
+                val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+                val days = duration.toDays().toInt()
+                val hours = duration.toHours().toInt() % 24
+                days > 0 || (days == 0 && hours > 0)
+            }
+            .map { listDto: WithLikeDto? ->
+                val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+                val days = duration.toDays().toInt()
+                val hours = duration.toHours().toInt() % 24
+                val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+                val inform = "⏳ %d일 %d시간".formatted(days, hours)
+                val like = addCommas(listDto.getLikeCount().toString())
+                val price = addCommas(listDto.getPrice().toString())
+                val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                TempDto.builder()
                     .productId(listDto.getProductId())
                     .imageUrl(mainImage[0])
                     .name(listDto.getName())
@@ -105,39 +213,26 @@ public class ListService {
                     .likeCount(like)
                     .liked(listDto.isLiked())
                     .status(listDto.getStatus())
-                    .build();
-        }).toList();
+                    .build()
+            }.toList()
 
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
+        return PageImpl(tempList, pageable, list.totalElements)
     }
 
-    public Page<TempDto> categoryList(Pageable pageable, Users user, Long categoryId) {
-        Page<WithLikeDto> list;
+    fun getAvailableBid(pageable: Pageable): Page<TempDto> {
+        val list = listRepository!!.getAvailableProductList(pageable)
 
-        if(user != null) {
-            Long id = user.getUserId();
-            list = listRepository.getCategoryList(id, categoryId, pageable);
-        } else {
-            list = listRepository.getCategoryListWithoutUser(categoryId, pageable);
-        }
-
-        List<TempDto> tempList = list.getContent().stream().map(listDto -> {
-            Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
-
-            int days = (int) duration.toDays();
-            int hours = (int) duration.toHours() % 24;
-            String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-            String inform = "⏳ %d일 %d시간".formatted(days, hours);
-            String like = addCommas(String.valueOf(listDto.getLikeCount()));
-            String price = addCommas(listDto.getPrice().toString());
-            String[] mainImage = listDto.getImageUrl().split(",");
-            String status = listDto.getStatus();
-
-            if (days < 0 || hours < 0 || status.equals("판매완료")) { // 마감된 경우
-                inform = "⏳ 입찰 마감";
-            }
-
-            return TempDto.builder()
+        val tempList = list!!.content.stream()
+            .map { listDto: ListDto? ->
+                val duration = Duration.between(LocalDateTime.now(), listDto.getEndAt())
+                val days = duration.toDays().toInt()
+                val hours = duration.toHours().toInt() % 24
+                val bidCount = "입찰 %d회".formatted(listDto.getBidCount())
+                val inform = "⏳ %d일 %d시간".formatted(days, hours)
+                val like = addCommas(listDto.getLikeCount().toString())
+                val price = addCommas(listDto.getPrice().toString())
+                val mainImage = listDto.getImageUrl().split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                TempDto.builder()
                     .productId(listDto.getProductId())
                     .imageUrl(mainImage[0])
                     .name(listDto.getName())
@@ -146,130 +241,21 @@ public class ListService {
                     .gap(inform)
                     .location(listDto.getLocation())
                     .likeCount(like)
-                    .liked(listDto.isLiked())
                     .status(listDto.getStatus())
-                    .build();
-        }).toList();
+                    .build()
+            }.toList()
 
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
+        return PageImpl(tempList, pageable, list.totalElements)
     }
 
-    public Page<TempDto> getProductsByPrice(Pageable pageable, Users user, int minPrice, int maxPrice) {
-        Page<WithLikeDto> list;
-
-        if(user != null) {
-            Long userId = user.getUserId();
-            list = listRepository.findByPriceRange(userId, minPrice, maxPrice, pageable);
-        } else {
-            list = listRepository.findByPriceRangeWithUserId(minPrice, maxPrice, pageable);
-        }
-
-        List<TempDto> tempList = list.getContent().stream().map(listDto -> {
-            Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
-
-            int days = (int) duration.toDays();
-            int hours = (int) duration.toHours() % 24;
-            String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-            String inform = "⏳ %d일 %d시간".formatted(days, hours);
-            String like = addCommas(String.valueOf(listDto.getLikeCount()));
-            String price = addCommas(listDto.getPrice().toString());
-            String[] mainImage = listDto.getImageUrl().split(",");
-            String status = listDto.getStatus();
-
-            if (days < 0 || hours < 0 || status.equals("판매완료")) { // 마감된 경우
-                inform = "⏳ 입찰 마감";
+    companion object {
+        fun addCommas(number: String): String {
+            try {
+                val value = number.toDouble() // 실수도 처리 가능
+                return String.format("%,.0f", value) // 천 단위마다 콤마 추가
+            } catch (e: NumberFormatException) {
+                return "Invalid number format"
             }
-
-            return TempDto.builder()
-                    .productId(listDto.getProductId())
-                    .imageUrl(mainImage[0])
-                    .name(listDto.getName())
-                    .price(price)
-                    .bidCount(bidCount)
-                    .gap(inform)
-                    .location(listDto.getLocation())
-                    .likeCount(like)
-                    .liked(listDto.isLiked())
-                    .status(listDto.getStatus())
-                    .build();
-        }).toList();
-
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
-    }
-
-    public Page<TempDto> getAvailableBidWithLike(Pageable pageable, Users user) {
-        Page<WithLikeDto> list = listRepository.getAvailableProductListWithLike(user.getUserId(), pageable);
-
-        List<TempDto> tempList = list.getContent().stream()
-                .filter(listDto -> { // 마감되지 않은 상품만 필터링
-                    Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
-                    int days = (int) duration.toDays();
-                    int hours = (int) duration.toHours() % 24;
-                    return days > 0 || (days == 0 && hours > 0);
-                })
-                .map(listDto -> {
-                    Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
-                    int days = (int) duration.toDays();
-                    int hours = (int) duration.toHours() % 24;
-                    String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-                    String inform = "⏳ %d일 %d시간".formatted(days, hours);
-                    String like = addCommas(String.valueOf(listDto.getLikeCount()));
-                    String price = addCommas(listDto.getPrice().toString());
-                    String[] mainImage = listDto.getImageUrl().split(",");
-
-                    return TempDto.builder()
-                            .productId(listDto.getProductId())
-                            .imageUrl(mainImage[0])
-                            .name(listDto.getName())
-                            .price(price)
-                            .bidCount(bidCount)
-                            .gap(inform)
-                            .location(listDto.getLocation())
-                            .likeCount(like)
-                            .liked(listDto.isLiked())
-                            .status(listDto.getStatus())
-                            .build();
-                }).toList();
-
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
-    }
-
-    public Page<TempDto> getAvailableBid(Pageable pageable) {
-        Page<ListDto> list = listRepository.getAvailableProductList(pageable);
-
-        List<TempDto> tempList = list.getContent().stream()
-                .map(listDto -> {
-                    Duration duration = Duration.between(LocalDateTime.now(), listDto.getEndAt());
-                    int days = (int) duration.toDays();
-                    int hours = (int) duration.toHours() % 24;
-                    String bidCount = "입찰 %d회".formatted(listDto.getBidCount());
-                    String inform = "⏳ %d일 %d시간".formatted(days, hours);
-                    String like = addCommas(String.valueOf(listDto.getLikeCount()));
-                    String price = addCommas(listDto.getPrice().toString());
-                    String[] mainImage = listDto.getImageUrl().split(",");
-
-                    return TempDto.builder()
-                            .productId(listDto.getProductId())
-                            .imageUrl(mainImage[0])
-                            .name(listDto.getName())
-                            .price(price)
-                            .bidCount(bidCount)
-                            .gap(inform)
-                            .location(listDto.getLocation())
-                            .likeCount(like)
-                            .status(listDto.getStatus())
-                            .build();
-                }).toList();
-
-        return new PageImpl<>(tempList, pageable, list.getTotalElements());
-    }
-
-    public static String addCommas(String number) {
-        try {
-            double value = Double.parseDouble(number); // 실수도 처리 가능
-            return String.format("%,.0f", value); // 천 단위마다 콤마 추가
-        } catch (NumberFormatException e) {
-            return "Invalid number format";
         }
     }
 }

@@ -1,14 +1,12 @@
-package com.example.ssauc.user.mypage.service;
+package com.example.ssauc.user.mypage.service
 
-import com.example.ssauc.user.login.entity.Users;
+import com.example.ssauc.user.login.entity.Users
 
-
-public interface ReputationService {
+interface ReputationService {
     // 평판 관련 로직 담당
+    fun getCurrentUser(email: String?): Users
 
-    Users getCurrentUser(String email);
+    fun updateReputation(userId: Long, changeType: String, changeAmount: Double)
 
-    void updateReputation(Long userId, String changeType, double changeAmount);
-
-    void updateReputationForOrder(Long userId, String changeType, double changeAmount);
+    fun updateReputationForOrder(userId: Long, changeType: String, changeAmount: Double)
 }

@@ -1,58 +1,50 @@
-package com.example.ssauc.user.chat.service;
+package com.example.ssauc.user.chat.service
 
-import com.example.ssauc.user.chat.dto.ReportRequestDto;
-import com.example.ssauc.user.chat.entity.ChatRoom;
-import com.example.ssauc.user.chat.entity.Report;
-import com.example.ssauc.user.chat.repository.ChatRoomRepository;
-import com.example.ssauc.user.chat.repository.ReportRepository;
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import com.example.ssauc.user.login.service.UserService;
-import com.example.ssauc.user.product.entity.Product;
-import com.example.ssauc.user.product.repository.ProductRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.chat.dto.ReportRequestDto
+import com.example.ssauc.user.chat.entity.ChatRoom
+import com.example.ssauc.user.chat.entity.Report
+import com.example.ssauc.user.chat.repository.ChatRoomRepository
+import com.example.ssauc.user.chat.repository.ReportRepository
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.login.repository.UsersRepository
+import lombok.RequiredArgsConstructor
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ReportService {
+class ReportService {
+    private val reportRepository: ReportRepository? = null
 
-    private final ReportRepository reportRepository;
+    private val chatRoomRepository: ChatRoomRepository? = null
 
-    private final ChatRoomRepository chatRoomRepository;
-
-    private final UsersRepository usersRepository;
+    private val usersRepository: UsersRepository? = null
 
 
-    public boolean reportUser(ReportRequestDto reportRequestDto) {
+    fun reportUser(reportRequestDto: ReportRequestDto): Boolean {
         try {
-            Report report = new Report();
-            report.setReporter(usersRepository.findById(reportRequestDto.getReporterUserId()).orElse(null));
-            report.setReportedUser(usersRepository.findById(reportRequestDto.getReportedUserId()).orElse(null));
-            report.setReportReason(reportRequestDto.getReportReason());
-            report.setDetails(reportRequestDto.getDetails());
-            report.setStatus("처리대기");
-            report.setReportDate(LocalDateTime.now());
-            reportRepository.save(report);
-            return true;
-        } catch (Exception e) {
-            return false;
+            val report = Report()
+            report.setReporter(usersRepository!!.findById(reportRequestDto.getReporterUserId()).orElse(null))
+            report.setReportedUser(usersRepository!!.findById(reportRequestDto.getReportedUserId()).orElse(null))
+            report.setReportReason(reportRequestDto.getReportReason())
+            report.setDetails(reportRequestDto.getDetails())
+            report.setStatus("처리대기")
+            report.setReportDate(LocalDateTime.now())
+            reportRepository!!.save(report)
+            return true
+        } catch (e: Exception) {
+            return false
         }
     }
 
 
-
-
-    public ChatRoom getChatRoom(long chatRoomId) {
-        return chatRoomRepository.findById(chatRoomId).orElse(null);
-    }
-    public Users getUsers(long userId) {
-        return usersRepository.findById(userId).orElse(null);
+    fun getChatRoom(chatRoomId: Long): ChatRoom? {
+        return chatRoomRepository!!.findById(chatRoomId).orElse(null)
     }
 
+    fun getUsers(userId: Long): Users? {
+        return usersRepository!!.findById(userId).orElse(null)
+    }
 }

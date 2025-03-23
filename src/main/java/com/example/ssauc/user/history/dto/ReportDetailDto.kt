@@ -1,29 +1,26 @@
-package com.example.ssauc.user.history.dto;
+package com.example.ssauc.user.history.dto
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.*
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReportDetailDto {
+class ReportDetailDto {
     // "product" 또는 "user" 값으로 신고 유형 구분
-    private String type;
+    public val type: String? = null
+
     // 상품 신고인 경우
-    private Long productId;
-    private String productName;
+    public val productId: Long? = null
+    public val productName: String? = null
+
     // 유저 신고인 경우
-    private String reportedUserName;
-    private String reportReason;
-    private String details;
-    private LocalDateTime reportDate;
-    private String status;
-    private LocalDateTime processedAt;
+    public val reportedUserName: String? = null
+    public val reportReason: String? = null
+    public val details: String? = null
+    public val reportDate: LocalDateTime? = null
+    public val status: String? = null
+    public val processedAt: LocalDateTime? = null
 }

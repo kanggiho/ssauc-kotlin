@@ -1,5 +1,6 @@
-package com.example.ssauc.user.order.dto;
-import lombok.*;
+package com.example.ssauc.user.order.dto
+
+import lombok.*
 
 @Getter
 @Setter
@@ -7,12 +8,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
-public class OrderRequestDto {
-    private Long productId;
-    private Long buyerId;
-    private Long sellerId;
-    private int totalPayment;
-    private String postalCode;
-    private String deliveryAddress;
-    private String selectedOption;
+class OrderRequestDto {
+    private val productId: Long? = null
+    private val buyerId: Long? = null
+    private val sellerId: Long? = null
+    private val totalPayment = 0
+    private val postalCode: String? = null
+    private val deliveryAddress: String? = null
+    private val selectedOption: String? = null
 }

@@ -1,66 +1,44 @@
-package com.example.ssauc.user.login.service;
+package com.example.ssauc.user.login.service
 
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority
 
-import java.util.Collection;
-import java.util.Collections;
+@org.springframework.stereotype.Service
+@lombok.RequiredArgsConstructor
+class CustomUserDetailsService : UserDetailsService {
+    private val userRepository: UsersRepository? = null
 
-@Service
-@RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
-
-    private final UsersRepository userRepository;
-
-    @Override
-    public UserDetails loadUserByUsername(String email) {
-        Users user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    override fun loadUserByUsername(email: String): UserDetails {
+        val user: Users = userRepository.findByEmail(email)
+            .orElseThrow<java.lang.RuntimeException>(java.util.function.Supplier<java.lang.RuntimeException> {
+                UsernameNotFoundException(
+                    "User not found with email: $email"
+                )
+            })
         // 익명 내부 클래스로 UserDetails 구현. getUsername()은 로그인 후 헤더에서 닉네임으로 표시되도록 user.getUserName() 반환
-        return new UserDetails() {
-            @Override
-            public Collection<? extends GrantedAuthority> getAuthorities() {
-                // 기본적으로 ROLE_USER 권한만 반환합니다.
-                return Collections.singleton(() -> "ROLE_USER");
-            }
+        return object : UserDetails() {
+            val authorities: Collection<Any?>
+                get() =// 기본적으로 ROLE_USER 권한만 반환합니다.
+                    setOf<GrantedAuthority>(GrantedAuthority { "ROLE_USER" })
 
-            @Override
-            public String getPassword() {
-                return user.getPassword();
-            }
+            val password: String
+                get() = user.password
 
-            // 여기서 이메일이 아니라 닉네임을 반환하여, 로그인 후 authentication.name이 닉네임이 되도록 함
-            @Override
-            public String getUsername() {
-                return user.getUserName();
-            }
+            val username: String
+                // 여기서 이메일이 아니라 닉네임을 반환하여, 로그인 후 authentication.name이 닉네임이 되도록 함
+                get() = user.userName
 
-            @Override
-            public boolean isAccountNonExpired() {
-                return true;
-            }
+            val isAccountNonExpired: Boolean
+                get() = true
 
-            @Override
-            public boolean isAccountNonLocked() {
-                return true;
-            }
+            val isAccountNonLocked: Boolean
+                get() = true
 
-            @Override
-            public boolean isCredentialsNonExpired() {
-                return true;
-            }
+            val isCredentialsNonExpired: Boolean
+                get() = true
 
-            @Override
-            public boolean isEnabled() {
-                // 계정 상태가 "active"인 경우에만 사용 가능하도록 설정
-                return "active".equalsIgnoreCase(user.getStatus());
-            }
-        };
+            val isEnabled: Boolean
+                get() =// 계정 상태가 "active"인 경우에만 사용 가능하도록 설정
+                    "active".equals(user.status, ignoreCase = true)
+        }
     }
 }

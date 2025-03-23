@@ -1,14 +1,14 @@
-package com.example.ssauc.user.bid.dto;
+package com.example.ssauc.user.bid.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class AutoBidRequestDto {
-    private Long productId;
-    private String userId;
-    private int maxBidAmount;
+class AutoBidRequestDto {
+    public val productId: Long? = null
+    public val userId: String? = null
+    public val maxBidAmount = 0
 }

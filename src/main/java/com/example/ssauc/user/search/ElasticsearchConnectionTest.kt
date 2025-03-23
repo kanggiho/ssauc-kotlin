@@ -1,28 +1,20 @@
-package com.example.ssauc.user.search;
+package com.example.ssauc.user.search
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.transport.endpoints.BooleanResponse;
-import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Component;
+import co.elastic.clients.elasticsearch.ElasticsearchClient
+import jakarta.annotation.PostConstruct
+import org.springframework.stereotype.Component
 
 @Component
-public class ElasticsearchConnectionTest {
-
-    private final ElasticsearchClient elasticsearchClient;
-
-    public ElasticsearchConnectionTest(ElasticsearchClient elasticsearchClient) {
-        this.elasticsearchClient = elasticsearchClient;
-    }
-
+class ElasticsearchConnectionTest(private val elasticsearchClient: ElasticsearchClient) {
     @PostConstruct
-    public void testConnection() {
+    fun testConnection() {
         try {
-            BooleanResponse response = elasticsearchClient.ping();
-            boolean isConnected = response.value();
-            System.out.println("✅ Elasticsearch 연결 상태: " + isConnected);
-        } catch (Exception e) {
-            System.err.println("❌ Elasticsearch 연결 실패: " + e.getMessage());
-            e.printStackTrace();
+            val response = elasticsearchClient.ping()
+            val isConnected = response.value()
+            println("✅ Elasticsearch 연결 상태: $isConnected")
+        } catch (e: Exception) {
+            System.err.println("❌ Elasticsearch 연결 실패: " + e.message)
+            e.printStackTrace()
         }
     }
 }

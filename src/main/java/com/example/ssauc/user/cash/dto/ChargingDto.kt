@@ -1,15 +1,15 @@
-package com.example.ssauc.user.cash.dto;
+package com.example.ssauc.user.cash.dto
 
-import lombok.*;
+import lombok.*
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChargingDto {
-    private String id;
-    private String name;
-    private long price;
-    private String currency;
+class ChargingDto {
+    private val id: String? = null
+    private val name: String? = null
+    private val price: Long = 0
+    private val currency: String? = null
 }

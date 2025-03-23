@@ -1,14 +1,11 @@
-package com.example.ssauc.user.recommendation.dto;
+package com.example.ssauc.user.recommendation.dto
 
-import com.example.ssauc.user.product.entity.Product;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.util.List;
+import lombok.Getter
+import lombok.Setter
 
 @Getter
 @Setter
-public class RecommendationResponse {
-    private List<RecommendationDto> recommendationProducts;
-    private String getExplanation;
+class RecommendationResponse {
+    private val recommendationProducts: List<RecommendationDto>? = null
+    private val getExplanation: String? = null
 }

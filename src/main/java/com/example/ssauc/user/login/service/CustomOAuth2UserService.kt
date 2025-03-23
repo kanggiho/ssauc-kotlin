@@ -1,109 +1,103 @@
-package com.example.ssauc.user.login.service;
+package com.example.ssauc.user.login.service
 
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import com.example.ssauc.user.login.repository.UsersRepository
+import lombok.RequiredArgsConstructor
+import org.springframework.context.annotation.Lazy
+import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException
+import org.springframework.security.oauth2.core.OAuth2Error
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User
+import org.springframework.security.oauth2.core.user.OAuth2User
+import org.springframework.stereotype.Service
 
 @Service
 @RequiredArgsConstructor
 @Lazy
-public class CustomOAuth2UserService extends DefaultOAuth2UserService {
+class CustomOAuth2UserService : DefaultOAuth2UserService() {
+    private val usersRepository: UsersRepository? = null
 
-    private final UsersRepository usersRepository;
-    private final @Lazy PasswordEncoder passwordEncoder;
+    @Lazy
+    private val passwordEncoder: PasswordEncoder? = null
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = super.loadUser(userRequest);
-        return processOAuth2User(userRequest, oauth2User);
+    @Throws(OAuth2AuthenticationException::class)
+    override fun loadUser(userRequest: OAuth2UserRequest): OAuth2User {
+        val oauth2User = super.loadUser(userRequest)
+        return processOAuth2User(userRequest, oauth2User)
     }
 
-    @SuppressWarnings("unchecked")
-    private OAuth2User processOAuth2User(OAuth2UserRequest userRequest, OAuth2User oauth2User) {
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        Map<String, Object> attributes = oauth2User.getAttributes();
+    private fun processOAuth2User(userRequest: OAuth2UserRequest, oauth2User: OAuth2User): OAuth2User {
+        val registrationId = userRequest.clientRegistration.registrationId
+        val attributes = oauth2User.attributes
 
-        String email = null;
-        String nickname = null;
+        var email: String? = null
+        var nickname: String? = null
 
-        if ("google".equals(registrationId)) {
-            email = (String) attributes.get("email");
-            nickname = (String) attributes.get("name");
-        } else if ("naver".equals(registrationId)) {
-            Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+        if ("google" == registrationId) {
+            email = attributes["email"] as String?
+            nickname = attributes["name"] as String?
+        } else if ("naver" == registrationId) {
+            val response = attributes["response"] as Map<String, Any>?
             if (response != null) {
-                email = (String) response.get("email");
-                nickname = (String) response.get("name");
+                email = response["email"] as String?
+                nickname = response["name"] as String?
             }
-        } else if ("kakao".equals(registrationId)) {
-            String kakaoId = String.valueOf(attributes.get("id"));
-            Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        } else if ("kakao" == registrationId) {
+            val kakaoId = attributes["id"].toString()
+            val kakaoAccount = attributes["kakao_account"] as Map<String, Any>?
             if (kakaoAccount != null) {
-                email = (String) kakaoAccount.get("email");
-                Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+                email = kakaoAccount["email"] as String?
+                val profile = kakaoAccount["profile"] as Map<String, Any>?
                 if (profile != null) {
-                    nickname = (String) profile.get("nickname");
+                    nickname = profile["nickname"] as String?
                 }
             }
             if (email == null) {
-                email = kakaoId + "@kakao.com";
+                email = "$kakaoId@kakao.com"
             }
             if (nickname == null) {
-                nickname = "KakaoUser_" + kakaoId;
+                nickname = "KakaoUser_$kakaoId"
             }
         }
 
         if (email == null) {
-            throw new OAuth2AuthenticationException(new OAuth2Error("invalid_request", "이메일을 가져올 수 없습니다.", null));
+            throw OAuth2AuthenticationException(OAuth2Error("invalid_request", "이메일을 가져올 수 없습니다.", null))
         }
         if (nickname == null) {
-            nickname = "SocialUser";
+            nickname = "SocialUser"
         }
 
-        Optional<Users> userOptional = usersRepository.findByEmail(email);
-        if (userOptional.isEmpty()) {
+        val userOptional = usersRepository!!.findByEmail(email)
+        if (userOptional!!.isEmpty) {
             // DB에 없는 사용자이면 additional_info_required
-            OAuth2Error oauth2Error = new OAuth2Error(
-                    "additional_info_required",
-                    "additional_info_required:" + email + ":" + nickname,
-                    null
-            );
-            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.getDescription());
+            val oauth2Error = OAuth2Error(
+                "additional_info_required",
+                "additional_info_required:$email:$nickname",
+                null
+            )
+            throw OAuth2AuthenticationException(oauth2Error, oauth2Error.description)
         }
 
         // user가 존재하지만, status != active이면 소셜 로그인 불가
-        Users user = userOptional.get();
-        if (!"active".equalsIgnoreCase(user.getStatus())) {
-            OAuth2Error oauth2Error = new OAuth2Error(
-                    "account_inactive",
-                    "inactive|" + email + "|" + nickname,  // inactive|이메일|닉네임
-                    null
-            );
-            throw new OAuth2AuthenticationException(oauth2Error, "inactive user");
+        val user = userOptional.get()
+        if (!"active".equals(user.status, ignoreCase = true)) {
+            val oauth2Error = OAuth2Error(
+                "account_inactive",
+                "inactive|$email|$nickname",  // inactive|이메일|닉네임
+                null
+            )
+            throw OAuth2AuthenticationException(oauth2Error, "inactive user")
         }
 
         // active 계정이면 로그인 허용
-        Map<String, Object> modifiableAttributes = new HashMap<>(attributes);
-        modifiableAttributes.put("email", email);
+        val modifiableAttributes: MutableMap<String, Any> = HashMap(attributes)
+        modifiableAttributes["email"] = email
 
-        return new DefaultOAuth2User(
-                Collections.singleton(() -> "ROLE_USER"),
-                modifiableAttributes,
-                "email"
-        );
+        return DefaultOAuth2User(
+            setOf<org.springframework.security.core.GrantedAuthority>(org.springframework.security.core.GrantedAuthority { "ROLE_USER" }),
+            modifiableAttributes,
+            "email"
+        )
     }
 }

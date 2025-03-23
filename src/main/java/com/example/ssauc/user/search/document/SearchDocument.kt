@@ -1,33 +1,27 @@
-package com.example.ssauc.user.search.document;
+package com.example.ssauc.user.search.document
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
-
-import java.time.LocalDateTime;
+import lombok.Getter
+import lombok.Setter
+import org.springframework.data.annotation.Id
+import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @Document(indexName = "search") // "search" 인덱스와 매핑
-public class SearchDocument {
-
+class SearchDocument {
     @Id
-    private String id;
+    private val id: String? = null
 
     @Field(type = FieldType.Text, analyzer = "korean_analyzer")
-    private String keyword;
-
-    @Field(type = FieldType.Text) //  category 필드 추가
-    private String category;
-
-    @Field(type = FieldType.Date)
-    private LocalDateTime createdAt;
+    private val keyword: String? = null
 
     // getCategory() 메서드 추가
-    public String getCategory() {
-        return category;
-    }
+    @Field(type = FieldType.Text) //  category 필드 추가
+    val category: String? = null
+
+    @Field(type = FieldType.Date)
+    private val createdAt: LocalDateTime? = null
 }

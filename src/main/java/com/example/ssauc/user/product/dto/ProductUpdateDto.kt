@@ -1,22 +1,25 @@
-package com.example.ssauc.user.product.dto;
+package com.example.ssauc.user.product.dto
 
-import lombok.*;
+import lombok.AllArgsConstructor
+import lombok.Builder
+import lombok.Data
+import lombok.NoArgsConstructor
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductUpdateDto {
-    private Long productId;
-    private String categoryName;
-    private String name;
-    private String description;
-    private Long price;
-    private Long startPrice;
-    private String imageUrl;
-    private String auctionDate;
-    private Integer auctionHour;
-    private Integer auctionMinute;
-    private int minIncrement;
-    private int dealType;
+class ProductUpdateDto {
+    private val productId: Long? = null
+    private val categoryName: String? = null
+    private val name: String? = null
+    private val description: String? = null
+    private val price: Long? = null
+    private val startPrice: Long? = null
+    private val imageUrl: String? = null
+    private val auctionDate: String? = null
+    private val auctionHour: Int? = null
+    private val auctionMinute: Int? = null
+    private val minIncrement = 0
+    private val dealType = 0
 }

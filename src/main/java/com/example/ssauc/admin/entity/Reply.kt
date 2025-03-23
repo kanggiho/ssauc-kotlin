@@ -1,10 +1,9 @@
-package com.example.ssauc.admin.entity;
+package com.example.ssauc.admin.entity
 
-import com.example.ssauc.user.contact.entity.Board;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.contact.entity.Board
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
 @Entity
 @Getter
@@ -14,26 +13,27 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 @Table(name = "reply")
-public class Reply {
+class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reply_id")
-    private Long replyId;
+    public var replyId: Long? = null
 
+    @JvmField
     @OneToOne
     @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
+    public val board: Board? = null
 
     @ManyToOne
     @JoinColumn(name = "replier_id", nullable = false)
-    private Admin admin;
+    public val admin: Admin? = null
 
     @Column(name = "subject", nullable = false, length = 200)
-    private String subject;
+    public var subject: String? = null
 
     @Column(name = "message", columnDefinition = "TEXT")
-    private String message;
+    public var message: String? = null
 
     @Column(name = "complete_at")
-    private LocalDateTime completeAt;
+    public var completeAt: LocalDateTime? = null
 }

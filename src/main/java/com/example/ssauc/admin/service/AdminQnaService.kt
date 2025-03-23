@@ -1,67 +1,63 @@
-package com.example.ssauc.admin.service;
+package com.example.ssauc.admin.service
 
-import com.example.ssauc.admin.dto.ReplyDto;
-import com.example.ssauc.admin.entity.Admin;
-import com.example.ssauc.admin.repository.AdminReplyRepository;
-import com.example.ssauc.admin.entity.Reply;
-import com.example.ssauc.admin.repository.AdminBoardRepository;
-import com.example.ssauc.user.contact.entity.Board;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.admin.dto.ReplyDto
+import com.example.ssauc.admin.entity.Admin
+import com.example.ssauc.admin.entity.Reply
+import com.example.ssauc.admin.repository.AdminBoardRepository
+import com.example.ssauc.admin.repository.AdminReplyRepository
+import com.example.ssauc.user.contact.entity.Board
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
-public class AdminQnaService
-{
+class AdminQnaService {
     @Autowired
-    private AdminBoardRepository adminBoardRepository;
+    private val adminBoardRepository: AdminBoardRepository? = null
 
     @Autowired
-    private AdminReplyRepository adminReplyRepository;
+    private val adminReplyRepository: AdminReplyRepository? = null
 
 
-    public Page<Board> getBoards(int page, String sortField, String sortDir) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
-        return adminBoardRepository.findAll(PageRequest.of(page, 10, sort));
+    fun getBoards(page: Int, sortField: String, sortDir: String): Page<Board?> {
+        val sort = Sort.by(Sort.Direction.fromString(sortDir), sortField)
+        return adminBoardRepository!!.findAll(PageRequest.of(page, 10, sort))
     }
 
-    public Board findBoardById(Long boardId) {
-        return adminBoardRepository.findById(boardId).orElse(null);
+    fun findBoardById(boardId: Long): Board? {
+        return adminBoardRepository!!.findById(boardId).orElse(null)
     }
 
-    public boolean updateBoardInfo(ReplyDto replyDto) {
-
-        Board board = adminBoardRepository.findById(replyDto.getBoardId()).orElse(null);
-        Admin admin = replyDto.getAdmin();
+    fun updateBoardInfo(replyDto: ReplyDto): Boolean {
+        val board = adminBoardRepository!!.findById(replyDto.getBoardId()).orElse(null)
+        val admin: Admin = replyDto.getAdmin()
 
         // board 테이블의 답변상태 답변완료로 수정
-        int updateResult = adminBoardRepository.updateBoardByBoardId("답변완료", replyDto.getBoardId());
+        val updateResult = adminBoardRepository.updateBoardByBoardId("답변완료", replyDto.getBoardId())
 
         // reply 테이블에 builder로 데이터 추가 후 넣기
-        Reply reply = Reply.builder()
-                .board(board)
-                .admin(admin)
-                .subject(replyDto.getTitle())
-                .message(replyDto.getContent())
-                .completeAt(LocalDateTime.now())
-                .build();
+        val reply: Reply = Reply.builder()
+            .board(board)
+            .admin(admin)
+            .subject(replyDto.getTitle())
+            .message(replyDto.getContent())
+            .completeAt(LocalDateTime.now())
+            .build()
 
-        adminReplyRepository.save(reply);
+        adminReplyRepository!!.save(reply)
 
-        return updateResult == 1;
+        return updateResult == 1
     }
 
-    public List<Board> findAllBoards() {
-        return adminBoardRepository.findAll();
+    fun findAllBoards(): List<Board?> {
+        return adminBoardRepository!!.findAll()
     }
 
 
-    public Reply findReplyByBoardId(Long boardId) {
-        return adminReplyRepository.findByBoardId(boardId).orElse(null);
+    fun findReplyByBoardId(boardId: Long?): Reply? {
+        return adminReplyRepository!!.findByBoardId(boardId)!!.orElse(null)
     }
 }

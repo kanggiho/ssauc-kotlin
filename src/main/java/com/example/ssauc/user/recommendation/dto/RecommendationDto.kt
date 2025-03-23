@@ -1,19 +1,19 @@
-package com.example.ssauc.user.recommendation.dto;
+package com.example.ssauc.user.recommendation.dto
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RecommendationDto {
-   Long productId;
-   String name;
-   String description;
-   Long price;
-   String location;
-   String imageUrl;
+class RecommendationDto {
+    var productId: Long? = null
+    var name: String? = null
+    var description: String? = null
+    var price: Long? = null
+    var location: String? = null
+    var imageUrl: String? = null
 }

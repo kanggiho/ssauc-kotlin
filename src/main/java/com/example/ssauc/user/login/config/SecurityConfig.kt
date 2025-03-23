@@ -1,89 +1,88 @@
-package com.example.ssauc.user.login.config;
+package com.example.ssauc.user.login.config
 
-import com.example.ssauc.user.login.handler.CustomLogoutSuccessHandler;
-import com.example.ssauc.user.login.handler.CustomOAuth2FailureHandler;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import com.example.ssauc.user.login.security.JwtAuthenticationFilter;
-import com.example.ssauc.user.login.handler.OAuth2LoginSuccessHandler;
-import com.example.ssauc.user.login.service.CustomOAuth2UserService;
-import com.example.ssauc.user.login.service.RefreshTokenService;
-import com.example.ssauc.user.login.util.JwtUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.authentication.AuthenticationManager
 
-@Configuration
+@org.springframework.context.annotation.Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
-public class SecurityConfig {
+@lombok.RequiredArgsConstructor
+class SecurityConfig {
+    private val jwtUtil: JwtUtil? = null
+    private val customOAuth2FailureHandler: CustomOAuth2FailureHandler? = null
 
-    private final JwtUtil jwtUtil;
-    private final CustomOAuth2FailureHandler customOAuth2FailureHandler;
-    private final @Lazy CustomOAuth2UserService customOAuth2UserService;
-    private final UsersRepository usersRepository;
+    @org.springframework.context.annotation.Lazy
+    private val customOAuth2UserService: CustomOAuth2UserService? = null
+    private val usersRepository: UsersRepository? = null
 
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtUtil, usersRepository);
+    @org.springframework.context.annotation.Bean
+    fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
+        return JwtAuthenticationFilter(jwtUtil, usersRepository)
     }
 
-    @Bean
-    public OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler(RefreshTokenService refreshTokenService) {
-        return new OAuth2LoginSuccessHandler(jwtUtil, refreshTokenService);
+    @org.springframework.context.annotation.Bean
+    fun oAuth2LoginSuccessHandler(refreshTokenService: RefreshTokenService?): OAuth2LoginSuccessHandler {
+        return OAuth2LoginSuccessHandler(jwtUtil, refreshTokenService)
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, RefreshTokenService refreshTokenService) throws Exception {
+    @org.springframework.context.annotation.Bean
+    @Throws(java.lang.Exception::class)
+    fun securityFilterChain(http: HttpSecurity, refreshTokenService: RefreshTokenService?): SecurityFilterChain {
         http
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/**",
-                                "/login",
-                                "/signup",
-                                "/register",
-                                "/api/user/**",
-                                "/api/auth/refresh-token",
-                                "/oauth2/**",
-                                "/api/find-id/**",
-                                "/api/reset-password/**",
-                                "/css/**",
-                                "/js/**",
-                                "/img/**",
-                                "/admin/**",
-                                "/list/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
+            .sessionManagement(org.springframework.security.config.Customizer<SessionManagementConfigurer<HttpSecurity?>> { sm: SessionManagementConfigurer<HttpSecurity?> ->
+                sm.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler(oAuth2LoginSuccessHandler(refreshTokenService))
-                        .failureHandler(customOAuth2FailureHandler)
-                )
-                .formLogin(form -> form.disable())
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessHandler(new CustomLogoutSuccessHandler(refreshTokenService, jwtUtil))
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID", "jwt_access", "jwt_refresh")
-                )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            })
+            .csrf(org.springframework.security.config.Customizer<CsrfConfigurer<HttpSecurity?>> { csrf: CsrfConfigurer<HttpSecurity?> -> csrf.disable() })
+            .authorizeHttpRequests(org.springframework.security.config.Customizer<AuthorizationManagerRequestMatcherRegistry> { auth: AuthorizationManagerRequestMatcherRegistry ->
+                auth
+                    .requestMatchers(
+                        "/**",
+                        "/login",
+                        "/signup",
+                        "/register",
+                        "/api/user/**",
+                        "/api/auth/refresh-token",
+                        "/oauth2/**",
+                        "/api/find-id/**",
+                        "/api/reset-password/**",
+                        "/css/**",
+                        "/js/**",
+                        "/img/**",
+                        "/admin/**",
+                        "/list/**"
+                    ).permitAll()
+                    .anyRequest().authenticated()
+            }
+            )
+            .oauth2Login(org.springframework.security.config.Customizer<OAuth2LoginConfigurer<HttpSecurity?>> { oauth2: OAuth2LoginConfigurer<HttpSecurity?> ->
+                oauth2
+                    .loginPage("/login")
+                    .userInfoEndpoint(org.springframework.security.config.Customizer<UserInfoEndpointConfig> { userInfo: UserInfoEndpointConfig ->
+                        userInfo.userService(
+                            customOAuth2UserService
+                        )
+                    })
+                    .successHandler(oAuth2LoginSuccessHandler(refreshTokenService))
+                    .failureHandler(customOAuth2FailureHandler)
+            }
+            )
+            .formLogin(org.springframework.security.config.Customizer<FormLoginConfigurer<HttpSecurity?>> { form: FormLoginConfigurer<HttpSecurity?> -> form.disable() })
+            .logout(org.springframework.security.config.Customizer<LogoutConfigurer<HttpSecurity?>> { logout: LogoutConfigurer<HttpSecurity?> ->
+                logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessHandler(CustomLogoutSuccessHandler(refreshTokenService, jwtUtil))
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID", "jwt_access", "jwt_refresh")
+            }
+            )
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
 
-        return http.build();
+        return http.build()
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
+    @org.springframework.context.annotation.Bean
+    @Throws(java.lang.Exception::class)
+    fun authenticationManager(configuration: AuthenticationConfiguration): AuthenticationManager {
+        return configuration.getAuthenticationManager()
     }
 }

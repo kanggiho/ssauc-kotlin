@@ -1,21 +1,21 @@
-package com.example.ssauc.user.history.dto;
+package com.example.ssauc.user.history.dto
 
-import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor
+import lombok.Builder
+import lombok.Data
+import lombok.NoArgsConstructor
+import java.time.LocalDateTime
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SellHistoryOngoingDto {
-    private Long productId;
-    private String productName;
-    private String productImageUrl;
-    private Long tempPrice;
-    private Long price;
-    private LocalDateTime createdAt;
-    private LocalDateTime endAt;
+class SellHistoryOngoingDto {
+    public val productId: Long? = null
+    public val productName: String? = null
+    public val productImageUrl: String? = null
+    public val tempPrice: Long? = null
+    public val price: Long? = null
+    public val createdAt: LocalDateTime? = null
+    public val endAt: LocalDateTime? = null
 }

@@ -1,29 +1,28 @@
-package com.example.ssauc.user.mypage.dto;
+package com.example.ssauc.user.mypage.dto
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor
+import lombok.Builder
+import lombok.Data
+import lombok.NoArgsConstructor
+import java.time.LocalDateTime
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EvaluatedDto {
-    private Long reviewId;
-    private Long orderId;
-    private String reviewerName;
-    private String revieweeName;
-    private String profileImageUrl;
-    private Long productId;
-    private String productName;
-    private String productImageUrl;
-    private LocalDateTime createdAt;
-    private String transactionType;
-    private Boolean option1;
-    private Boolean option2;
-    private Boolean option3;
-    private String comment;
+class EvaluatedDto {
+    private val reviewId: Long? = null
+    private val orderId: Long? = null
+    private val reviewerName: String? = null
+    private val revieweeName: String? = null
+    private val profileImageUrl: String? = null
+    private val productId: Long? = null
+    private val productName: String? = null
+    private val productImageUrl: String? = null
+    private val createdAt: LocalDateTime? = null
+    private val transactionType: String? = null
+    private val option1: Boolean? = null
+    private val option2: Boolean? = null
+    private val option3: Boolean? = null
+    private val comment: String? = null
 }

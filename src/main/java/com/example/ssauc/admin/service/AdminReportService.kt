@@ -1,72 +1,65 @@
-package com.example.ssauc.admin.service;
+package com.example.ssauc.admin.service
 
-import com.example.ssauc.admin.repository.AdminReportRepository;
-import com.example.ssauc.user.chat.entity.Report;
-import com.example.ssauc.user.login.repository.UsersRepository;
-import com.example.ssauc.user.mypage.event.UserWarnedEvent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.ssauc.admin.repository.AdminReportRepository
+import com.example.ssauc.user.chat.entity.Report
+import com.example.ssauc.user.login.repository.UsersRepository
+import com.example.ssauc.user.mypage.event.UserWarnedEvent
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationEventPublisher
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
-public class AdminReportService {
+class AdminReportService {
+    @Autowired
+    private val adminReportRepository: AdminReportRepository? = null
 
     @Autowired
-    private AdminReportRepository adminReportRepository;
+    private val userRepository: UsersRepository? = null
 
-    @Autowired
-    private UsersRepository userRepository;
+    var eventPublisher: ApplicationEventPublisher? = null
 
-    ApplicationEventPublisher eventPublisher;
-
-    public Page<Report> getReports(int page, String sortField, String sortDir) {
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortField);
-        return adminReportRepository.findAll(PageRequest.of(page, 10, sort));
+    fun getReports(page: Int, sortField: String, sortDir: String): Page<Report?> {
+        val sort = Sort.by(Sort.Direction.fromString(sortDir), sortField)
+        return adminReportRepository!!.findAll(PageRequest.of(page, 10, sort))
     }
 
-    public Report findReportById(Long reportId) {
-        return adminReportRepository.findById(reportId).orElse(null);
+    fun findReportById(reportId: Long): Report? {
+        return adminReportRepository!!.findById(reportId).orElse(null)
     }
 
-    public boolean updateReportInfo(String action, long reportId) {
+    fun updateReportInfo(action: String, reportId: Long): Boolean {
+        val report = adminReportRepository!!.findById(reportId).orElse(null) ?: return false
 
-        Report report = adminReportRepository.findById(reportId).orElse(null);
+        var temp = 0
 
-        if(report == null) return false;
-
-        int temp = 0;
-
-        if(action.equals("참작")){
-            temp = 0;
-        } else if (action.equals("경고")) {
-            temp= 1;
-        } else if (action.equals("제명")) {
-            temp = 3;
+        if (action == "참작") {
+            temp = 0
+        } else if (action == "경고") {
+            temp = 1
+        } else if (action == "제명") {
+            temp = 3
         }
 
 
         // report 업데이트
-        int updateReport = adminReportRepository.updateReportByReportId("처리완료", LocalDateTime.now() ,reportId);
+        val updateReport = adminReportRepository.updateReportByReportId("처리완료", LocalDateTime.now(), reportId)
 
         // reportedUser 업데이트
-        int updateReportedUser = userRepository.updateUserByWarningCount(temp,report.getReportedUser().getUserId());
+        val updateReportedUser = userRepository!!.updateUserByWarningCount(temp, report.reportedUser.userId)
 
 
-        if(action.equals("경고")){
-            eventPublisher.publishEvent(new UserWarnedEvent(this, report.getReportedUser().getUserId()));
+        if (action == "경고") {
+            eventPublisher!!.publishEvent(UserWarnedEvent(this, report.reportedUser.userId))
         }
 
-        return updateReport == 1 && updateReportedUser == 1;
-
+        return updateReport == 1 && updateReportedUser == 1
     }
 
-    public List<Report> findAllReports() {
-        return adminReportRepository.findAll();
+    fun findAllReports(): List<Report?> {
+        return adminReportRepository!!.findAll()
     }
 }

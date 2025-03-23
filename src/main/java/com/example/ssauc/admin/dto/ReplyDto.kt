@@ -1,7 +1,7 @@
-package com.example.ssauc.admin.dto;
+package com.example.ssauc.admin.dto
 
-import com.example.ssauc.admin.entity.Admin;
-import lombok.*;
+import com.example.ssauc.admin.entity.Admin
+import lombok.*
 
 @Getter
 @Setter
@@ -9,9 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReplyDto {
-    private long boardId;
-    private String title;
-    private String content;
-    private Admin admin;
+class ReplyDto {
+    public val boardId: Long = 0
+    public val title: String? = null
+    public val content: String? = null
+    public val admin: Admin? = null
 }

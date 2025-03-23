@@ -1,12 +1,15 @@
-package com.example.ssauc.user.chat.dto;
+package com.example.ssauc.user.chat.dto
 
-import lombok.*;
+import lombok.AllArgsConstructor
+import lombok.Getter
+import lombok.NoArgsConstructor
+import lombok.Setter
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BanRequestDto {
-    private Long userId;         // 차단하는 사용자 ID
-    private Long blockedUserId;  // 차단 당하는 사용자 ID
+class BanRequestDto {
+    private val userId: Long? = null // 차단하는 사용자 ID
+    private val blockedUserId: Long? = null // 차단 당하는 사용자 ID
 }

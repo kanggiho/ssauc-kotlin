@@ -1,26 +1,25 @@
-package com.example.ssauc.user.search.document;
+package com.example.ssauc.user.search.document
 
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.elasticsearch.annotations.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
+import lombok.Getter
+import lombok.Setter
+import org.springframework.data.annotation.Id
+import org.springframework.data.elasticsearch.annotations.Document
+import org.springframework.data.elasticsearch.annotations.Field
+import org.springframework.data.elasticsearch.annotations.FieldType
+import org.springframework.data.elasticsearch.annotations.Mapping
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @Document(indexName = "search_log")
 @Mapping(mappingPath = "elasticsearch/mappings/related_mapping.json")
-public class SearchLogDocument {
-
+class SearchLogDocument {
     @Id
-    private String id;
+    private val id: String? = null
 
     @Field(type = FieldType.Keyword)
-    private List<String> keywords;
+    private val keywords: List<String>? = null
 
     @Field(type = FieldType.Date)
-    private LocalDateTime searchedAt;
+    private val searchedAt: LocalDateTime? = null
 }

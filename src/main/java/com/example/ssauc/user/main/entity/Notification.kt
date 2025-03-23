@@ -1,10 +1,9 @@
-package com.example.ssauc.user.main.entity;
+package com.example.ssauc.user.main.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.login.entity.Users
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
 @Entity
 @Builder
@@ -13,24 +12,23 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "notification")
-public class Notification {
-
+class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long notificationId;
+    private val notificationId: Long? = null
 
     // 알림 대상 사용자
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private val user: Users? = null
 
     @Column(nullable = false, length = 50)
-    private String type;
+    private var type: String? = null
 
     @Column(nullable = false, length = 255)
-    private String message;
+    private var message: String? = null
 
-    private LocalDateTime createdAt;
+    private val createdAt: LocalDateTime? = null
 
-    private int readStatus;
+    private val readStatus = 0
 }

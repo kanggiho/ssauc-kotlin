@@ -1,11 +1,10 @@
-package com.example.ssauc.user.pay.entity;
+package com.example.ssauc.user.pay.entity
 
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.order.entity.Orders;
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import com.example.ssauc.user.login.entity.Users
+import com.example.ssauc.user.order.entity.Orders
+import jakarta.persistence.*
+import lombok.*
+import java.time.LocalDateTime
 
 @Entity
 @Builder
@@ -14,35 +13,34 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Payment {
-
+class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "payment_id")
-    private Long paymentId;
+    private var paymentId: Long? = null
 
     // 결제 요청 주문
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
-    private Orders order;
+    private val order: Orders? = null
 
     // 결제 하는 사용자
     @ManyToOne
     @JoinColumn(name = "payer_id", nullable = false)
-    private Users payer;
+    private val payer: Users? = null
 
     @Column(name = "amount")
-    private Long amount;
+    private var amount: Long? = null
 
     @Column(name = "payment_method", length = 50)
-    private String paymentMethod;
+    private var paymentMethod: String? = null
 
     @Column(name = "payment_status", length = 50)
-    private String paymentStatus;
+    private var paymentStatus: String? = null
 
     @Column(name = "payment_date")
-    private LocalDateTime paymentDate;
+    private var paymentDate: LocalDateTime? = null
 
     @Column(name = "payment_number")
-    private String paymentNumber;
+    private var paymentNumber: String? = null
 }

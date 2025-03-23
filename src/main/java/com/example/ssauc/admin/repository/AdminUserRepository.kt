@@ -1,27 +1,24 @@
-package com.example.ssauc.admin.repository;
+package com.example.ssauc.admin.repository
 
-import com.example.ssauc.user.login.entity.Users;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.ssauc.user.login.entity.Users
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.transaction.annotation.Transactional
 
-import java.util.List;
+interface AdminUserRepository : JpaRepository<Users?, Long?> {
+    override fun findAll(pageable: Pageable): Page<Users?>
 
-public interface AdminUserRepository extends JpaRepository<Users, Long> {
-
-  Page<Users> findAll(Pageable pageable);
-
-  @Transactional
-  @Modifying
-  @Query("UPDATE Users u SET u.status = :status WHERE u.userId = :userId")
-  int updateUsersByUserId(@Param("status") String status, @Param("userId") Long userId);
+    @Transactional
+    @Modifying
+    @Query("UPDATE Users u SET u.status = :status WHERE u.userId = :userId")
+    fun updateUsersByUserId(@Param("status") status: String?, @Param("userId") userId: Long?): Int
 
 
-  List<Users> findByWarningCountGreaterThanEqual(int warningCount);
+    fun findByWarningCountGreaterThanEqual(warningCount: Int): List<Users?>?
 
-  Page<Users> findByUserNameContainingIgnoreCase(String keyword, Pageable pageable);
+    fun findByUserNameContainingIgnoreCase(keyword: String?, pageable: Pageable?): Page<Users?>?
 }

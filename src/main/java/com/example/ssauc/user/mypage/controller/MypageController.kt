@@ -1,336 +1,317 @@
-package com.example.ssauc.user.mypage.controller;
+package com.example.ssauc.user.mypage.controller
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.ssauc.user.history.dto.BuyBidHistoryDto;
-import com.example.ssauc.user.history.dto.SellHistoryOngoingDto;
-import com.example.ssauc.user.history.service.HistoryService;
-import com.example.ssauc.user.login.entity.Users;
-import com.example.ssauc.user.login.util.TokenExtractor;
-import com.example.ssauc.user.mypage.dto.*;
-import com.example.ssauc.user.mypage.service.MypageService;
-import com.example.ssauc.user.mypage.service.UserProfileService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.amazonaws.services.s3.AmazonS3
+import com.amazonaws.services.s3.model.ObjectMetadata
+import com.example.ssauc.user.history.service.HistoryService
+import com.example.ssauc.user.login.util.TokenExtractor
+import com.example.ssauc.user.mypage.dto.EvaluationDto
+import com.example.ssauc.user.mypage.dto.ResponseUserInfoDto
+import com.example.ssauc.user.mypage.dto.UserUpdateDto
+import com.example.ssauc.user.mypage.service.MypageService
+import com.example.ssauc.user.mypage.service.UserProfileService
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import lombok.RequiredArgsConstructor
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import java.io.IOException
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/mypage")  // "/mypage" 경로로 들어오는 요청을 처리
-public class MypageController {
+@RequestMapping("/mypage") // "/mypage" 경로로 들어오는 요청을 처리
+class MypageController {
+    private val mypageService: MypageService? = null
+    private val historyService: HistoryService? = null
+    private val tokenExtractor: TokenExtractor? = null
+    private val userProfileService: UserProfileService? = null
+    private val amazonS3: AmazonS3? = null
 
-    private final MypageService mypageService;
-    private final HistoryService historyService;
-    private final TokenExtractor tokenExtractor;
-    private final UserProfileService userProfileService;
-    private final AmazonS3 amazonS3;
+    @Value("\${aws.s3.bucket}")
+    private val bucketName: String? = null
 
-    @Value("${aws.s3.bucket}")
-    private String bucketName;
-
-    @GetMapping  // GET 요청을 받아서 mypage.html을 반환
-    public String mypage(HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Users latestUser = mypageService.getCurrentUser(user.getEmail());
-        model.addAttribute("user", latestUser);
+    @GetMapping // GET 요청을 받아서 mypage.html을 반환
+    fun mypage(request: HttpServletRequest, model: Model): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val latestUser = mypageService!!.getCurrentUser(user.email)
+        model.addAttribute("user", latestUser)
 
         // 입찰중
-        int pageSize = 10;
-        Pageable pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "product.endAt"));
-        Page<BuyBidHistoryDto> biddingPage = historyService.getBiddingHistoryPage(latestUser, pageable);
-        model.addAttribute("bidList", biddingPage.getContent());
+        val pageSize = 10
+        val pageable: Pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "product.endAt"))
+        val biddingPage = historyService!!.getBiddingHistoryPage(latestUser, pageable)
+        model.addAttribute("bidList", biddingPage.content)
 
         // 판매중
-        Pageable sellPageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<SellHistoryOngoingDto> sellPage = historyService.getOngoingSellHistoryPage(latestUser, sellPageable);
-        model.addAttribute("sellList", sellPage.getContent());
+        val sellPageable: Pageable = PageRequest.of(0, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+        val sellPage = historyService.getOngoingSellHistoryPage(latestUser, sellPageable)
+        model.addAttribute("sellList", sellPage.content)
 
-        return "mypage/mypage";
+        return "mypage/mypage"
     }
 
     // 프로필 수정 페이지 (개별 주소 필드 분리)
     @GetMapping("/profile-update")
-    public String showProfileUpdate(HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Users currentUser = userProfileService.getCurrentUser(user.getEmail());
-        model.addAttribute("user", currentUser);
+    fun showProfileUpdate(request: HttpServletRequest, model: Model): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val currentUser = userProfileService!!.getCurrentUser(user.email)
+        model.addAttribute("user", currentUser)
         // location 필드를 공백 기준으로 분리 (예: "우편번호 기본주소 상세주소")
-        String location = currentUser.getLocation();
+        val location = currentUser!!.location
         if (location == null || location.isEmpty()) {
             // location이 없을 때 기본값
-            model.addAttribute("zipcode", "");
-            model.addAttribute("address", "");
-            model.addAttribute("addressDetail", "");
+            model.addAttribute("zipcode", "")
+            model.addAttribute("address", "")
+            model.addAttribute("addressDetail", "")
         } else {
-            String[] parts = location.split(" ");
-            String zipcode = parts.length >= 1 ? parts[0] : "";
-            String address = "";
-            String addressDetail = "";
+            val parts = location.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            val zipcode = if (parts.size >= 1) parts[0] else ""
+            var address = ""
+            var addressDetail = ""
 
             // 기본 주소: index 1,2,3까지
-            if (parts.length >= 4) {
-                address = parts[1] + " " + parts[2] + " " + parts[3];
-            } else if (parts.length == 2) {
+            if (parts.size >= 4) {
+                address = parts[1] + " " + parts[2] + " " + parts[3]
+            } else if (parts.size == 2) {
                 // 우편번호 + 한 단어만 있을 경우
-                address = parts[1];
+                address = parts[1]
             }
             // 상세 주소: index 4부터 나머지
-            if (parts.length > 4) {
-                StringBuilder sb = new StringBuilder();
-                for (int i = 4; i < parts.length; i++) {
-                    sb.append(parts[i]).append(" ");
+            if (parts.size > 4) {
+                val sb = StringBuilder()
+                for (i in 4 until parts.size) {
+                    sb.append(parts[i]).append(" ")
                 }
-                addressDetail = sb.toString().trim();
+                addressDetail = sb.toString().trim { it <= ' ' }
             }
 
-            model.addAttribute("zipcode", zipcode);
-            model.addAttribute("address", address);
-            model.addAttribute("addressDetail", addressDetail);
+            model.addAttribute("zipcode", zipcode)
+            model.addAttribute("address", address)
+            model.addAttribute("addressDetail", addressDetail)
         }
 
-        return "mypage/profile-update";
+        return "mypage/profile-update"
     }
 
     // 2) 프로필 이미지 업로드 (S3)
     @PostMapping("/uploadImage")
     @ResponseBody
-    public ResponseEntity<?> uploadProfileImage(@RequestParam("file") MultipartFile file) {
+    fun uploadProfileImage(@RequestParam("file") file: MultipartFile): ResponseEntity<*> {
         // 파일 크기 제한 (3MB)
-        if(file.getSize() > 3 * 1024 * 1024) {
-            return ResponseEntity.badRequest().body("파일 크기는 3MB를 초과할 수 없습니다.");
+        if (file.size > 3 * 1024 * 1024) {
+            return ResponseEntity.badRequest().body("파일 크기는 3MB를 초과할 수 없습니다.")
         }
         // 이미지 여부 간단 체크
-        if(!file.getContentType().startsWith("image/")) {
-            return ResponseEntity.badRequest().body("이미지 파일만 업로드 가능합니다.");
+        if (!file.contentType!!.startsWith("image/")) {
+            return ResponseEntity.badRequest().body("이미지 파일만 업로드 가능합니다.")
         }
 
         try {
             // 고유 파일명 (timestamp_파일명)
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentLength(file.getSize());
-            metadata.setContentType(file.getContentType());
+            val fileName = System.currentTimeMillis().toString() + "_" + file.originalFilename
+            val metadata = ObjectMetadata()
+            metadata.contentLength = file.size
+            metadata.contentType = file.contentType
 
-            amazonS3.putObject(bucketName, fileName, file.getInputStream(), metadata);
+            amazonS3!!.putObject(bucketName, fileName, file.inputStream, metadata)
 
-            String fileUrl = amazonS3.getUrl(bucketName, fileName).toString();
-            Map<String, String> result = new HashMap<>();
-            result.put("url", fileUrl);
-            return ResponseEntity.ok(result);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("업로드 실패: " + e.getMessage());
+            val fileUrl = amazonS3.getUrl(bucketName, fileName).toString()
+            val result: MutableMap<String, String> = HashMap()
+            result["url"] = fileUrl
+            return ResponseEntity.ok<Map<String, String>>(result)
+        } catch (e: IOException) {
+            e.printStackTrace()
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("업로드 실패: " + e.message)
         }
     }
 
     // 프로필 업데이트 처리 (AJAX JSON POST)
     @PostMapping("/profile-update")
     @ResponseBody
-    public ResponseEntity<?> updateProfile(@RequestBody UserUpdateDto dto, HttpServletRequest request) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
+    fun updateProfile(@RequestBody dto: UserUpdateDto, request: HttpServletRequest): ResponseEntity<*> {
+        val user = tokenExtractor!!.getUserFromToken(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("로그인이 필요합니다.")
         try {
-            Users currentUser = userProfileService.getCurrentUser(user.getEmail());
-            userProfileService.updateUserProfile(currentUser, dto);
-            return ResponseEntity.ok("프로필이 성공적으로 수정되었습니다.");
-        } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            val currentUser = userProfileService!!.getCurrentUser(user.email)
+            userProfileService.updateUserProfile(currentUser!!, dto)
+            return ResponseEntity.ok("프로필이 성공적으로 수정되었습니다.")
+        } catch (ex: RuntimeException) {
+            return ResponseEntity.badRequest().body(ex.message)
         }
     }
 
     // 리뷰 현황 (작성 가능, 받은, 보낸)
     @GetMapping("/evaluation")
-    public String evaluatePage(@RequestParam(value = "filter", required = false, defaultValue = "pending") String filter,
-                               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-                               HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Users latestUser = mypageService.getCurrentUser(user.getEmail());
-        model.addAttribute("user", latestUser);
+    fun evaluatePage(
+        @RequestParam(value = "filter", required = false, defaultValue = "pending") filter: String,
+        @RequestParam(value = "page", required = false, defaultValue = "1") page: Int,
+        request: HttpServletRequest, model: Model
+    ): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val latestUser = mypageService!!.getCurrentUser(user.email)
+        model.addAttribute("user", latestUser)
 
-        int pageSize = 10;
-        if ("received".equals(filter)) {
-            Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-            Page<EvaluationReviewDto> receivedPageData = mypageService.getReceivedReviews(latestUser, pageable);
-            model.addAttribute("reviewList", receivedPageData.getContent());
-            model.addAttribute("totalPages", receivedPageData.getTotalPages());
-        } else if ("written".equals(filter)) {
+        val pageSize = 10
+        if ("received" == filter) {
+            val pageable: Pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+            val receivedPageData = mypageService.getReceivedReviews(
+                latestUser!!, pageable
+            )
+            model.addAttribute("reviewList", receivedPageData!!.content)
+            model.addAttribute("totalPages", receivedPageData.totalPages)
+        } else if ("written" == filter) {
             // 판매 마감 리스트: 판매중 상태에서 (경매 마감 시간 + 30분) < 현재 시간인 상품
-            Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-            Page<EvaluationReviewDto> writtenPageData = mypageService.getWrittenReviews(latestUser, pageable);
-            model.addAttribute("reviewList", writtenPageData.getContent());
-            model.addAttribute("totalPages", writtenPageData.getTotalPages());
-        } else if ("pending".equals(filter)) {
-            Pageable pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "orderDate"));
-            Page<EvaluationPendingDto> pendingPageData = mypageService.getPendingReviews(latestUser, pageable);
-            model.addAttribute("reviewList", pendingPageData.getContent());
-            model.addAttribute("totalPages", pendingPageData.getTotalPages());
+            val pageable: Pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"))
+            val writtenPageData = mypageService.getWrittenReviews(
+                latestUser!!, pageable
+            )
+            model.addAttribute("reviewList", writtenPageData!!.content)
+            model.addAttribute("totalPages", writtenPageData.totalPages)
+        } else if ("pending" == filter) {
+            val pageable: Pageable = PageRequest.of(page - 1, pageSize, Sort.by(Sort.Direction.DESC, "orderDate"))
+            val pendingPageData = mypageService.getPendingReviews(
+                latestUser!!, pageable
+            )
+            model.addAttribute("reviewList", pendingPageData!!.content)
+            model.addAttribute("totalPages", pendingPageData.totalPages)
         }
-        model.addAttribute("currentPage", page);
-        model.addAttribute("filter", filter);
-        return "mypage/evaluation";
+        model.addAttribute("currentPage", page)
+        model.addAttribute("filter", filter)
+        return "mypage/evaluation"
     }
 
     // 리뷰 작성 페이지
     @GetMapping("/evaluate")
-    public String evaluationPage(@RequestParam("orderId") Long orderId,
-                                 @RequestParam("productId") Long productId,
-                                 HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Users latestUser = mypageService.getCurrentUser(user.getEmail());
-        model.addAttribute("user", latestUser);
+    fun evaluationPage(
+        @RequestParam("orderId") orderId: Long,
+        @RequestParam("productId") productId: Long?,
+        request: HttpServletRequest, model: Model
+    ): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val latestUser = mypageService!!.getCurrentUser(user.email)
+        model.addAttribute("user", latestUser)
         // 주문 정보를 기반으로 평가 데이터 준비 (상품명, 상대방 이름, 거래 유형 등)
-        EvaluationDto evaluationDto = mypageService.getEvaluationData(orderId, latestUser);
-        model.addAttribute("evaluationDto", evaluationDto);
-        model.addAttribute("productName", evaluationDto.getProductName());
-        model.addAttribute("otherUserName", evaluationDto.getOtherUserName());
+        val evaluationDto = mypageService.getEvaluationData(orderId, latestUser!!)
+        model.addAttribute("evaluationDto", evaluationDto)
+        model.addAttribute("productName", evaluationDto.productName)
+        model.addAttribute("otherUserName", evaluationDto.otherUserName)
 
-        return "mypage/evaluate";
+        return "mypage/evaluate"
     }
 
     // 리뷰 제출 처리 - JSON POST 요청을 받음
     @PostMapping("/evaluate/submit")
     @ResponseBody
-    public ResponseEntity<?> submitEvaluation(@RequestBody EvaluationDto evaluationDto, HttpServletRequest request) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
+    fun submitEvaluation(@RequestBody evaluationDto: EvaluationDto, request: HttpServletRequest): ResponseEntity<*> {
+        val user = tokenExtractor!!.getUserFromToken(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("로그인이 필요합니다.")
 
-        Users latestUser = mypageService.getCurrentUser(user.getEmail());
+        val latestUser = mypageService!!.getCurrentUser(user.email)
         try {
-            mypageService.submitEvaluation(evaluationDto, latestUser);
-            return ResponseEntity.ok("평가가 완료되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("평가 제출에 실패했습니다: " + e.getMessage());
+            mypageService.submitEvaluation(evaluationDto, latestUser!!)
+            return ResponseEntity.ok("평가가 완료되었습니다.")
+        } catch (e: Exception) {
+            return ResponseEntity.badRequest().body("평가 제출에 실패했습니다: " + e.message)
         }
     }
 
     // 리뷰 상세 페이지 - reviewId를 통해 리뷰 상세 정보를 조회
     @GetMapping("/evaluated")
-    public String evaluatedPage(@RequestParam("reviewId") Long reviewId,
-                                HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        Users latestUser = mypageService.getCurrentUser(user.getEmail());
-        model.addAttribute("user", latestUser);
+    fun evaluatedPage(
+        @RequestParam("reviewId") reviewId: Long,
+        request: HttpServletRequest, model: Model
+    ): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val latestUser = mypageService!!.getCurrentUser(user.email)
+        model.addAttribute("user", latestUser)
 
-        EvaluatedDto reviewDto = mypageService.getReviewById(reviewId, latestUser.getUserId());
-        model.addAttribute("review", reviewDto);
+        val reviewDto = mypageService.getReviewById(reviewId, latestUser!!.userId)
+        model.addAttribute("review", reviewDto)
 
         // reviewType 결정: 현재 사용자가 리뷰 작성자이면 "written", 아니면 "received"
-        String reviewType = "";
-        if(latestUser.getUserName().equals(reviewDto.getReviewerName())) {
-            reviewType = "written";
+        var reviewType = ""
+        reviewType = if (latestUser.userName == reviewDto.reviewerName) {
+            "written"
         } else {
-            reviewType = "received";
+            "received"
         }
-        model.addAttribute("reviewType", reviewType);
+        model.addAttribute("reviewType", reviewType)
 
-        return "mypage/evaluated";
+        return "mypage/evaluated"
     }
 
 
     // 회원 정보 페이지
     @GetMapping("/info")
-    public String memberInfo(HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if(user == null) {
-            return "redirect:/login";
-        }
-        Users userInfo = mypageService.getUserInfo(user.getEmail());
-        model.addAttribute("user", userInfo);
+    fun memberInfo(request: HttpServletRequest, model: Model): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        val userInfo = mypageService!!.getUserInfo(user.email)
+        model.addAttribute("user", userInfo)
 
-        List<ReputationGraphDto> reputationData = mypageService.getReputationHistory(userInfo);
-        model.addAttribute("reputationData", reputationData);
+        val reputationData = mypageService.getReputationHistory(userInfo)
+        model.addAttribute("reputationData", reputationData)
 
-        return "mypage/info";
+        return "mypage/info"
     }
 
     // 다른 회원 정보 모달
     @GetMapping("/info/json")
     @ResponseBody
-    public ResponseUserInfoDto getUserInfoJson(@RequestParam String userName) {
-        return mypageService.getUserInfoJson(userName);
+    fun getUserInfoJson(@RequestParam userName: String?): ResponseUserInfoDto? {
+        return mypageService!!.getUserInfoJson(userName)
     }
-  
+
     // 회원 탈퇴 페이지 진입
     @GetMapping("/withdraw")
-    public String withdrawPage(HttpServletRequest request, Model model) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("user", user);
-        return "mypage/withdraw";
+    fun withdrawPage(request: HttpServletRequest, model: Model): String {
+        val user = tokenExtractor!!.getUserFromToken(request) ?: return "redirect:/login"
+        model.addAttribute("user", user)
+        return "mypage/withdraw"
     }
 
     // 회원 탈퇴 처리 (토큰 쿠키 삭제)
     @PostMapping("/withdraw")
     @ResponseBody
-    public ResponseEntity<?> withdrawUser(@RequestBody Map<String, String> requestBody,
-                                          HttpServletRequest request,
-                                          HttpServletResponse response) {
-        Users user = tokenExtractor.getUserFromToken(request);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-        String inputPassword = requestBody.get("password");
+    fun withdrawUser(
+        @RequestBody requestBody: Map<String?, String?>,
+        request: HttpServletRequest,
+        response: HttpServletResponse
+    ): ResponseEntity<*> {
+        val user = tokenExtractor!!.getUserFromToken(request)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body("로그인이 필요합니다.")
+        val inputPassword = requestBody["password"]
         if (inputPassword == null || inputPassword.isEmpty()) {
-            return ResponseEntity.badRequest().body("비밀번호를 입력해주세요.");
+            return ResponseEntity.badRequest().body("비밀번호를 입력해주세요.")
         }
         try {
             // 탈퇴 로직 (inactive로 변경)
-            userProfileService.withdrawUser(user, inputPassword);
+            userProfileService!!.withdrawUser(user, inputPassword)
 
             // 토큰 쿠키 삭제 (로그아웃)
-            Cookie accessCookie = new Cookie("jwt_access", null);
-            accessCookie.setMaxAge(0);
-            accessCookie.setPath("/");
-            response.addCookie(accessCookie);
+            val accessCookie = Cookie("jwt_access", null)
+            accessCookie.maxAge = 0
+            accessCookie.path = "/"
+            response.addCookie(accessCookie)
 
-            Cookie refreshCookie = new Cookie("jwt_refresh", null);
-            refreshCookie.setMaxAge(0);
-            refreshCookie.setPath("/");
-            response.addCookie(refreshCookie);
+            val refreshCookie = Cookie("jwt_refresh", null)
+            refreshCookie.maxAge = 0
+            refreshCookie.path = "/"
+            response.addCookie(refreshCookie)
 
-            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
-        } catch (RuntimeException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.")
+        } catch (ex: RuntimeException) {
+            return ResponseEntity.badRequest().body(ex.message)
         }
     }
-
-
 }

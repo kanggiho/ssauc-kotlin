@@ -1,29 +1,20 @@
-package com.example.ssauc.user.search.controller;
+package com.example.ssauc.user.search.controller
 
+import com.example.ssauc.user.search.service.RelatedSearchService
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
-import com.example.ssauc.user.search.service.RelatedSearchService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/related-search")
-public class RelatedSearchController {
-
-    private final RelatedSearchService relatedSearchService;
-
-    public RelatedSearchController(RelatedSearchService relatedSearchService) {
-        this.relatedSearchService = relatedSearchService;
-    }
-
+class RelatedSearchController(private val relatedSearchService: RelatedSearchService) {
     /**
      * 특정 검색어에 대한 연관 검색어 조회
      * 예: GET /api/related-search?keyword=맥북
      */
     @GetMapping
-    public List<String> getRelatedSearchTerms(@RequestParam String keyword) {
-        return relatedSearchService.getRelatedSearchTerms(keyword);
+    fun getRelatedSearchTerms(@RequestParam keyword: String?): List<String?> {
+        return relatedSearchService.getRelatedSearchTerms(keyword)
     }
 
     /**
@@ -31,9 +22,9 @@ public class RelatedSearchController {
      * 예: POST /api/related-search?keywords=맥북,애플워치
      */
     @PostMapping
-    public String saveSearchLog(@RequestParam String keywords) {
-        List<String> list = Arrays.asList(keywords.split(","));
-        relatedSearchService.saveSearchLog(list);
-        return "Saved search log: " + list;
+    fun saveSearchLog(@RequestParam keywords: String): String {
+        val list = Arrays.asList(*keywords.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray())
+        relatedSearchService.saveSearchLog(list)
+        return "Saved search log: $list"
     }
 }

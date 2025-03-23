@@ -1,33 +1,32 @@
-package com.example.ssauc.user.history.dto;
+package com.example.ssauc.user.history.dto
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
-import java.time.LocalDateTime;
+import lombok.Builder
+import lombok.Getter
+import lombok.Setter
+import java.time.LocalDateTime
 
 @Getter
 @Setter
 @Builder
-public class SoldDetailDto {
+class SoldDetailDto {
     // Product 테이블 관련 필드
-    private Long productId;
-    private String productName;
-    private Long startPrice;
-    private LocalDateTime createdAt;
-    private int dealType;
-    private String imageUrl;
+    public val productId: Long? = null
+    public val productName: String? = null
+    public val startPrice: Long? = null
+    public val createdAt: LocalDateTime? = null
+    public val dealType = 0
+    public val imageUrl: String? = null
 
     // Orders 테이블 관련 필드
-    private Long orderId;
-    private String buyerName;
-    private Long totalPrice;
-    private String recipientName;
-    private String recipientPhone;
-    private String postalCode;
-    private String deliveryAddress;
-    private String deliveryStatus;
-    private LocalDateTime orderDate;
-    private LocalDateTime completedDate;
+    public val orderId: Long? = null
+    public val buyerName: String? = null
+    public val totalPrice: Long? = null
+    public val recipientName: String? = null
+    public val recipientPhone: String? = null
+    public val postalCode: String? = null
+    public val deliveryAddress: String? = null
+    public val deliveryStatus: String? = null
+    public val orderDate: LocalDateTime? = null
+    public val completedDate: LocalDateTime? = null
 }
 

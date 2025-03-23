@@ -1,24 +1,26 @@
-package com.example.ssauc.admin.repository;
+package com.example.ssauc.admin.repository
 
-import com.example.ssauc.user.bid.entity.ProductReport;
-import com.example.ssauc.user.chat.entity.Report;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.ssauc.user.bid.entity.ProductReport
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.EntityGraph
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
-import java.time.LocalDateTime;
-
-public interface AdminProductReportRepository extends JpaRepository<ProductReport, Long> {
-    @EntityGraph(attributePaths = {"reporter", "reportedUser"})
-    Page<ProductReport> findAll(Pageable pageable);
+interface AdminProductReportRepository : JpaRepository<ProductReport?, Long?> {
+    @EntityGraph(attributePaths = ["reporter", "reportedUser"])
+    override fun findAll(pageable: Pageable): Page<ProductReport?>
 
     @Transactional
     @Modifying
     @Query("UPDATE ProductReport r SET r.status = :status , r.processedAt = :processedAt WHERE r.reportId = :reportId")
-    int updateProductReportByReportId(@Param("status") String status, @Param("processedAt") LocalDateTime processedAt, @Param("reportId") Long reportId);
+    fun updateProductReportByReportId(
+        @Param("status") status: String?,
+        @Param("processedAt") processedAt: LocalDateTime?,
+        @Param("reportId") reportId: Long?
+    ): Int
 }
